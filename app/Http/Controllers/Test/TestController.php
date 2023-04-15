@@ -13,6 +13,9 @@ use App\Models\Test\DimensionCustomer;
 use App\Models\Test\DTWarehouse;
 use App\Models\Test\FeederEleven;
 use App\Models\Test\FeederThirty;
+use App\Models\Test\Tickets;
+use App\Enums\AssetEnum;
+use App\Enums\FeederEnum;
 
 class TestController extends BaseApiController
 {
@@ -51,14 +54,14 @@ class TestController extends BaseApiController
         $TotalDSS = DTWarehouse::count();
         $TotalFeederEl = FeederEleven::count();
         $TotalFeederThirty =  FeederThirty::count();
-       // $TotalTickets = Tickets::count();
+        $TotalTickets = Tickets::count();
     
         $data = [
             'total_dss' => $TotalDSS,
             'total_customers' => $TotalCustomers, //DB::connection('stagging')->table("ems_customers")->count(),
             'feeder_11' => $TotalFeederEl, //DB::connection('stagging')->table("gis_11KV Feeder")->count(),
             'feeder_33' => $TotalFeederThirty, //DB::connection('stagging')->table("gis_33KV Feeder")->count(),
-           //'crm_tickets' => $TotalTickets  //DB::connection('crm')->table("tickets")->count(), // Access denied issue to be fixed by infrastructure  //$TotalTickets
+           'crm_tickets' => $TotalTickets  //DB::connection('crm')->table("tickets")->count(), // Access denied issue to be fixed by infrastructure  //$TotalTickets
         ];
 
         return $this->sendSuccess($data, "Asset Information Saved Successfully", Response::HTTP_OK);
@@ -68,6 +71,77 @@ class TestController extends BaseApiController
     public function getUser(){
         $user = Auth::user();
         return $this->sendSuccess($user, "User Information", Response::HTTP_OK);
+    }
+
+
+    public function allCustomers(Request $request){
+
+        if($request->type == 'postpaid'){
+
+            $customers = DimensionCustomer::whereIn('StatusCode', ['A', 'S'])->where("AccountType", $requestType)->paginate(20); //getPostpaid
+
+            return $this->sendSuccess($customers, "Customer Successfully Loaded", Response::HTTP_OK);
+
+        } else if($request->type == 'prepaid'){
+
+            $customers = DimensionCustomer::whereIn('StatusCode', ['0', '1'])->where("AccountType", $requestType)->paginate(20); //getPrepaid
+
+            return $this->sendSuccess($customers, "Customer Successfully Loaded", Response::HTTP_OK);
+
+        }else {
+
+            $customers = DimensionCustomer::select('SetupDate', 'AccountNo', 'BookNo', 'MeterNo', 'Mobile', 'OldAccountNo', 'TariffID', 'Surname', 'FirstName', 'OtherNames', 'AcctTypeDesc',
+            'OldTariffCode', 'TarriffCode', 'AccountType', 'Address', 'BUID', 'BusinessHub', 'service_center', 'UTID',
+            'ConnectionType', 'ArrearsBalance', 'State', 'City', 'StatusCode')->whereIn("StatusCode", ['A', 'S', '1', '0'])->paginate(15); //getAll
+
+            return $this->sendSuccess($customers, "Customer Successfully Loaded", Response::HTTP_OK);
+
+        }
+
+    }
+
+
+    public function getAssetWH(Request $request){
+
+        if($request->type == AssetEnum::DT_eleven()->value){
+            return DTWarehouse::where("assettype", AssetEnum::DT_eleven()->value)->paginate(20);
+        } else if($request->type == AssetEnum::DT_thirty_three()->value) {
+            returnDTWarehouse::where("assettype", AssetEnum::DT_thirty_three()->value)->paginate(20);
+        }else {
+            return DTWarehouse::paginate(20)->toArray();
+        }
+
+    }
+
+
+
+    public function findex(Request $request){
+
+        if($request->type == FeederEnum::FT_eleven()->value){  //11KV Feeder  11KV Feeder
+            
+            $feeder = FeederEleven::where("assettype", FeederEnum::FT_eleven()->value)->paginate(20); 
+            return $feeder;
+
+         }else if($request->type == FeederEnum::FT_thirty_three()->value){
+        
+            $feeder = Feederthirty::where("assettype", FeederEnum::FT_thirty_three()->value)->paginate(20); 
+            return $feeder;
+        
+        }else {
+
+            $eleven = FeederEleven::get(); 
+            $thirty = Feederthirty::get();
+            $feeders = $eleven->merge($thirty)->rowpageme(10);
+    
+            return $feeders;
+        }
+
+    }
+
+
+    public function tindex() {
+        $tickets = Tickets::paginate(20);
+        return $tickets;
     }
 
 

@@ -10,6 +10,7 @@ use App\Http\Controllers\Service\ServiceController;
 use App\Http\Controllers\ACE\FeederController;
 use App\Http\Controllers\CRM\TicketController;
 use App\Http\Controllers\Test\TestController;
+use App\Http\Controllers\Authenticate\UserController;
 
 /*
 |--------------------------------------------------------------------------
@@ -49,8 +50,6 @@ Route::middleware(['auth:sanctum'])->group(function() {
     Route::get('get_type', [ServiceController::class, 'getType'])->name('get_type');
     Route::get('get_service_type', [ServiceController::class, 'index'])->name('get_service_type');
 
-    Route::get('get_dashboard_stats', [AssetController::class, 'stats']);
-
     });
 });
 
@@ -61,6 +60,9 @@ Route::group(['prefix' => 'v1', 'namespace' => 'Api\v1', 'middleware' => 'OAuth'
 
     Route::middleware(['auth:sanctum'])->group(function() {
 
+        Route::get('get_user', [UserController::class, 'getUser']);
+
+        Route::get('get_dashboard_stats', [AssetController::class, 'stats']);
 
         Route::get('grap_customers/{type?}', [CustomerInformation::class, 'allCustomers']);  // Get Customers
 
@@ -89,13 +91,15 @@ Route::group(['prefix' => 'v2', 'namespace' => 'Api\v2', 'middleware' => 'OAuth'
 
         Route::get('get_dashboard_stats', [TestController::class, 'stats']);
 
-        Route::get('grap_customers_test/{type?}', [TestController::class, 'allCustomers']);  // Get Customers
+        Route::get('grap_customers/{type?}', [TestController::class, 'allCustomers']);  // Get Customers
 
-        Route::get('grap_asset_test/{type?}', [TestController::class, 'getAssetWH']);  // Get Asset Warehouse
+        Route::get('grap_asset/{type?}', [TestController::class, 'getAssetWH']);  // Get Asset Warehouse
 
-        Route::get('grap_feeder_test/{type?}', [TestController::class, 'index']); //Get Feeder Warehouse
+        Route::get('grap_feeder/{type?}', [TestController::class, 'findex']); //Get Feeder Warehouse
             
-        Route::get('tickets_test', [TestController::class, 'index']);
+        Route::get('tickets', [TestController::class, 'tindex']);
       
     });
 });
+
+/*********************************** END OF ROUTE FOR TESTING ON LOCAL MACHINE ************************************** */
