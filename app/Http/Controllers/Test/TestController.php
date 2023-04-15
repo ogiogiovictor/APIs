@@ -16,6 +16,7 @@ use App\Models\Test\FeederThirty;
 use App\Models\Test\Tickets;
 use App\Enums\AssetEnum;
 use App\Enums\FeederEnum;
+use App\Http\Resources\UserResource;
 
 class TestController extends BaseApiController
 {
@@ -71,8 +72,8 @@ class TestController extends BaseApiController
     }
 
     public function getUser(){
-        $user = Auth::user();
-        return $this->sendSuccess($user, "User Information", Response::HTTP_OK);
+        return $authUser = new UserResource(Auth::user()); 
+        //return $this->sendSuccess($user, "User Information", Response::HTTP_OK);
     }
 
 
