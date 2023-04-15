@@ -12,6 +12,8 @@ use App\Http\Controllers\CRM\TicketController;
 use App\Http\Controllers\Test\TestController;
 use App\Http\Controllers\Authenticate\UserController;
 use App\Http\Controllers\Authenticate\RoleController;
+use App\Http\Controllers\Authenticate\PermissionController;
+
 
 /*
 |--------------------------------------------------------------------------
@@ -72,6 +74,14 @@ Route::group(['prefix' => 'v1', 'namespace' => 'Api\v1', 'middleware' => 'OAuth'
         Route::get('grap_feeder/{type?}', [FeederController::class, 'index']); //Get Feeder Warehouse
             
         Route::get('tickets', [TicketController::class, 'index']);
+
+        //Only for Administrative Users
+        Route::prefix('roles')->middleware('role:admin')->group(function() {
+         
+            Route::apiResource('roles', [RoleController::class]);
+            Route::apiResource('permissions', [PermissionController::class]);
+
+        });
       
     });
 });
@@ -101,7 +111,10 @@ Route::group(['prefix' => 'v2', 'namespace' => 'Api\v2', 'middleware' => 'OAuth'
         Route::get('tickets', [TestController::class, 'tindex']);
 
         //Only for Administrative Users
-        Route::prefix('roles')->middleware('role:admin')->controller(RoleController::class)->group(function() {
+        Route::prefix('roles')->middleware('role:admin')->group(function() {
+         
+            Route::apiResource('roles', [RoleController::class]);
+            Route::apiResource('permissions', [PermissionController::class]);
 
         });
       
