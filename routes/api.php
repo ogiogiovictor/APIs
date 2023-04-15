@@ -75,13 +75,13 @@ Route::group(['prefix' => 'v1', 'namespace' => 'Api\v1', 'middleware' => 'OAuth'
             
         Route::get('tickets', [TicketController::class, 'index']);
 
-        //Only for Administrative Users
-        Route::prefix('roles')->middleware('role:admin')->group(function() {
+        // //Only for Administrative Users
+        // Route::prefix('roles')->middleware('role:admin')->group(function() {
          
-            Route::apiResource('roles', [RoleController::class]);
-            Route::apiResource('permissions', [PermissionController::class]);
+        //     Route::apiResource('roles', [RoleController::class]);
+        //     Route::apiResource('permissions', [PermissionController::class]);
 
-        });
+        // });
       
     });
 });
