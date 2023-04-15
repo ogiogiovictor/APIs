@@ -212,6 +212,8 @@ return [
 
     'aliases' => Facade::defaultAliases()->merge([
         // 'ExampleClass' => App\Example\ExampleClass::class,
+        'AuthorityEnum' => App\Enums\AuthorityEnum::class,
+        'StatusEnum' => App\Enums\StatusEnum::class,
     ])->toArray(),
 
 ];

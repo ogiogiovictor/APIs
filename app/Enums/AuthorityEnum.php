@@ -12,7 +12,7 @@ enum AuthorityEnum: string
     public function label(): string
     {
         return match($this) {
-            self::ADMIN => 'hq',
+            self::HEADQUATERS => 'hq',
             self::REGION => 'region',
             self::BUSINESSHUB => 'business_hub',
             self::SERVICECENTER => 'service_center',

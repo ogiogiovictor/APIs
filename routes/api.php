@@ -11,6 +11,7 @@ use App\Http\Controllers\ACE\FeederController;
 use App\Http\Controllers\CRM\TicketController;
 use App\Http\Controllers\Test\TestController;
 use App\Http\Controllers\Authenticate\UserController;
+use App\Http\Controllers\Authenticate\RoleController;
 
 /*
 |--------------------------------------------------------------------------
@@ -98,6 +99,11 @@ Route::group(['prefix' => 'v2', 'namespace' => 'Api\v2', 'middleware' => 'OAuth'
         Route::get('grap_feeder/{type?}', [TestController::class, 'findex']); //Get Feeder Warehouse
             
         Route::get('tickets', [TestController::class, 'tindex']);
+
+        //Only for Administrative Users
+        Route::prefix('roles')->controller(RoleController::class)->group(function() {
+
+        });
       
     });
 });

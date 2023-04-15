@@ -66,13 +66,15 @@ class CustomerService
     $TotalFeederEl = FeederEleven::count();
     $TotalFeederThirty =  FeederThirty::count();
     $TotalTickets = Tickets::count();
+    $CustomerByRegion = DimensionCustomer::selectRaw('Region, count(*) as total')->groupBy('Region')->get();
 
     $data = [
         'total_dss' => $TotalDSS,
         'total_customers' => $TotalCustomers, //DB::connection('stagging')->table("ems_customers")->count(),
         'feeder_11' => $TotalFeederEl, //DB::connection('stagging')->table("gis_11KV Feeder")->count(),
         'feeder_33' => $TotalFeederThirty, //DB::connection('stagging')->table("gis_33KV Feeder")->count(),
-       'crm_tickets' => $TotalTickets  //DB::connection('crm')->table("tickets")->count(), // Access denied issue to be fixed by infrastructure  //$TotalTickets
+       'crm_tickets' => $TotalTickets,  //DB::connection('crm')->table("tickets")->count(), // Access denied issue to be fixed by infrastructure  //$TotalTickets
+        'customer_by_region' => $CustomerByRegion
     ];
 
     return $data;

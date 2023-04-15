@@ -8,6 +8,7 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 use Spatie\Permission\Traits\HasRoles;
+use App\Enums\AuthorityEnum;
 
 class User extends Authenticatable
 {
@@ -42,5 +43,27 @@ class User extends Authenticatable
      */
     protected $casts = [
         'email_verified_at' => 'datetime',
+        'authority' => AuthorityEnum::class,
     ];
+
+
+    public function isHQ(): bool
+    {
+        return $this->authority->value == AuthorityEnum::HEADQUATERS->value;
+    }
+
+    public function isRegion(): bool
+    {
+        return $this->authority->value == AuthorityEnum::REGION->value;
+    }
+
+    public function isBhub(): bool
+    {
+        return $this->authority->value == AuthorityEnum::BUSINESSHUB->value;
+    }
+
+    public function isSCenter(): bool
+    {
+        return $this->authority->value == AuthorityEnum::SERVICECENTER->value;
+    }
 }

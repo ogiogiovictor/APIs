@@ -4,6 +4,7 @@ namespace App\Providers;
 
 // use Illuminate\Support\Facades\Gate;
 use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvider;
+use Illuminate\Support\Facades\Gate;
 
 class AuthServiceProvider extends ServiceProvider
 {
@@ -21,6 +22,9 @@ class AuthServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        //
+        Gate::define('hq', fn($user) => $user->isHQ());
+        Gate::define('region', fn($user) => $user->isRegion());
+        Gate::define('business_hub', fn($user) => $user->isBhub());
+        Gate::define('service_center', fn($user) => $user->isSCenter());
     }
 }
