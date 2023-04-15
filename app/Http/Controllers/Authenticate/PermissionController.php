@@ -32,5 +32,20 @@ class PermissionController extends BaseApiController
 
     }
 
+    public function update(Request $request, Permission $permission) {
+
+        $validate = $request->validate(['name' => ['required'] ]);
+        $newRole = Permission::update([$validate]);
+
+        try{
+            return $this->sendSuccess($newRole, "Roles Information", Response::HTTP_OK);
+        }catch(\Exception $e){
+            return $this->sendError("Error", "Error Loading Data, Something went wrong", Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
+
+    }
+
+
+
 
 }

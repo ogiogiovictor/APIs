@@ -29,6 +29,18 @@ class RoleController extends BaseApiController
             return $this->sendError("Error", "Error Loading Data, Something went wrong", Response::HTTP_INTERNAL_SERVER_ERROR);
         }
         
+    }
+
+    public function update(Request $request, Role $permission) {
+
+        $validate = $request->validate(['name' => ['required'] ]);
+        $newRole = Role::update([$validate]);
+
+        try{
+            return $this->sendSuccess($newRole, "Roles Information", Response::HTTP_OK);
+        }catch(\Exception $e){
+            return $this->sendError("Error", "Error Loading Data, Something went wrong", Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
 
     }
 }
