@@ -101,7 +101,7 @@ Route::group(['prefix' => 'v2', 'namespace' => 'Api\v2', 'middleware' => 'OAuth'
         Route::get('tickets', [TestController::class, 'tindex']);
 
         //Only for Administrative Users
-        Route::prefix('roles')->controller(RoleController::class)->group(function() {
+        Route::prefix('roles')->middleware('role:admin')->controller(RoleController::class)->group(function() {
 
         });
       

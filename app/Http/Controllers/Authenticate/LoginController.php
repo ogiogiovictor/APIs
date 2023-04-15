@@ -38,4 +38,45 @@ class LoginController extends BaseApiController
         }
 
     }
+
+
+
+    public function register(Request $request): Object {
+
+        $postData = $request->validate([
+            //$postData = Validator::make($request->all(), [
+                'name' => 'required|string|max:255',
+                'email' => 'required|string|email|unique:users,email',
+                //'password' => ['required', 'min:8', Password::min(8)->mixedCase()->letters()->numbers()->symbols()->uncompromised(),]
+                'password' => ['required', 'min:8']
+  
+            ]);     
+
+            $user = $this->UserCreate($postData);
+
+             //Atach User to a Role
+           $user->assignRole('user');
+
+           //Dispatch a Job to send Email
+
+
+           $json = ['status' => Response::HTTP_OK, 'token' => $user->createToken('API Token')->plainTextToken];
+           return response()->json($json, 200); 
+      
+    }
+
+
+    private function UserCreate($postData){
+        
+        //Lets Create the User
+       $user = User::create([
+           'name' =>  $postData['name'],
+           'email' => $postData['email'],
+           'status' => 1,
+           'authority' => 'user',
+       ]);
+       return $user;
+   }
+
+
 }

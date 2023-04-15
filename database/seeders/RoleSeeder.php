@@ -32,6 +32,7 @@ class RoleSeeder extends Seeder
         [ 'name' => 'senior_manager'],
         [ 'name' => 'admin'],
         [ 'name' => 'md'],
+        [ 'name' => 'third_party_app'],
     ];
 
     public function run(): void
