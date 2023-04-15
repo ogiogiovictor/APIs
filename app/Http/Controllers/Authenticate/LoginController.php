@@ -21,7 +21,7 @@ class LoginController extends BaseApiController
             $userStatus = User::where('email', $request->email)->value('status');
 
             if($userStatus == 0 || $userStatus == 'NULL'){
-                return $this->sendSuccess('Invalid Status', "No Activation Included in the account", Response::HTTP_UNAUTHORIZED);
+                return $this->sendError('Invalid Status', "No Activation Included in the account", Response::HTTP_UNAUTHORIZED);
             }
 
             if(Auth::attempt(['email' => $request->email, 'password' => $request->password])){
