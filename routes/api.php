@@ -9,6 +9,8 @@ use App\Http\Controllers\ACE\AssetController;
 use App\Http\Controllers\Service\ServiceController;
 use App\Http\Controllers\ACE\FeederController;
 use App\Http\Controllers\CRM\TicketController;
+use App\Http\Controllers\Test\TestController;
+
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -67,6 +69,30 @@ Route::group(['prefix' => 'v1', 'namespace' => 'Api\v1', 'middleware' => 'OAuth'
         Route::get('grap_feeder/{type?}', [FeederController::class, 'index']); //Get Feeder Warehouse
             
         Route::get('tickets', [TicketController::class, 'index']);
+      
+    });
+});
+
+
+
+
+/*********************************** ROUTE FOR TESTING ON LOCAL MACHINE ************************************** */
+
+Route::post('auth_login_test', [TestController::class, 'login']);
+
+/////////////////////////////////////// API FOR CUSTOMER MANAGEMEMENT SYSTEM ///////////////////////////////////  'middleware' => 'oAuth'
+Route::group(['prefix' => 'v2', 'namespace' => 'Api\v2', 'middleware' => 'OAuth'], function () {
+
+    Route::middleware(['auth:sanctum'])->group(function() {
+
+
+        Route::get('grap_customers_test/{type?}', [TestController::class, 'allCustomers']);  // Get Customers
+
+        Route::get('grap_asset_test/{type?}', [TestController::class, 'getAssetWH']);  // Get Asset Warehouse
+
+        Route::get('grap_feeder_test/{type?}', [TestController::class, 'index']); //Get Feeder Warehouse
+            
+        Route::get('tickets_test', [TestController::class, 'index']);
       
     });
 });
