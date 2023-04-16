@@ -17,6 +17,13 @@ use App\Models\Test\Tickets;
 use App\Enums\AssetEnum;
 use App\Enums\FeederEnum;
 use App\Http\Resources\UserResource;
+use App\Http\Resources\CustomerResource;
+use App\Helpers\StringHelper;
+use App\Models\Test\ZoneBills;
+use App\Models\Test\ZonePayment;
+use App\Models\Test\ECMIPayment;
+
+
 
 class TestController extends BaseApiController
 {
@@ -58,7 +65,7 @@ class TestController extends BaseApiController
         $TotalFeederThirty =  FeederThirty::count();
         $TotalTickets = Tickets::count();
         $CustomerByRegion = DimensionCustomer::selectRaw('Region, count(*) as total')->groupBy('Region')->get();
-        $recentCustomers = DimensionCustomer::whereIn('statusCode', ['0', '1', 'A', 'S'])->orderBy('SetupDate', 'desc')->take(10)->get();
+        $recentCustomers = CustomerResource::collection(DimensionCustomer::whereIn('statusCode', ['0', '1', 'A', 'S'])->orderBy('SetupDate', 'desc')->take(10)->get());
 
 
         $data = [
@@ -99,13 +106,13 @@ class TestController extends BaseApiController
 
         if($request->type == 'postpaid'){
 
-            $customers = DimensionCustomer::whereIn('StatusCode', ['A', 'S'])->where("AccountType", $requestType)->paginate(20); //getPostpaid
+            $customers = DimensionCustomer::whereIn('StatusCode', ['A', 'S'])->where("AccountType", $request->type)->paginate(20); //getPostpaid
 
             return $this->sendSuccess($customers, "Customer Successfully Loaded", Response::HTTP_OK);
 
         } else if($request->type == 'prepaid'){
 
-            $customers = DimensionCustomer::whereIn('StatusCode', ['0', '1'])->where("AccountType", $requestType)->paginate(20); //getPrepaid
+            $customers = DimensionCustomer::whereIn('StatusCode', ['0', '1'])->where("AccountType", $request->type)->paginate(20); //getPrepaid
 
             return $this->sendSuccess($customers, "Customer Successfully Loaded", Response::HTTP_OK);
 
@@ -163,6 +170,32 @@ class TestController extends BaseApiController
     public function tindex() {
         $tickets = Tickets::paginate(20);
         return $tickets;
+    }
+
+
+    public function customer360($acctionNo, $dss){
+
+        try {
+
+           $changeAccountNumber = StringHelper::formatAccountNumber($acctionNo);
+
+            $customer = DimensionCustomer::with('bills')->where('AccountNo', $changeAccountNumber)->first();
+
+            if ($customer->AccountType == 'Postpaid') {
+                $customer->load('payments');
+            } elseif ($customer->AccountType == 'Prepaid') {
+                $customer->load('transactions');
+            }
+
+            $distribution = DTWarehouse::where('Assetid', $dss)->first();
+            $customer->distribution = $distribution;
+
+            return $this->sendSuccess($customer, "Customer 360 Loaded", Response::HTTP_OK);
+
+        }catch(\Exception $e) {
+            return $this->sendError("No Data", $e , Response::HTTP_UNAUTHORIZED);
+        }
+
     }
 
 

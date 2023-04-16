@@ -13,4 +13,28 @@ class DimensionCustomer extends Model
     protected $primaryKey = "CustomerSK";
 
     public $timestamps = false;
+
+      public function bills()
+    {
+        //return $this->hasMany(ZoneBills::class, "AccountNo");
+        return $this->hasMany(ZoneBills::class, 'AccountNo', 'AccountNo');
+    }
+
+    public function postpaid()
+    {
+        return $this->hasMany(ZonePayment::class, 'AccountNo', 'AccountNo');
+    }
+
+    public function payments()
+    {
+        
+       return $this->hasMany(ZonePayment::class, 'AccountNo', 'AccountNo');
+        
+    }
+
+    public function transactions() {
+        return $this->hasMany(ECMIPayment::class, 'AccountNo', 'AccountNo');
+    }
+
+   
 }

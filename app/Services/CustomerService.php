@@ -8,6 +8,7 @@ use App\Models\DTWarehouse;
 use App\Models\FeederEleven;
 use App\Models\FeederThirty;
 use App\Models\Tickets;
+use App\Http\Resources\CustomerResource;
 
 
 
@@ -67,7 +68,7 @@ class CustomerService
     $TotalFeederThirty =  FeederThirty::count();
     $TotalTickets = Tickets::count();
     $CustomerByRegion = DimensionCustomer::selectRaw('Region, count(*) as total')->groupBy('Region')->get();
-    $recentCustomers = DimensionCustomer::whereIn('statusCode', ['0', '1', 'A', 'S'])->orderBy('SetupDate', 'desc')->take(10)->get();
+    $recentCustomers = CustomerResource::collection(DimensionCustomer::whereIn('statusCode', ['0', '1', 'A', 'S'])->orderBy('SetupDate', 'desc')->take(10)->get());
 
 
     $data = [
@@ -77,7 +78,11 @@ class CustomerService
         'feeder_33' => $TotalFeederThirty, //DB::connection('stagging')->table("gis_33KV Feeder")->count(),
        'crm_tickets' => $TotalTickets,  //DB::connection('crm')->table("tickets")->count(), // Access denied issue to be fixed by infrastructure  //$TotalTickets
         'customer_by_region' => $CustomerByRegion,
-        'recent_customers' => $recentCustomers
+        'recent_customers' => $recentCustomers,
+        "total_staff" => 0,
+        "outsourced_staff" => 0,
+        "msms_meters" => 0,
+        "service_centers" => 0,
     ];
 
     return $data;

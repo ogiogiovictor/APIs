@@ -110,13 +110,16 @@ Route::group(['prefix' => 'v2', 'namespace' => 'Api\v2', 'middleware' => 'OAuth'
             
         Route::get('tickets', [TestController::class, 'tindex']);
 
-        //Only for Administrative Users
-        // Route::prefix('roles')->middleware('role:admin')->group(function() {
-         
-        //     Route::apiResource('roles', [RoleController::class]);
-        //     Route::apiResource('permissions', [PermissionController::class]);
+        //Customer 360
+        Route::get('customer360/{account?}/{dss?}', [TestController::class, 'customer360']);
 
-        // });
+       // Only for Administrative Users
+        Route::prefix('roles')->middleware('role:admin')->group(function() {
+         
+            Route::apiResource('roles', RoleController::class);
+            Route::apiResource('permissions', PermissionController::class);
+
+        });
       
     });
 });

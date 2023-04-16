@@ -22,12 +22,15 @@ class DimensionCustomer extends Model
         'BookNo', 'MeterNo', 'AccountNo', 'Surname', 'Firstname'
     ];
 
-    public function customerEPayment(): HasMany {
-        return $this->hasMany(ECMIPayment::class, "AccountNo");
+    public function bills()
+    {
+        //return $this->hasMany(ZoneBills::class, "AccountNo");
+        return $this->hasMany(ZoneBills::class, 'AccountNo', 'AccountNo');
     }
 
-    public function customerMPayment(): HasMany {
-        return $this->hasMany(EMSPayment::class, "AccountNo");
+    public function postpaid()
+    {
+        return $this->hasMany(ZonePayment::class, 'AccountNo', 'AccountNo');
     }
     
 }

@@ -36,6 +36,24 @@ class StringHelper
         return strtoupper(substr($name, 0, 2));
     }
 
+    public static function removeSpecialCharsAndSlashes($accountNumber) {
+        // Replace all non-alphanumeric characters and slashes with an empty string
+        return preg_replace('/[^a-zA-Z0-9]/', '', $accountNumber);
+      }
+
+
+      public static function formatAccountNumber($cleanedAccountNumber) {
+        // Define the regular expression pattern for formatting the account number
+        $pattern = '/(\d{2})(\d{2})(\d{2})(\d{4})(\d{2})/';
+    
+        // Use the preg_replace() function to format the account number
+        $formattedAccountNumber = preg_replace($pattern, '$1/$2/$3/$4-$5', $cleanedAccountNumber);
+    
+        // Return the formatted account number
+        return $formattedAccountNumber;
+    }
+    
+
 
     public static function convertHTMLToText(string $html): string
     {
