@@ -28,7 +28,7 @@ class TestController extends BaseApiController
             $userStatus = User::where('email', $request->email)->value('status');
 
             if($userStatus == 0 || $userStatus == 'NULL'){
-                return $this->sendError('Invalid Status', "No Activation Included in the account", Response::HTTP_UNAUTHORIZED);
+                return $this->sendError('Invalid User', "No Activation Included in the account", Response::HTTP_UNAUTHORIZED);
             }
 
             if(Auth::attempt(['email' => $request->email, 'password' => $request->password])){
@@ -75,7 +75,12 @@ class TestController extends BaseApiController
     }
 
     public function getUser(){
-        return $authUser = new UserResource(Auth::user()); 
+        try{
+            return $authUser = new UserResource(Auth::user()); 
+        }catch(\Exception $e) {
+            return $this->sendError("No Data", "Asset Information Saved Successfully", Response::HTTP_UNAUTHORIZED);
+        }
+       
         //return $this->sendSuccess($user, "User Information", Response::HTTP_OK);
     }
 
