@@ -20,15 +20,16 @@ use App\Http\Resources\UserResource;
 
 class TestController extends BaseApiController
 {
-    public function login(LoginRequest $request): Object
+    public function login(LoginRequest $request) //: Object
     {
 
         if($request->expectsJson()) {
 
             $userStatus = User::where('email', $request->email)->value('status');
 
-            if($userStatus == 0 || $userStatus == 'NULL'){
-                return $this->sendError('Invalid User', "No Activation Included in the account", Response::HTTP_UNAUTHORIZED);
+
+            if($userStatus == 0 ){ //|| $userStatus == 'NULL'
+                return $this->sendError('Invalid User', "No Activation Included in the account.  $userStatus", Response::HTTP_UNAUTHORIZED);
             }
 
             if(Auth::attempt(['email' => $request->email, 'password' => $request->password])){
@@ -67,7 +68,11 @@ class TestController extends BaseApiController
             'feeder_33' => $TotalFeederThirty, //DB::connection('stagging')->table("gis_33KV Feeder")->count(),
            'crm_tickets' => $TotalTickets,  //DB::connection('crm')->table("tickets")->count(), // Access denied issue to be fixed by infrastructure  //$TotalTickets
            'customer_by_region' => $CustomerByRegion,
-           'recent_customers' => $recentCustomers
+           'recent_customers' => $recentCustomers,
+           "total_staff" => 0,
+           "outsourced_staff" => 0,
+           "msms_meters" => 0,
+           "service_centers" => 0,
         ];
 
         return $this->sendSuccess($data, "Asset Information Saved Successfully", Response::HTTP_OK);
@@ -75,10 +80,15 @@ class TestController extends BaseApiController
     }
 
     public function getUser(){
+
+        if(!Auth::check()) {
+            return $this->sendError("No Data", "Error Loading User Data", Response::HTTP_UNAUTHORIZED);
+        }
+
         try{
             return $authUser = new UserResource(Auth::user()); 
         }catch(\Exception $e) {
-            return $this->sendError("No Data", "Asset Information Saved Successfully", Response::HTTP_UNAUTHORIZED);
+            return $this->sendError("No Data", "Error Loading User Data", Response::HTTP_UNAUTHORIZED);
         }
        
         //return $this->sendSuccess($user, "User Information", Response::HTTP_OK);
