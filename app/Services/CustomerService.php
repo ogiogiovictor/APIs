@@ -89,4 +89,21 @@ class CustomerService
     
 
     }
+
+
+    public function getCustomerByType(){
+
+        $postpaid = DimensionCustomer::selectRaw('StatusCode, count(*) as total')
+        ->where("AccountType", 'Postpaid')->groupBy('StatusCode')->get();
+
+        $prepaid = DimensionCustomer::selectRaw('StatusCode, count(*) as total')
+        ->where("AccountType", 'Prepaid')->groupBy('StatusCode')->get();
+
+        $data = [
+            'postpaid' => $customers,
+            'prepaid' => $prepaid,
+        ];
+        
+        return $data;
+    }
 }

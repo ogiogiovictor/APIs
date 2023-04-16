@@ -22,6 +22,8 @@ use App\Helpers\StringHelper;
 use App\Models\Test\ZoneBills;
 use App\Models\Test\ZonePayment;
 use App\Models\Test\ECMIPayment;
+use App\Models\Test\CRMUsers;
+
 
 
 
@@ -104,15 +106,34 @@ class TestController extends BaseApiController
 
     public function allCustomers(Request $request){
 
-        if($request->type == 'postpaid'){
+        $postpaid = DimensionCustomer::selectRaw('StatusCode, count(*) as total')
+        ->where("AccountType", 'Postpaid')->groupBy('StatusCode')->get();
 
-            $customers = DimensionCustomer::whereIn('StatusCode', ['A', 'S'])->where("AccountType", $request->type)->paginate(20); //getPostpaid
+        $prepaid = DimensionCustomer::selectRaw('StatusCode, count(*) as total')
+        ->where("AccountType", 'Prepaid')->groupBy('StatusCode')->get();
 
-            return $this->sendSuccess($customers, "Customer Successfully Loaded", Response::HTTP_OK);
+
+        if($request->type == 'Postpaid'){
+
+           $customers = DimensionCustomer::whereIn('StatusCode', ['A', 'S'])->where("AccountType", $request->type)->paginate(20); //getPostpaid
+
+           $data = [
+            'customers' => $customers,
+            'postpaid' => $postpaid,
+            'prepaid' => $prepaid,
+           ];
+
+            return $this->sendSuccess($data, "Customer Successfully Loaded", Response::HTTP_OK);
 
         } else if($request->type == 'prepaid'){
 
             $customers = DimensionCustomer::whereIn('StatusCode', ['0', '1'])->where("AccountType", $request->type)->paginate(20); //getPrepaid
+
+            $data = [
+                'customers' => $customers,
+                'postpaid' => $postpaid,
+                'prepaid' => $prepaid,
+               ];
 
             return $this->sendSuccess($customers, "Customer Successfully Loaded", Response::HTTP_OK);
 
@@ -122,7 +143,13 @@ class TestController extends BaseApiController
             'OldTariffCode', 'TarriffCode', 'AccountType', 'Address', 'BUID', 'BusinessHub', 'service_center', 'UTID',
             'ConnectionType', 'ArrearsBalance', 'State', 'City', 'StatusCode')->whereIn("StatusCode", ['A', 'S', '1', '0'])->paginate(15); //getAll
 
-            return $this->sendSuccess($customers, "Customer Successfully Loaded", Response::HTTP_OK);
+            $data = [
+                'customers' => $customers,
+                'postpaid' => $postpaid,
+                'prepaid' => $prepaid,
+               ];
+
+            return $this->sendSuccess($data, "Customer Successfully Loaded", Response::HTTP_OK);
 
         }
 
@@ -173,7 +200,7 @@ class TestController extends BaseApiController
     }
 
 
-    public function customer360($acctionNo, $dss){
+    public function customer360($acctionNo, $dss, $perPage = 2){
 
         try {
 
@@ -186,12 +213,19 @@ class TestController extends BaseApiController
             } elseif ($customer->AccountType == 'Prepaid') {
                 $customer->load('transactions');
             }
-
+           
 
             $distribution = DTWarehouse::select('Assetid', 'assettype', 'AssetName', 'DSS_11KV_415V_Make',
              'DSS_11KV_415V_Rating', 'DSS_11KV_415V_Address', 'DSS_11KV_415V_Owner', 
              'DSS_11KV_415V_parent', 'longtitude', 'latitude', 'naccode')->where('Assetid', $dss)->first();
             $customer->distribution = $distribution;
+
+            $crm_user = CRMUsers::where('accountno', $changeAccountNumber)->first();
+            //Get the Tickets
+             $tickets = Tickets::where('user_id', $crm_user->id)->get();
+
+            $customer->distribution = $distribution;
+            $customer->tickets = $tickets;
 
             return $this->sendSuccess($customer, "Customer 360 Loaded", Response::HTTP_OK);
 
