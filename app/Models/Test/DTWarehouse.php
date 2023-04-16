@@ -9,7 +9,7 @@ class DTWarehouse extends Model
 {
     use HasFactory;
     protected $table = "gis_dss";
-    protected $primaryKey = "Assetid";
+    protected $primaryKey = "msrepl_tran_version";
 
     public $timestamps = false;
 }
