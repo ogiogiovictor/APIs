@@ -23,7 +23,8 @@ use App\Models\Test\ZoneBills;
 use App\Models\Test\ZonePayment;
 use App\Models\Test\ECMIPayment;
 use App\Models\Test\CRMUsers;
-
+use Illuminate\Support\Facades\Validator;
+use App\Models\Test\MsmsCustomer;
 
 
 
@@ -200,6 +201,38 @@ class TestController extends BaseApiController
     }
 
 
+    
+    public function tshow(Request $request){
+
+        // $validator = Validator::make($request, [
+        //     'ticketid' => 'required',
+        // ]);
+
+        // if($validator->fails()){
+        //     return response()->json([ 'error' => true, 'message' => $validator->errors() ]);
+        // }
+
+        $ticket = Tickets::where('ticket_no', $request->ticketid)->first();
+        //Get the Customer Details in CRM
+        $getAccountNo = CRMUsers::where('id', $ticket->user_id)->first();
+       // Now Get the Customer Information.
+        $customer = DimensionCustomer::where('AccountNo', $getAccountNo->accountno)
+        ->orWhere('MeterNo', $getAccountNo->accountno)->first();
+
+        $data = [
+            'ticket' => $ticket,
+            'customer' => $customer,
+        ];
+
+        if($ticket){
+            return $this->sendSuccess($data, "Customer 360 Loaded", Response::HTTP_OK);
+        }else {
+            return $this->sendError("No Data", "No data Found" , Response::HTTP_NO_CONTENT);
+        } 
+
+    }
+
+
     public function customer360($acctionNo, $dss, $perPage = 2){
 
         try {
@@ -224,8 +257,23 @@ class TestController extends BaseApiController
             //Get the Tickets
              $tickets = Tickets::where('user_id', $crm_user->id)->get();
 
+             //Get the MSMS Meters
+            /* $msmsMeters = MsmsCustomer::with('meter_details')->select("id", "title", "surname", "firstname", "other_names", "supply_address",
+             "lga", "contact_no", "email", "means_of_id", "o_account_no", "service_center", "unique_code",
+             "debt", "debt_date", "debt_type")->where('o_account_no', $changeAccountNumber)->first();
+            */
+
+            $msmsMeters = MsmsCustomer::with(['customer_meters', 'meter_details'])
+            ->select("id", "title", "surname", "firstname", "other_names", "supply_address",
+            "lga", "contact_no", "email", "means_of_id", "o_account_no", "service_center", "unique_code",
+            "debt", "debt_date", "debt_type")
+            ->where('o_account_no', $changeAccountNumber)->first();
+
+
             $customer->distribution = $distribution;
             $customer->tickets = $tickets;
+            $customer->msmsCustomerInfo = $msmsMeters;
+
 
             return $this->sendSuccess($customer, "Customer 360 Loaded", Response::HTTP_OK);
 
@@ -234,6 +282,8 @@ class TestController extends BaseApiController
         }
 
     }
+
+
 
 
 }

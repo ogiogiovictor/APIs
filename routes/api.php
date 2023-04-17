@@ -75,8 +75,10 @@ Route::group(['prefix' => 'v1', 'namespace' => 'Api\v1', 'middleware' => 'OAuth'
             
         Route::get('tickets', [TicketController::class, 'index']);
 
+        Route::post('tickets', [TicketController::class, 'show']);
+
         // Only for Administrative Users
-        Route::prefix('roles')->middleware('role:admin')->group(function() {
+        Route::prefix('iroles')->middleware('role:admin')->group(function() {
          
             Route::apiResource('roles', RoleController::class);
             Route::apiResource('permissions', PermissionController::class);
@@ -109,6 +111,8 @@ Route::group(['prefix' => 'v2', 'namespace' => 'Api\v2', 'middleware' => 'OAuth'
         Route::get('grap_feeder/{type?}', [TestController::class, 'findex']); //Get Feeder Warehouse
             
         Route::get('tickets', [TestController::class, 'tindex']);
+
+        Route::post('tickets', [TestController::class, 'tshow']);
 
        // Only for Administrative Users
         Route::prefix('roles')->middleware('role:admin')->group(function() {
