@@ -250,15 +250,21 @@ class TestController extends BaseApiController
             }
            
 
-            $distribution = DTWarehouse::select('Assetid', 'assettype', 'AssetName', 'DSS_11KV_415V_Make',
-             'DSS_11KV_415V_Rating', 'DSS_11KV_415V_Address', 'DSS_11KV_415V_Owner', 
-             'DSS_11KV_415V_parent', 'longtitude', 'latitude', 'naccode')->where('Assetid', $dss)->first();
-            $customer->distribution = $distribution;
+            if($dss){
+                $distribution = DTWarehouse::select('Assetid', 'assettype', 'AssetName', 'DSS_11KV_415V_Make',
+                'DSS_11KV_415V_Rating', 'DSS_11KV_415V_Address', 'DSS_11KV_415V_Owner', 
+                'DSS_11KV_415V_parent', 'longtitude', 'latitude', 'naccode')->where('Assetid', $dss)->first();
+                $customer->distribution = $distribution;
+            }
 
             $crm_user = CRMUsers::where('accountno', $changeAccountNumber)->first();
+
+            if($crm_user){
             //Get the Tickets
              $tickets = Tickets::where('user_id', $crm_user->id)->get();
-
+             $customer->tickets = $tickets;
+            }
+          
              //Get the MSMS Meters
             /* $msmsMeters = MsmsCustomer::with('meter_details')->select("id", "title", "surname", "firstname", "other_names", "supply_address",
              "lga", "contact_no", "email", "means_of_id", "o_account_no", "service_center", "unique_code",
@@ -270,11 +276,11 @@ class TestController extends BaseApiController
             "lga", "contact_no", "email", "means_of_id", "o_account_no", "service_center", "unique_code",
             "debt", "debt_date", "debt_type")
             ->where('o_account_no', $changeAccountNumber)->first();
-
-
-            $customer->distribution = $distribution;
-            $customer->tickets = $tickets;
-            $customer->msmsCustomerInfo = $msmsMeters;
+            
+            if($msmsMeters){
+                $customer->msmsCustomerInfo = $msmsMeters;
+            }
+           
 
 
             return $this->sendSuccess($customer, "Customer 360 Loaded", Response::HTTP_OK);
