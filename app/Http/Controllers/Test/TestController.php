@@ -121,7 +121,7 @@ class TestController extends BaseApiController
            $customers = DimensionCustomer::whereIn('StatusCode', ['A', 'S'])->where("AccountType", $request->type)->paginate(20); //getPostpaid
 
            $data = [
-            'customers' => $customers,
+            'customers' => CustomerResource::collection($customers)->response()->getData(true),
             'postpaid' => $postpaid,
             'prepaid' => $prepaid,
            ];
@@ -133,7 +133,7 @@ class TestController extends BaseApiController
             $customers = DimensionCustomer::whereIn('StatusCode', ['0', '1'])->where("AccountType", $request->type)->paginate(20); //getPrepaid
 
             $data = [
-                'customers' => $customers,
+                'customers' => CustomerResource::collection($customers)->response()->getData(true),
                 'postpaid' => $postpaid,
                 'prepaid' => $prepaid,
                ];
@@ -147,7 +147,7 @@ class TestController extends BaseApiController
             'ConnectionType', 'ArrearsBalance', 'State', 'City', 'StatusCode')->whereIn("StatusCode", ['A', 'S', '1', '0'])->paginate(15); //getAll
 
             $data = [
-                'customers' => $customers,
+                'customers' => CustomerResource::collection($customers)->response()->getData(true),
                 'postpaid' => $postpaid,
                 'prepaid' => $prepaid,
                ];
