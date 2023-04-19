@@ -280,7 +280,7 @@ class TestController extends BaseApiController
             return $this->sendSuccess($customer, "Customer 360 Loaded", Response::HTTP_OK);
 
         }catch(\Exception $e) {
-            return $this->sendError("No Data", $e , Response::HTTP_UNAUTHORIZED);
+            return $this->sendError("No Data", $e , Response::HTTP_NOT_FOUND);
         }
 
     }
