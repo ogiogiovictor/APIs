@@ -25,6 +25,8 @@ use App\Models\Test\ECMIPayment;
 use App\Models\Test\CRMUsers;
 use Illuminate\Support\Facades\Validator;
 use App\Models\Test\MsmsCustomer;
+use Carbon\Carbon;
+use Illuminate\Support\Facades\DB;
 
 
 
@@ -72,12 +74,12 @@ class TestController extends BaseApiController
 
 
         $data = [
-            'total_dss' => $TotalDSS,
-            'total_customers' => $TotalCustomers, //DB::connection('stagging')->table("ems_customers")->count(),
-            'feeder_11' => $TotalFeederEl, //DB::connection('stagging')->table("gis_11KV Feeder")->count(),
-            'feeder_33' => $TotalFeederThirty, //DB::connection('stagging')->table("gis_33KV Feeder")->count(),
-           'crm_tickets' => $TotalTickets,  //DB::connection('crm')->table("tickets")->count(), // Access denied issue to be fixed by infrastructure  //$TotalTickets
-           'customer_by_region' => $CustomerByRegion,
+            'total_dss' => StringHelper::formatNumber($TotalDSS),
+            'total_customers' => StringHelper::formatNumber($TotalCustomers), //DB::connection('stagging')->table("ems_customers")->count(),
+            'feeder_11' => StringHelper::formatNumber($TotalFeederEl), //DB::connection('stagging')->table("gis_11KV Feeder")->count(),
+            'feeder_33' => StringHelper::formatNumber($TotalFeederThirty), //DB::connection('stagging')->table("gis_33KV Feeder")->count(),
+           'crm_tickets' => StringHelper::formatNumber($TotalTickets),  //DB::connection('crm')->table("tickets")->count(), // Access denied issue to be fixed by infrastructure  //$TotalTickets
+           'customer_by_region' => StringHelper::formatNumber($CustomerByRegion),
            'recent_customers' => $recentCustomers,
            "total_staff" => 0,
            "outsourced_staff" => 0,
@@ -233,7 +235,7 @@ class TestController extends BaseApiController
     }
 
 
-    public function customer360($acctionNo, $dss, $perPage = 2){
+    public function customer360($acctionNo, $dss){
 
         try {
 
@@ -281,6 +283,56 @@ class TestController extends BaseApiController
             return $this->sendError("No Data", $e , Response::HTTP_UNAUTHORIZED);
         }
 
+    }
+
+
+    public function getBills(){
+
+        try{
+
+             $currentMonth = Carbon::now()->month;
+             $currentYear = Carbon::now()->year;
+   
+            $thisMonthBills = ZoneBills::where('BillMonth', $currentMonth)
+            ->where('BillYear', $currentYear)
+            ->sum('CurrentChgTotal');
+
+            $lastMonth = Carbon::now()->subMonth()->month;
+
+            $lastMonthBill = ZoneBills::where('BillMonth', $lastMonth)
+            ->where('BillYear', $currentYear)
+            ->sum('CurrentChgTotal');
+
+            
+            //Top 100 Highest Billed Customers
+            $topCustomers = DimensionCustomer::with(['zoneBills' => function($query) {
+                $query->select('AccountNo', DB::raw('SUM(CurrentChgTotal) as total_billed'))
+                    ->groupBy('AccountNo');
+            }])
+            ->select('AccountNo')
+            //->orderByDesc('spectrumbill.total_billed')
+            ->take(100)
+            ->get();
+
+            $totalBilled = $topCustomers->sum(function($customer) {
+                return $customer->zoneBills->sum('total_billed');
+            });
+
+
+            $bills  = ZoneBills::paginate(30);
+
+            $data = [
+                'thisMonthBills' => StringHelper::formatNumber($thisMonthBills),
+                'lastMonthBills' => StringHelper::formatNumber($lastMonthBill),
+                'bills' => $bills,
+                'totalHighestBill' => StringHelper::formatNumber($totalBilled),
+                'highestBilledCustomers' => $topCustomers,
+            ];
+            
+            return $this->sendSuccess($data, "Bills Loaded", Response::HTTP_OK);
+        }catch(\Exception $e) {
+            return $this->sendError("No Bills", $e , Response::HTTP_UNAUTHORIZED);
+        }
     }
 
 

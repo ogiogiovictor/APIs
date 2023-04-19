@@ -10,5 +10,5 @@ class CRMUser extends Model
     use HasFactory;
 
     protected $connection = 'crm';
-    protected $table = "crm_users";
+    protected $table = "users";
 }

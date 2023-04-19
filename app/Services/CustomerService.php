@@ -72,12 +72,12 @@ class CustomerService
 
 
     $data = [
-        'total_dss' => $TotalDSS,
-        'total_customers' => $TotalCustomers, //DB::connection('stagging')->table("ems_customers")->count(),
-        'feeder_11' => $TotalFeederEl, //DB::connection('stagging')->table("gis_11KV Feeder")->count(),
-        'feeder_33' => $TotalFeederThirty, //DB::connection('stagging')->table("gis_33KV Feeder")->count(),
-       'crm_tickets' => $TotalTickets,  //DB::connection('crm')->table("tickets")->count(), // Access denied issue to be fixed by infrastructure  //$TotalTickets
-        'customer_by_region' => $CustomerByRegion,
+        'total_dss' => StringHelper::formatNumber($TotalDSS),
+        'total_customers' => StringHelper::formatNumber($TotalCustomers), //DB::connection('stagging')->table("ems_customers")->count(),
+        'feeder_11' => StringHelper::formatNumber($TotalFeederEl), //DB::connection('stagging')->table("gis_11KV Feeder")->count(),
+        'feeder_33' => StringHelper::formatNumber($TotalFeederThirty), //DB::connection('stagging')->table("gis_33KV Feeder")->count(),
+       'crm_tickets' => StringHelper::formatNumber($TotalTickets),  //DB::connection('crm')->table("tickets")->count(), // Access denied issue to be fixed by infrastructure  //$TotalTickets
+        'customer_by_region' => StringHelper::formatNumber($CustomerByRegion),
         'recent_customers' => $recentCustomers,
         "total_staff" => 0,
         "outsourced_staff" => 0,
@@ -106,4 +106,44 @@ class CustomerService
         
         return $data;
     }
+
+
+    public function customer360($changeAccountNumber){
+
+        $customer = DimensionCustomer::with('bills')->where('AccountNo', $changeAccountNumber)->first();
+
+        if ($customer->AccountType == 'Postpaid') {
+            $customer->load('payments');
+        } elseif ($customer->AccountType == 'Prepaid') {
+            $customer->load('transactions');
+        }
+
+        $distribution = DTWarehouse::select('Assetid', 'assettype', 'AssetName', 'DSS_11KV_415V_Make',
+        'DSS_11KV_415V_Rating', 'DSS_11KV_415V_Address', 'DSS_11KV_415V_Owner', 
+        'DSS_11KV_415V_parent', 'longtitude', 'latitude', 'naccode')->where('Assetid', $dss)->first();
+       $customer->distribution = $distribution;
+
+       $crm_user = CRMUser::where('accountno', $changeAccountNumber)->first();
+       //Get the Tickets
+       $tickets = Tickets::where('user_id', $crm_user->id)->get();
+
+
+       $msmsMeters = MsmsCustomer::with(['customer_meters', 'meter_details'])
+       ->select("id", "title", "surname", "firstname", "other_names", "supply_address",
+       "lga", "contact_no", "email", "means_of_id", "o_account_no", "service_center", "unique_code",
+       "debt", "debt_date", "debt_type")
+       ->where('o_account_no', $changeAccountNumber)->first();
+
+
+       $customer->distribution = $distribution;
+       $customer->tickets = $tickets;
+       $customer->msmsCustomerInfo = $msmsMeters;
+
+       return $customer;
+
+
+    }
+
+
+
 }

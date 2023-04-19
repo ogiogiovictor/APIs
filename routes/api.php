@@ -13,7 +13,7 @@ use App\Http\Controllers\Test\TestController;
 use App\Http\Controllers\Authenticate\UserController;
 use App\Http\Controllers\Authenticate\RoleController;
 use App\Http\Controllers\Authenticate\PermissionController;
-
+use App\Http\Controllers\Customer\CustomerOveriewController;
 
 /*
 |--------------------------------------------------------------------------
@@ -78,12 +78,17 @@ Route::group(['prefix' => 'v1', 'namespace' => 'Api\v1', 'middleware' => 'OAuth'
         Route::post('tickets', [TicketController::class, 'show']);
 
         // Only for Administrative Users
-        Route::prefix('iroles')->middleware('role:admin')->group(function() {
+      /*  Route::prefix('iroles')->middleware('role:admin')->group(function() {
          
             Route::apiResource('roles', RoleController::class);
             Route::apiResource('permissions', PermissionController::class);
 
         });
+        */
+
+         //Customer 360
+         Route::get('customer360/{account?}/{dss?}', [CustomerOveriewController::class, 'customer360']);
+
       
     });
 });
@@ -126,6 +131,7 @@ Route::group(['prefix' => 'v2', 'namespace' => 'Api\v2', 'middleware' => 'OAuth'
          Route::get('customer360/{account?}/{dss?}', [TestController::class, 'customer360']);
 
          //Get Bill
+         Route::get('getbills', [TestController::class, 'getBills']);
 
       
     });

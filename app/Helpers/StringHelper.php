@@ -60,6 +60,12 @@ class StringHelper
         $text = preg_replace("/\n\s+/", "\n", rtrim(html_entity_decode(strip_tags($html))));
         return $text;
     }
+
+    public static function formatNumber($number) {
+        return number_format((float) $number, 2, '.', ',');
+    } 
+
+    
   
 
 
