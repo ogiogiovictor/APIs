@@ -74,12 +74,12 @@ class TestController extends BaseApiController
 
 
         $data = [
-            'total_dss' => StringHelper::formatNumber($TotalDSS),
-            'total_customers' => StringHelper::formatNumber($TotalCustomers), //DB::connection('stagging')->table("ems_customers")->count(),
-            'feeder_11' => StringHelper::formatNumber($TotalFeederEl), //DB::connection('stagging')->table("gis_11KV Feeder")->count(),
-            'feeder_33' => StringHelper::formatNumber($TotalFeederThirty), //DB::connection('stagging')->table("gis_33KV Feeder")->count(),
-           'crm_tickets' => StringHelper::formatNumber($TotalTickets),  //DB::connection('crm')->table("tickets")->count(), // Access denied issue to be fixed by infrastructure  //$TotalTickets
-           'customer_by_region' => StringHelper::formatNumber($CustomerByRegion),
+            'total_dss' => $TotalDSS,
+            'total_customers' => $TotalCustomers, //DB::connection('stagging')->table("ems_customers")->count(),
+            'feeder_11' => TotalFeederEl, //DB::connection('stagging')->table("gis_11KV Feeder")->count(),
+            'feeder_33' => $TotalFeederThirty, //DB::connection('stagging')->table("gis_33KV Feeder")->count(),
+           'crm_tickets' => TotalTickets,  //DB::connection('crm')->table("tickets")->count(), // Access denied issue to be fixed by infrastructure  //$TotalTickets
+           'customer_by_region' => $CustomerByRegion,
            'recent_customers' => $recentCustomers,
            "total_staff" => 0,
            "outsourced_staff" => 0,
