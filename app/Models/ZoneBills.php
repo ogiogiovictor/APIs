@@ -11,9 +11,9 @@ class ZoneBills extends Model
 
     use HasFactory;
 
-    protected $table = "MAIN_WAREHOUSE_STAGGING.dbo.Spectrumbill";
+    protected $table = "EMS_ZONE.dbo.SpectrumBill";
 
-    protected $connection = 'stagging';
+    protected $connection = 'zone_connection';
 
     public $timestamps = false;
 
@@ -22,6 +22,7 @@ class ZoneBills extends Model
      */
     public function customer()
     {
+        
         return $this->belongsTo(DimensionCustomer::class, 'AccountNo');
     }
 

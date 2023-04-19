@@ -23,9 +23,11 @@ class CustomerService
     public function getCustomerInfo(){
         $customers = DimensionCustomer::select('SetupDate', 'AccountNo', 'BookNo', 'MeterNo', 'Mobile', 'OldAccountNo', 'TariffID', 'Surname', 'FirstName', 'OtherNames', 'AcctTypeDesc',
         'OldTariffCode', 'TarriffCode', 'AccountType', 'Address', 'BUID', 'BusinessHub', 'service_center', 'UTID',
-        'ConnectionType', 'ArrearsBalance', 'State', 'City', 'StatusCode')->whereIn("StatusCode", ['A', 'S', '1', '0'])->paginate(15);
+        'ConnectionType', 'ArrearsBalance', 'State', 'City', 'StatusCode')->whereIn("StatusCode", ['A', 'S', '1', '0'])->orderBy('SetupDate', 'desc')->paginate(20);
 
-        return $customers;
+      
+        return CustomerResource::collection($customers)->response()->getData(true);
+
     }
 
     public function findCustomer($search_term) {
@@ -46,7 +48,7 @@ class CustomerService
 
         $customers = DimensionCustomer::whereIn('StatusCode', ['A', 'S'])->where("AccountType", $requestType)->paginate(20);
 
-        return $customers;
+        return CustomerResource::collection($customers)->response()->getData(true);
 
     }
 
@@ -55,7 +57,7 @@ class CustomerService
         
         $customers = DimensionCustomer::whereIn('StatusCode', ['0', '1'])->where("AccountType", $requestType)->paginate(20);
 
-        return $customers;
+        return CustomerResource::collection($customers)->response()->getData(true);
 
     }
 
@@ -118,6 +120,8 @@ class CustomerService
             $customer->load('transactions');
         }
 
+        return $customer;
+        
         $distribution = DTWarehouse::select('Assetid', 'assettype', 'AssetName', 'DSS_11KV_415V_Make',
         'DSS_11KV_415V_Rating', 'DSS_11KV_415V_Address', 'DSS_11KV_415V_Owner', 
         'DSS_11KV_415V_parent', 'longtitude', 'latitude', 'naccode')->where('Assetid', $dss)->first();

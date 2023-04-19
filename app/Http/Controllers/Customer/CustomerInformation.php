@@ -62,23 +62,48 @@ class CustomerInformation extends BaseApiController
 
     public function allCustomers(Request $request){
 
-        if($request->type == 'postpaid'){
+        $postpaid = DimensionCustomer::selectRaw('StatusCode, count(*) as total')
+        ->where("AccountType", 'Postpaid')->whereIn("StatusCode", ['A', 'S', '1', '0'])->groupBy('StatusCode')->get();
+
+        $prepaid = DimensionCustomer::selectRaw('StatusCode, count(*) as total')
+        ->where("AccountType", 'Prepaid')->whereIn("StatusCode", ['0', '1'])->groupBy('StatusCode')->get();
+
+
+        if($request->type == 'Postpaid'){
 
             $customers = (new CustomerService)->getPostpaid($request->type); //getPostpaid
 
-            return $this->sendSuccess($customers, "Customer Successfully Loaded", Response::HTTP_OK);
+            $data = [
+                'customers' => $customers,
+                'postpaid' => $postpaid,
+                'prepaid' => $prepaid,
+            ];
 
-        } else if($request->type == 'prepaid'){
+            return $this->sendSuccess($data, "Customer Successfully Loaded", Response::HTTP_OK);
+
+        } else if($request->type == 'Prepaid'){
 
             $customers = (new CustomerService)->getPrepaid($request->type); //getPrepaid
 
-            return $this->sendSuccess($customers, "Customer Successfully Loaded", Response::HTTP_OK);
+            $data = [
+                'customers' => $customers,
+                'postpaid' => $postpaid,
+                'prepaid' => $prepaid,
+               ];
+
+            return $this->sendSuccess($data, "Customer Successfully Loaded", Response::HTTP_OK);
 
         }else {
 
             $customers = (new CustomerService)->getCustomerInfo(); //getAll
 
-            return $this->sendSuccess($customers, "Customer Successfully Loaded", Response::HTTP_OK);
+            $data = [
+                'customers' => $customers,
+                'postpaid' => $postpaid,
+                'prepaid' => $prepaid,
+               ];
+
+            return $this->sendSuccess($data, "Customer Successfully Loaded", Response::HTTP_OK);
 
         }
 
