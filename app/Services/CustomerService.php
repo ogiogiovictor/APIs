@@ -9,7 +9,8 @@ use App\Models\FeederEleven;
 use App\Models\FeederThirty;
 use App\Models\Tickets;
 use App\Http\Resources\CustomerResource;
-
+use App\Models\CRMUser;
+use App\Models\MsmsCustomer;
 
 
 
@@ -110,7 +111,7 @@ class CustomerService
     }
 
 
-    public function customer360($changeAccountNumber){
+    public function customer360($changeAccountNumber, $dss){
 
         $customer = DimensionCustomer::with('bills')->where('AccountNo', $changeAccountNumber)->first();
 
@@ -120,28 +121,36 @@ class CustomerService
             $customer->load('transactions');
         }
 
-        return $customer;
+      
         
         $distribution = DTWarehouse::select('Assetid', 'assettype', 'AssetName', 'DSS_11KV_415V_Make',
         'DSS_11KV_415V_Rating', 'DSS_11KV_415V_Address', 'DSS_11KV_415V_Owner', 
         'DSS_11KV_415V_parent', 'longtitude', 'latitude', 'naccode')->where('Assetid', $dss)->first();
-       $customer->distribution = $distribution;
+
+        if($distribution){
+            $customer->distribution = $distribution;
+        }
+       
 
        $crm_user = CRMUser::where('accountno', $changeAccountNumber)->first();
-       //Get the Tickets
-       $tickets = Tickets::where('user_id', $crm_user->id)->get();
 
+       if($crm_user){
+        //Get the Tickets
+       $tickets = Tickets::where('user_id', $crm_user->id)->get();
+       $customer->tickets = $tickets;
+       }
+       
 
        $msmsMeters = MsmsCustomer::with(['customer_meters', 'meter_details'])
        ->select("id", "title", "surname", "firstname", "other_names", "supply_address",
        "lga", "contact_no", "email", "means_of_id", "o_account_no", "service_center", "unique_code",
        "debt", "debt_date", "debt_type")
        ->where('o_account_no', $changeAccountNumber)->first();
+       if($msmsMeters){
+        $customer->msmsCustomerInfo = $msmsMeters;
+       }
 
-
-       $customer->distribution = $distribution;
-       $customer->tickets = $tickets;
-       $customer->msmsCustomerInfo = $msmsMeters;
+      
 
        return $customer;
 
