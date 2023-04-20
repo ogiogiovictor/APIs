@@ -14,7 +14,7 @@ use App\Http\Controllers\Authenticate\UserController;
 use App\Http\Controllers\Authenticate\RoleController;
 use App\Http\Controllers\Authenticate\PermissionController;
 use App\Http\Controllers\Customer\CustomerOveriewController;
-
+use App\Http\Controllers\Bills\CustomerBills;
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -89,6 +89,8 @@ Route::group(['prefix' => 'v1', 'namespace' => 'Api\v1', 'middleware' => 'OAuth'
          //Customer 360
          Route::get('customer360/{account?}/{dss?}', [CustomerOveriewController::class, 'customer360']);
 
+          //Get Bill
+          Route::get('getbills', [CustomerBills::class, 'getBills']);
       
     });
 });
