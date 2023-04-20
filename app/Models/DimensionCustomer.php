@@ -29,16 +29,30 @@ class DimensionCustomer extends Model
 
     public function postpaid()
     {
-        return $this->hasMany(ZonePayment::class, 'AccountNo', 'AccountNo');
+        return $this->hasMany(ZonePayments::class, 'AccountNo', 'AccountNo');
     }
 
     public function payments()
     { 
-       return $this->hasMany(ZonePayment::class, 'AccountNo', 'AccountNo');
+       return $this->hasMany(ZonePayments::class, 'AccountNo', 'AccountNo');
     }
 
     public function transactions() {
         return $this->hasMany(ECMIPayment::class, 'AccountNo', 'AccountNo');
     }
+
+    public function zoneBills()
+    {
+        return $this->hasMany(ZoneBills::class, 'AccountNo', 'AccountNo')
+            ->select('AccountNo', DB::raw('SUM(CurrentChgTotal) as total_billed'))
+            ->groupBy('AccountNo');
+    }
+
+
+    public function getTotalOwingAttribute()
+    {
+        return $this->zoneBills->sum('CurrentChgTotal') - $this->payments->sum('Payments');
+    }
+
     
 }

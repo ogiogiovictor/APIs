@@ -17,7 +17,7 @@ class CustomerOveriewController extends BaseApiController
 
             $changeAccountNumber = StringHelper::formatAccountNumber($acctionNo);
 
-            $customer = (new CustomerService)->customer360($changeAccountNumber);
+            $customer = (new CustomerService)->customer360($changeAccountNumber, $dss);
 
             return $this->sendSuccess($customer, "Customer 360 Loaded", Response::HTTP_OK);
             
