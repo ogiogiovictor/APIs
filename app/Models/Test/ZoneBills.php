@@ -9,7 +9,7 @@ class ZoneBills extends Model
 {
     use HasFactory;
 
-    protected $primaryKey = 'BillID';
+    protected $primaryKey = 'rowguid';
     protected $table = "spectrumbill";
 
     public $timestamps = false;

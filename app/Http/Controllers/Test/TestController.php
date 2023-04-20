@@ -130,7 +130,7 @@ class TestController extends BaseApiController
 
             return $this->sendSuccess($data, "Customer Successfully Loaded", Response::HTTP_OK);
 
-        } else if($request->type == 'prepaid'){
+        } else if($request->type == 'Prepaid'){
 
             $customers = DimensionCustomer::whereIn('StatusCode', ['0', '1'])->where("AccountType", $request->type)->paginate(20); //getPrepaid
 
