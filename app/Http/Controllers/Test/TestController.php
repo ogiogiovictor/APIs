@@ -27,6 +27,8 @@ use Illuminate\Support\Facades\Validator;
 use App\Models\Test\MsmsCustomer;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
+use App\Http\Requests\TicketRequest;
+use App\Http\Requests\RecordRequest;
 
 
 
@@ -76,9 +78,9 @@ class TestController extends BaseApiController
         $data = [
             'total_dss' => $TotalDSS,
             'total_customers' => $TotalCustomers, //DB::connection('stagging')->table("ems_customers")->count(),
-            'feeder_11' => TotalFeederEl, //DB::connection('stagging')->table("gis_11KV Feeder")->count(),
+            'feeder_11' => $TotalFeederEl, //DB::connection('stagging')->table("gis_11KV Feeder")->count(),
             'feeder_33' => $TotalFeederThirty, //DB::connection('stagging')->table("gis_33KV Feeder")->count(),
-           'crm_tickets' => TotalTickets,  //DB::connection('crm')->table("tickets")->count(), // Access denied issue to be fixed by infrastructure  //$TotalTickets
+           'crm_tickets' => $TotalTickets,  //DB::connection('crm')->table("tickets")->count(), // Access denied issue to be fixed by infrastructure  //$TotalTickets
            'customer_by_region' => $CustomerByRegion,
            'recent_customers' => $recentCustomers,
            "total_staff" => 0,
@@ -204,15 +206,8 @@ class TestController extends BaseApiController
 
 
     
-    public function tshow(Request $request){
+    public function tshow(TicketRequest $request){
 
-        // $validator = Validator::make($request, [
-        //     'ticketid' => 'required',
-        // ]);
-
-        // if($validator->fails()){
-        //     return response()->json([ 'error' => true, 'message' => $validator->errors() ]);
-        // }
 
         $ticket = Tickets::where('ticket_no', $request->ticketid)->first();
         //Get the Customer Details in CRM
@@ -339,6 +334,12 @@ class TestController extends BaseApiController
         }catch(\Exception $e) {
             return $this->sendError("No Bills", $e , Response::HTTP_UNAUTHORIZED);
         }
+    }
+
+
+
+    public function cstore(RecordRequest $request){
+        //To be continued
     }
 
 

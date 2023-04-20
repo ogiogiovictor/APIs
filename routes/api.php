@@ -89,6 +89,10 @@ Route::group(['prefix' => 'v1', 'namespace' => 'Api\v1', 'middleware' => 'OAuth'
          //Customer 360
          Route::get('customer360/{account?}/{dss?}', [CustomerOveriewController::class, 'customer360']);
 
+         Route::apiResource('get_customers', CustomerInformation::class)->only(['index', 'store'])->middleware(['throttle:10,1']);
+
+         //Get Bill
+         Route::get('getbills', [TestController::class, 'getBills']);
       
     });
 });
@@ -130,8 +134,13 @@ Route::group(['prefix' => 'v2', 'namespace' => 'Api\v2', 'middleware' => 'OAuth'
          //Customer 360
          Route::get('customer360/{account?}/{dss?}', [TestController::class, 'customer360']);
 
+         Route::apiResource('get_customers', CustomerInformation::class)->only(['index', 'store'])->middleware(['throttle:10,1']);
+
          //Get Bill
          Route::get('getbills', [TestController::class, 'getBills']);
+
+         //Create CRMD Customer Record
+         Route::post('crmd', [TestController::class, 'cstore']);
 
       
     });
