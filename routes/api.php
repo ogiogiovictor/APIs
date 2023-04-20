@@ -93,9 +93,7 @@ Route::group(['prefix' => 'v1', 'namespace' => 'Api\v1', 'middleware' => 'OAuth'
 
          //Get Bill
          Route::get('getbills', [TestController::class, 'getBills']);
-          //Get Bill
-          Route::get('getbills', [CustomerBills::class, 'getBills']);
-      
+        
     });
 });
 
