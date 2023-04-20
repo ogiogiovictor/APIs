@@ -121,26 +121,27 @@ class TestController extends BaseApiController
         if($request->type == 'Postpaid'){
 
            $customers = DimensionCustomer::whereIn('StatusCode', ['A', 'S'])->where("AccountType", $request->type)->paginate(20); //getPostpaid
-
+           
            $data = [
             'customers' => CustomerResource::collection($customers)->response()->getData(true),
             'postpaid' => $postpaid,
             'prepaid' => $prepaid,
            ];
 
+           
             return $this->sendSuccess($data, "Customer Successfully Loaded", Response::HTTP_OK);
 
         } else if($request->type == 'Prepaid'){
 
             $customers = DimensionCustomer::whereIn('StatusCode', ['0', '1'])->where("AccountType", $request->type)->paginate(20); //getPrepaid
-
+            
             $data = [
                 'customers' => CustomerResource::collection($customers)->response()->getData(true),
                 'postpaid' => $postpaid,
                 'prepaid' => $prepaid,
                ];
 
-            return $this->sendSuccess($customers, "Customer Successfully Loaded", Response::HTTP_OK);
+            return $this->sendSuccess($data, "Customer Successfully Loaded", Response::HTTP_OK);
 
         }else {
 

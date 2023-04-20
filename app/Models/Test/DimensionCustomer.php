@@ -33,6 +33,10 @@ class DimensionCustomer extends Model
         
     }
 
+    public function prepaid() {
+        return $this->hasMany(ECMIPayment::class, 'AccountNo', 'AccountNo');
+    }
+
     public function transactions() {
         return $this->hasMany(ECMIPayment::class, 'AccountNo', 'AccountNo');
     }
