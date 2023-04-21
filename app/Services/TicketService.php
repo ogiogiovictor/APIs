@@ -25,8 +25,29 @@ class TicketService
          $data = [
              'ticket' => $ticket,
              'customer' => $customer,
+             'totalTicket' => $ticket->count(),
          ];
 
          return $data;
+    }
+
+
+    public function ticketStats(){
+
+        $allTicket = Tickets::paginate(20);
+        $closedTicket = Tickets::where('status', 'closed')->count();
+        $openTickets = Tickets::where('status', 'open')->count();
+        $unassignedTickets = Tickets::where('unassigned', 1)->count();
+
+        $data = [
+            'tickets' => $tickets,
+            'totalTicket' => $tickets->count(),
+            'closedTicket' => $closedTicket,
+            'openTicket' => $openTickets,
+            'unassigned' => $unassignedTickets,
+        ];
+
+        return $data;
+
     }
 }

@@ -12,4 +12,8 @@ class DTWarehouse extends Model
     protected $primaryKey = "msrepl_tran_version";
 
     public $timestamps = false;
+
+    public function getCustomerCount(){
+        return $this->hasMany(DimensionCustomer::class, 'DistributionID', 'Assetid');
+    }
 }

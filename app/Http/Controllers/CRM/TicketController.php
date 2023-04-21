@@ -11,8 +11,16 @@ use App\Services\TicketService;
 class TicketController extends Controller
 {
     public function index(){
-        return Tickets::paginate(20);
+        $ticketData = (new TicketService)->ticketStats();
+
+        if($ticketData){
+            return $this->sendSuccess($ticketData, "Ticket Successfully  Loaded", Response::HTTP_OK);
+        }else {
+            return $this->sendError("No Data", "No data Found" , Response::HTTP_NO_CONTENT);
+        }
     }
+
+
 
     public function show(TicketRequest $request){
 

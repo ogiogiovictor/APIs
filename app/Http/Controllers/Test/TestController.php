@@ -164,12 +164,57 @@ class TestController extends BaseApiController
 
     public function getAssetWH(Request $request){
 
+        //11kva DT count
+        //33kva DT count
+        $elevenDt = DTWarehouse::where('assettype', AssetEnum::DT_eleven()->value)->count();
+        $thirtyDt = DTWarehouse::where('assettype', AssetEnum::DT_thirty_three()->value)->count();
+        $dtTotal = DTWarehouse::count();
+        //$dtByBhub = DTWarehouse::selectRaw('BusinessHub, count(*) as total')->groupBy('BusinessHub')->get();
+
+
         if($request->type == AssetEnum::DT_eleven()->value){
-            return DTWarehouse::where("assettype", AssetEnum::DT_eleven()->value)->paginate(20);
+            
+            $getDTs = DTWarehouse::withCount('getCustomerCount')
+            ->where('assettype', AssetEnum::DT_eleven()->value)
+            ->paginate(20);
+
+            $data =[
+                'allDt' => $getDTs,
+                'elevenDt' => $elevenDt,
+                'thirtyDt' => $thirtyDt,
+                'dtTotal' => $dtTotal,
+            ];
+
+            return $this->sendSuccess($data, "Customer Successfully Loaded", Response::HTTP_OK);
+
         } else if($request->type == AssetEnum::DT_thirty_three()->value) {
-            returnDTWarehouse::where("assettype", AssetEnum::DT_thirty_three()->value)->paginate(20);
+            
+            $getDTs = DTWarehouse::withCount('getCustomerCount')
+            ->where('assettype', AssetEnum::DT_thirty_three()->value)
+            ->paginate(20);
+
+            $data =[
+                'allDt' => $getDTs,
+                'elevenDt' => $elevenDt,
+                'thirtyDt' => $thirtyDt,
+                'dtTotal' => $dtTotal,
+            ];
+
+            return $this->sendSuccess($data, "Customer Successfully Loaded", Response::HTTP_OK);
+            
         }else {
-            return DTWarehouse::paginate(20)->toArray();
+
+            $getDTs = DTWarehouse::withCount('getCustomerCount')->paginate(20);
+
+            $data =[
+                'allDt' => $getDTs,
+                'elevenDt' => $elevenDt,
+                'thirtyDt' => $thirtyDt,
+                'dtTotal' => $dtTotal,
+            ];
+
+            return $this->sendSuccess($data, "Customer Successfully Loaded", Response::HTTP_OK);
+            
         }
 
     }
@@ -202,7 +247,24 @@ class TestController extends BaseApiController
 
     public function tindex() {
         $tickets = Tickets::paginate(20);
-        return $tickets;
+
+        $closedTicket = Tickets::where('status', 'closed')->count();
+        $openTickets = Tickets::where('status', 'open')->count();
+        $unassignedTickets = Tickets::where('unassigned', 1)->count();
+
+        $data = [
+            'tickets' => $tickets,
+            'totalTicket' => $tickets->count(),
+            'closedTicket' => $closedTicket,
+            'openTicket' => $openTickets,
+            'unassigned' => $unassignedTickets,
+        ];
+
+        if($tickets){
+            return $this->sendSuccess($data, "Customer 360 Loaded", Response::HTTP_OK);
+        }else {
+            return $this->sendError("No Data", "No data Found" , Response::HTTP_NO_CONTENT);
+        }
     }
 
 
@@ -220,6 +282,7 @@ class TestController extends BaseApiController
         $data = [
             'ticket' => $ticket,
             'customer' => $customer,
+            'totalTicket' => $ticket->count(),
         ];
 
         if($ticket){
@@ -308,11 +371,11 @@ class TestController extends BaseApiController
             
             //Top 100 Highest Billed Customers
             $topCustomers = DimensionCustomer::with(['zoneBills' => function($query) {
-                $query->select('AccountNo', DB::raw('SUM(CurrentChgTotal) as total_billed'))
+                $query->orderBy('BillDate', 'desc')
+                ->select('AccountNo', DB::raw('SUM(CurrentChgTotal) as total_billed'))
                     ->groupBy('AccountNo');
             }])
             ->select('AccountNo')
-            //->orderByDesc('spectrumbill.total_billed')
             ->take(100)
             ->get();
 
@@ -321,7 +384,7 @@ class TestController extends BaseApiController
             });
 
 
-            $bills  = ZoneBills::paginate(30);
+            $bills  = ZoneBills::orderBy('BillDate', 'desc')->paginate(30);
 
             $data = [
                 'thisMonthBills' => StringHelper::formatNumber($thisMonthBills),

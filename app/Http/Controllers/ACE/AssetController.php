@@ -57,7 +57,7 @@ class AssetController extends BaseApiController
     }
 
     public function getAssetWH(Request $request){
-        
+
         if($request->type == AssetEnum::DT_eleven()->value){
             return $this->AssetRepository->getAllEleven();
         } else if($request->type == AssetEnum::DT_thirty_three()->value) {

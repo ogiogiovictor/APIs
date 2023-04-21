@@ -18,4 +18,8 @@ class DTWarehouse extends Model
 
     public $timestamps = false;
 
+    public function getCustomerCount(){
+        return $this->hasMany(DimensionCustomer::class, 'DistributionID', 'Assetid');
+    }
+
 }

@@ -36,10 +36,7 @@ class AssetRepository implements AssetRepositoryInterface
         }
    }
 
-   public function allFeeders() {
 
-
-   }
 
    public function allServiceUnit(){
     
@@ -53,21 +50,53 @@ class AssetRepository implements AssetRepositoryInterface
    //Get Asset From Warehouse
    public function getAllDSSW() {
 
-    $getAsset = DTWarehouse::paginate(20)->toArray();
-    return $getAsset;
+    $getDTs = DTWarehouse::withCount('getCustomerCount')->paginate(20);
+
+    $data =[
+                'allDt' => $getDTs,
+                'elevenDt' => $elevenDt,
+                'thirtyDt' => $thirtyDt,
+                'dtTotal' => $dtTotal,
+    ];
+
+    return $data;
    }
 
 
    public function getAllEleven() {
 
-    $getAsset = DTWarehouse::where("assettype", AssetEnum::DT_eleven()->value)->paginate(20);
-    return $getAsset;
+    $elevenDt = DTWarehouse::where('assettype', AssetEnum::DT_eleven()->value)->count();
+    $thirtyDt = DTWarehouse::where('assettype', AssetEnum::DT_thirty_three()->value)->count();
+    $dtTotal = DTWarehouse::count();
+
+    $getDTs = DTWarehouse::withCount('getCustomerCount')
+    ->where('assettype', AssetEnum::DT_eleven()->value)
+    ->paginate(20);
+
+    $data =[
+        'allDt' => $getDTs,
+        'elevenDt' => $elevenDt,
+        'thirtyDt' => $thirtyDt,
+        'dtTotal' => $dtTotal,
+    ];
+
+    return $data;
    }
 
    public function getAllThirty() {
 
-    $getAsset = DTWarehouse::where("assettype", AssetEnum::DT_thirty_three()->value)->paginate(20);
-    return $getAsset;
+    $getDTs = DTWarehouse::withCount('getCustomerCount')
+            ->where('assettype', AssetEnum::DT_thirty_three()->value)
+            ->paginate(20);
+
+    $data =[
+                'allDt' => $getDTs,
+                'elevenDt' => $elevenDt,
+                'thirtyDt' => $thirtyDt,
+                'dtTotal' => $dtTotal,
+    ];
+
+    return $data;
    }
 
 

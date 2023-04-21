@@ -37,7 +37,7 @@ class CustomerResource extends JsonResource
             'BUID' => $this->BUID,
             'BusinessHub' =>  $this->BusinessHub,
             'Region' => $this->Region,
-            'StatusCode' => $this->StatusCode,
+            'StatusCode' => $this->getStatusLabel($this->StatusCode),
             'service_center' => $this->service_center,
             'CustomerSK' => $this->CustomerSK,
             "AcctTypeDesc" => $this->AcctTypeDesc,
@@ -47,4 +47,20 @@ class CustomerResource extends JsonResource
     ];
     //return parent::toArray($request);
     }
+
+    public function getStatusLabel($status)
+    {
+        $statuses = [
+            'A' => 'Active',
+            'I' => 'Inactive',
+            'S' => 'Suspended',
+            'C' => 'Closed',
+            '0' => 'Inactive',
+            '1' => 'Active',
+        ];
+    
+        return $statuses[$status] ?? $status;
+    }
+
+
 }
