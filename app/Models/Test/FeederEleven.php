@@ -10,7 +10,7 @@ class FeederEleven extends Model
     use HasFactory;
 
     protected $primaryKey = 'msrepl_tran_version';
-    protected $table = "11KV Feeder";
+    protected $table = "11KV feeder";
 
     public $timestamps = false;
 }

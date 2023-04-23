@@ -10,7 +10,7 @@ class FeederThirty extends Model
     use HasFactory;
 
     protected $primaryKey = 'msrepl_tran_version';
-    protected $table = "33KV Feeder";
+    protected $table = "33KV feeder";
 
     public $timestamps = false;
 }

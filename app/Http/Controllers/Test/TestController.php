@@ -185,7 +185,7 @@ class TestController extends BaseApiController
                 'dtTotal' => $dtTotal,
             ];
 
-            return $this->sendSuccess($data, "Customer Successfully Loaded", Response::HTTP_OK);
+            return $this->sendSuccess($data, "DSS Successfully Loaded", Response::HTTP_OK);
 
         } else if($request->type == AssetEnum::DT_thirty_three()->value) {
             
@@ -200,7 +200,7 @@ class TestController extends BaseApiController
                 'dtTotal' => $dtTotal,
             ];
 
-            return $this->sendSuccess($data, "Customer Successfully Loaded", Response::HTTP_OK);
+            return $this->sendSuccess($data, "DSS Successfully Loaded", Response::HTTP_OK);
             
         }else {
 
@@ -213,7 +213,7 @@ class TestController extends BaseApiController
                 'dtTotal' => $dtTotal,
             ];
 
-            return $this->sendSuccess($data, "Customer Successfully Loaded", Response::HTTP_OK);
+            return $this->sendSuccess($data, "DSS Successfully Loaded", Response::HTTP_OK);
             
         }
 
