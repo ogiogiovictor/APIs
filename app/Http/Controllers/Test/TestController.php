@@ -235,11 +235,13 @@ class TestController extends BaseApiController
         
         }else {
 
-            $eleven = FeederEleven::get(); 
-            $thirty = Feederthirty::get();
-            $feeders = $eleven->merge($thirty)->rowpageme(10);
+            $eleven = FeederEleven::select('Assetid', 'naccode', 'assettype', 'Capture DateTime', 'Synced DateTime', 'latitude', 'longtitude', 'F11kvFeeder_Name', 'F11kvFeeder_parent');
+            $thirty = Feederthirty::select('Assetid', 'naccode', 'assettype', 'Capture DateTime', 'Synced DateTime', 'latitude', 'longtitude', 'F33kv_Feeder_Name', 'F33kv_Feeder_parent');
+            $feeders = $eleven->unionAll($thirty)->paginate(20);
     
             return $feeders;
+
+       
         }
 
     }
