@@ -223,26 +223,34 @@ class TestController extends BaseApiController
 
     public function findex(Request $request){
 
-        if($request->type == FeederEnum::FT_eleven()->value){  //11KV Feeder  11KV Feeder
-            
-            $feeder = FeederEleven::where("assettype", FeederEnum::FT_eleven()->value)->paginate(20); 
-            return $feeder;
+        $elevenA = FeederEleven::where("assettype", FeederEnum::FT_eleven()->value)->count();
+        $thirtyA = Feederthirty::where("assettype", FeederEnum::FT_thirty_three()->value)->count();
+        $total = FeederEleven::count() + Feederthirty::count();
 
-         }else if($request->type == FeederEnum::FT_thirty_three()->value){
+        $eleven = FeederEleven::select('11KV feeder.Assetid', 'serviceunits.Name', 'serviceunits.Biz_Hub',  'serviceunits.Region', '11KV feeder.naccode', '11KV feeder.assettype', '11KV feeder.Capture DateTime', 
+        '11KV feeder.Synced DateTime', '11KV feeder.latitude', '11KV feeder.longtitude', '11KV feeder.F11kvFeeder_Name', '11KV feeder.F11kvFeeder_parent')
+        ->leftjoin('gis_dss', '11KV feeder.F11kvFeeder_parent', '=', 'gis_dss.Assetid')
+        ->leftjoin('serviceunits', 'gis_dss.DSS_11KV_415V_Owner', '=', 'serviceunits.Name');
         
-            $feeder = Feederthirty::where("assettype", FeederEnum::FT_thirty_three()->value)->paginate(20); 
-            return $feeder;
+
+        $thirty = Feederthirty::select('33KV feeder.Assetid', 'serviceunits.Name',  'serviceunits.Biz_Hub', 'serviceunits.Region', '33KV feeder.naccode', '33KV feeder.assettype', '33KV feeder.Capture DateTime',
+         '33KV feeder.Synced DateTime', '33KV feeder.latitude', '33KV feeder.longtitude', '33KV feeder.F33kv_Feeder_Name', '33KV feeder.F33kv_Feeder_parent')
+        ->leftjoin('gis_dss', '33KV feeder.F33kv_Feeder_parent', '=', 'gis_dss.Assetid')
+        ->leftjoin('serviceunits', 'gis_dss.DSS_11KV_415V_Owner', '=', 'serviceunits.Name');
         
-        }else {
 
-            $eleven = FeederEleven::select('Assetid', 'naccode', 'assettype', 'Capture DateTime', 'Synced DateTime', 'latitude', 'longtitude', 'F11kvFeeder_Name', 'F11kvFeeder_parent');
-            $thirty = Feederthirty::select('Assetid', 'naccode', 'assettype', 'Capture DateTime', 'Synced DateTime', 'latitude', 'longtitude', 'F33kv_Feeder_Name', 'F33kv_Feeder_parent');
-            $feeders = $eleven->unionAll($thirty)->paginate(20);
-    
-            return $feeders;
+        $feeders = $eleven->unionAll($thirty)->paginate(20);
 
-       
-        }
+        $data = [
+           'feeder_eleven' => $elevenA,
+           'feeder_thirty' => $thirtyA,
+           'total_feeder' => $total,
+           'feeders' => $feeders,
+        ];
+
+        return $this->sendSuccess($data, "DSS Successfully Loaded", Response::HTTP_OK);
+
+        
 
     }
 
