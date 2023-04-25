@@ -114,10 +114,6 @@ Route::group(['prefix' => 'v2', 'namespace' => 'Api\v2', 'middleware' => 'OAuth'
         Route::get('get_dashboard_stats', [TestController::class, 'stats']);
 
         Route::get('grap_customers/{type?}', [TestController::class, 'allCustomers']);  // Get Customers
-
-        Route::get('grap_asset/{type?}', [TestController::class, 'getAssetWH']);  // Get Asset Warehouse
-
-        Route::get('grap_feeder/{type?}', [TestController::class, 'findex']); //Get Feeder Warehouse
             
         Route::get('tickets', [TestController::class, 'tindex']);
 
@@ -138,10 +134,16 @@ Route::group(['prefix' => 'v2', 'namespace' => 'Api\v2', 'middleware' => 'OAuth'
 
          //Get Bill
          Route::get('getbills', [TestController::class, 'getBills']);
+         Route::get('grap_asset/{type?}', [TestController::class, 'getAssetWH']);  // Get Asset Warehouse
+
+
 
          //Create CRMD Customer Record
          Route::post('crmd', [TestController::class, 'cstore']);
-
+         Route::get('grap_feeder/{type?}', [TestController::class, 'findex']); //Get Feeder Warehouse
+         Route::get('/payments', [TestController::class, 'getPayments']);
+         Route::get('/paymentDetails/{FAccount?}/{Token?}/{type?}', [TestController::class, 'getPaymentDetails']);
+         Route::get('transmission_stations', [TestController::class, 'getTransmissionStations']);
       
     });
 });

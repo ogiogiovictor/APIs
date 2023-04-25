@@ -8,6 +8,7 @@ use Illuminate\Support\Carbon;
 use App\Models\BusinessUnit;
 use App\Models\ECMIPayment;
 use App\Models\EMSPayment;
+use App\Helpers\StringHelper;
 
 class ZoneResource extends JsonResource
 {
@@ -21,6 +22,7 @@ class ZoneResource extends JsonResource
         return [
             'BookNo' => $this->booknumber,
             'AccountNo' => $this->AccountNo,
+            'FAccountNo' => StringHelper::removeSpecialCharsAndSlashes($this->AccountNo),
             'MeterNo' => $this->MeterNo,
             'SetupDate' => $this->ApplicationDate,
             'TariffID' => $this->TariffID,
@@ -30,7 +32,7 @@ class ZoneResource extends JsonResource
             'OpenDate' => $this->NewsetupDate,
             'Surname' => $this->Surname,
             'FirstName' => $this->FirstName,
-            //'FullName' => $this->OtherNames,
+            'CustomerName' => $this->Surname . ' ' . $this->FirstName,
             'Address' => $this->Address1 . ' ' . $this->Address2 ,
             'State' => $this->State,
             'Mobile' => $this->Mobile,
@@ -42,7 +44,6 @@ class ZoneResource extends JsonResource
            // 'TransID' => $this->TransID,
             'OldAccountNo' => $this->oldaccountnumber,
             'ServiceCenter' => '',
-            //'CustomerSK' => $this->CustomerID,
             "AcctTypeDesc" => $this->AcctTypeDesc,
             "City" => $this->City,
             "Region"=> $this->State,

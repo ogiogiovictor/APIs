@@ -29,6 +29,9 @@ use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use App\Http\Requests\TicketRequest;
 use App\Http\Requests\RecordRequest;
+use App\Http\Resources\EcmiPaymentResource;
+use App\Models\Test\TransmissionStation;
+
 
 
 
@@ -248,10 +251,58 @@ class TestController extends BaseApiController
            'feeders' => $feeders,
         ];
 
-        return $this->sendSuccess($data, "DSS Successfully Loaded", Response::HTTP_OK);
+        return $this->sendSuccess($data, "Feeder Successfully Loaded", Response::HTTP_OK);
 
         
 
+    }
+
+
+    public function getPayments(){
+
+        $newpayment = new EcmiPayment();
+        $ecmi_payment = $newpayment->paymentCount();
+        $ems_payment = ZonePayment::count();
+        $total_payments = $ecmi_payment + $ems_payment;
+        $today_payment_ecmi = $newpayment->whereDate('TransactionDateTime', Carbon::today())->count();
+        $today_payment_ems = ZonePayment::whereDate('PayDate', Carbon::today())->count();
+
+        $selectECMI = ECMIPayment::select("TransactionDateTime", "BUID", "TransactionNo", "Token", 
+        "AccountNo", "MeterNo", "Amount",  DB::raw("'prepaid' as CSPClientID"), DB::raw("REGEXP_REPLACE(AccountNo, '[^0-9a-zA-Z]+', '') as FAccount"))
+        ->orderBy("TransactionDateTime", "desc");
+
+       $selectEMS = ZonePayment::select("PayDate", "BusinessUnit", "PaymentID", "receiptnumber", 
+       "AccountNo", "MeterNo", "Payments",  DB::raw("'postpaid' as PaymentSource"), DB::raw("REGEXP_REPLACE(AccountNo, '[^0-9a-zA-Z]+', '') as FAccount"))
+       ->orderBy("PayDate", "desc");
+
+       $bothpayment = $selectECMI->unionAll($selectEMS)->orderBy('TransactionDateTime', 'desc')->paginate(20);
+
+       
+        $data = [
+            'ecmi_payment' => $ecmi_payment,
+            'ems_payment' => $ems_payment,
+            'total_payments' => $total_payments,
+            'payments' => $bothpayment,
+            'today_payments' => $today_payment_ecmi + $today_payment_ems,
+        ];
+
+        return $this->sendSuccess($data, "Payment Successfully Loaded", Response::HTTP_OK);
+    }
+
+
+    public function getPaymentDetails($account, $Token, $CSPClientID){
+        //$formattedAccount = StringHelper::formatAccountNumber($account);
+         //   return  $formattedAccount;
+        if($CSPClientID == "prepaid"){
+           // $payment = ECMIPayment::where('AccountNo', $formattedAccount)->where('Token', $Token)->first();
+            $payment = new EcmiPaymentResource(ECMIPayment::where('Token', $Token)->first());
+          
+        }else {
+            //$payment = ZonePayment::where('AccountNo', $account)->where('receiptnumber', $Token)->first();
+            $payment = new ZoneResource(ZonePayment::where('receiptnumber', $Token)->first());
+        }
+
+        return $this->sendSuccess($payment, "Payment Successfully Loaded", Response::HTTP_OK);
     }
 
 
@@ -408,6 +459,18 @@ class TestController extends BaseApiController
         }catch(\Exception $e) {
             return $this->sendError("No Bills", $e , Response::HTTP_UNAUTHORIZED);
         }
+    }
+
+    public function getTransmissionStations(){
+            
+            try{
+    
+                $transmissionStations = TransmissionStation::all();
+    
+                return $this->sendSuccess($transmissionStations, "Transmission Stations Loaded", Response::HTTP_OK);
+            }catch(\Exception $e) {
+                return $this->sendError("No Transmission Stations", $e , Response::HTTP_UNAUTHORIZED);
+            }
     }
 
 

@@ -21,4 +21,6 @@ class ECMIPayment extends Model
     public function customerE(): BelongsTo {
         return $this->belongsTo(DimensionCustomer::class, "AccountNo");
     }
+
+    
 }

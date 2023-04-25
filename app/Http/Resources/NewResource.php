@@ -7,6 +7,7 @@ use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Support\Carbon;
 use App\Models\ECMIPayment;
 use App\Models\EMSPayment;
+use App\Helpers\StringHelper;
 
 
 class NewResource extends JsonResource
@@ -21,6 +22,7 @@ class NewResource extends JsonResource
         return [
                 'SetupDate' => $this->SetupDate,
                 'AccountNo' => $this->AccountNo,
+                'FAccountNo' => StringHelper::removeSpecialCharsAndSlashes($this->AccountNo),
                 'BookNo' => $this->BookNo,
                 'MeterNo' => $this->MeterNo,
                 'OldAccountNo' => $this->OldAccountNo,

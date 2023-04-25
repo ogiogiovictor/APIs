@@ -11,13 +11,19 @@ class ECMIPayment extends Model
 
     use HasFactory;
 
-    protected $primaryKey = 'AccountNo';
+    protected $primaryKey = 'Token';
     protected $table = "transactions";
 
     public $timestamps = false;
 
+    public $incrementing = false; // Specify that the primary key is not an auto-incrementing integer
+
     public function customer()
     {
         return $this->belongsTo(DimensionCustomer::class, 'AccountNo', 'AccountNo');
+    }
+
+    public function paymentCount(){
+        return $this->count();
     }
 }
