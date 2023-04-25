@@ -14,8 +14,8 @@ final class FeederEnum extends Enum
 
     protected static function values(): array{
         return [
-            'FT_eleven' => '11kv Feeder',
-            'FT_thirty_three' => '33kv Feeder',
+            'FT_eleven' => '11KV Feeder',
+            'FT_thirty_three' => '33KV Feeder',
         ];
     }
 

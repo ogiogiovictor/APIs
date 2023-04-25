@@ -3,36 +3,42 @@
 namespace App\Services;
 use App\Models\DimensionCustomer;
 use App\Models\ZoneCustomer;
-use DB;
+use Illuminate\Support\Facades\DB;
 use App\Models\DTWarehouse;
 use App\Models\FeederEleven;
 use App\Models\FeederThirty;
 use App\Models\Tickets;
 use App\Enums\FeederEnum;
+use App\Models\ServiceUnit;
 
 
 class AssetService
 {
     
-
+  
   
     public function getFeederEleven() {
 
-        $getAsset = FeederEleven::where("assettype", FeederEnum::FT_eleven()->value)->paginate(20);
-        return $getAsset;
+     
+        $eleven =  FeederEleven::paginate(20);
+
+        return $eleven;
     
        }
     
        public function getFeederThirty() {
     
-        $getAsset = Feederthirty::where("assettype", FeederEnum::FT_thirty_three()->value)->paginate(20);
-        return $getAsset;
+       
+        $thirty =  FeederThirty::paginate(20);
+        
+
+       
+
+        return $thirty;
     
        }
 
        public function allFeeder() {
-     
-        //collect(FeederEleven::get());
 
         $eleven = FeederEleven::get(); 
         $thirty = Feederthirty::get();

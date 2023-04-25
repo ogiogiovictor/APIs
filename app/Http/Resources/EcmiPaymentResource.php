@@ -4,7 +4,9 @@ namespace App\Http\Resources;
 
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
-use App\Models\Test\DimensionCustomer;
+//use App\Models\Test\DimensionCustomer;
+use App\Models\DimensionCustomer;
+use App\Helpers\StringHelper;
 
 class EcmiPaymentResource extends JsonResource
 {
@@ -21,6 +23,7 @@ class EcmiPaymentResource extends JsonResource
             'TransactionNo' => $this->TransactionNo ?? '',
             'Token' => $this->Token ?? '',
             'AccountNo' => $this->AccountNo,
+            'FAccountNo' => StringHelper::removeSpecialCharsAndSlashes($this->AccountNo),
             'CustomerName' => trim(DimensionCustomer::where('AccountNo', $this->AccountNo)->value('Surname')). ' ' . 
              trim(DimensionCustomer::where('AccountNo', $this->AccountNo)->value('OtherNames')),
             'MeterNo' => $this->MeterNo,

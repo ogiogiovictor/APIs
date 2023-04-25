@@ -14,4 +14,10 @@ class ZonePayments extends Model
     protected $connection = 'zone_connection';
 
     public $timestamps = false;
+
+    public function customer()
+    {
+        return $this->belongsTo(DimensionCustomer::class, 'AccountNo', 'AccountNo');
+    }
+
 }

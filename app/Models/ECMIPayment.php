@@ -18,8 +18,17 @@ class ECMIPayment extends Model
 
     public $timestamps = false;
 
+    public function customer()
+    {
+        return $this->belongsTo(DimensionCustomer::class, 'AccountNo', 'AccountNo');
+    }
+
     public function customerE(): BelongsTo {
         return $this->belongsTo(DimensionCustomer::class, "AccountNo");
+    }
+
+    public function paymentCount(){
+        return $this->count();
     }
 
     

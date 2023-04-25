@@ -33,9 +33,9 @@ class CustomerService
 
     public function findCustomer($search_term) {
         $customers =  DimensionCustomer::select('*')->where(function ($query) use ($search_term ) {
-            $query->whereNotIn("StatusCode", ["P, I, C, N"]);
-            $query->where('AccountNo', $search_term);
-            //$query->where('AccountNo', 'like', '%'. $search_term .  '%');
+            $query->whereNotIn("StatusCode", ["0, I, C, N"]);
+            //$query->where('AccountNo', $search_term);
+            $query->where('AccountNo', 'like', '%'. $search_term .  '%');
             $query->orWhere('MeterNo', $search_term );
            // $query->orWhere('OldAccountNo', $search_term);
         })->get();  //first();
@@ -122,12 +122,10 @@ class CustomerService
         }
 
       
-        
-        $distribution = DTWarehouse::select('Assetid', 'assettype', 'AssetName', 'DSS_11KV_415V_Make',
-        'DSS_11KV_415V_Rating', 'DSS_11KV_415V_Address', 'DSS_11KV_415V_Owner', 
-        'DSS_11KV_415V_parent', 'longtitude', 'latitude', 'naccode')->where('Assetid', $dss)->first();
-
-        if($distribution){
+        if($dss){
+            $distribution = DTWarehouse::select('Assetid', 'assettype', 'AssetName', 'DSS_11KV_415V_Make',
+            'DSS_11KV_415V_Rating', 'DSS_11KV_415V_Address', 'DSS_11KV_415V_Owner', 
+            'DSS_11KV_415V_parent', 'longtitude', 'latitude', 'naccode')->where('Assetid', $dss)->first();
             $customer->distribution = $distribution;
         }
        

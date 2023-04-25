@@ -15,6 +15,8 @@ use App\Http\Controllers\Authenticate\RoleController;
 use App\Http\Controllers\Authenticate\PermissionController;
 use App\Http\Controllers\Customer\CustomerOveriewController;
 use App\Http\Controllers\Bills\CustomerBills;
+use App\Http\Controllers\IBEDCENGINE\PaymentController;
+use App\Http\Controllers\ACE\InjectionSubStationController;
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -44,7 +46,7 @@ Route::middleware(['auth:sanctum'])->group(function() {
     /*|--------------------------------------------------------------------------
     | CUSTOMER API INTEGRATION - LIFAN
     |-------------------------------------------------------------------------- */
-    Route::apiResource('get_customers', CustomerInformation::class)->only(['index', 'store'])->middleware(['throttle:10,1']);
+    Route::apiResource('get_customers', CustomerInformation::class)->only(['index', 'store'])->middleware(['throttle:10,6']);
 
      /*|--------------------------------------------------------------------------
     | ASSET-GIS API INTEGRATION FOR CMS
@@ -68,10 +70,6 @@ Route::group(['prefix' => 'v1', 'namespace' => 'Api\v1', 'middleware' => 'OAuth'
         Route::get('get_dashboard_stats', [AssetController::class, 'stats']);
 
         Route::get('grap_customers/{type?}', [CustomerInformation::class, 'allCustomers']);  // Get Customers
-
-        Route::get('grap_asset/{type?}', [AssetController::class, 'getAssetWH']);  // Get Asset Warehouse
-
-        Route::get('grap_feeder/{type?}', [FeederController::class, 'index']); //Get Feeder Warehouse
             
         Route::get('tickets', [TicketController::class, 'index']);
 
@@ -92,7 +90,15 @@ Route::group(['prefix' => 'v1', 'namespace' => 'Api\v1', 'middleware' => 'OAuth'
         // Route::apiResource('get_customers', CustomerInformation::class)->only(['index', 'store'])->middleware(['throttle:10,1']);
 
          //Get Bill
-         Route::get('getbills', [TestController::class, 'getBills']);
+         Route::get('getbills', [CustomerBills::class, 'getBills']);
+         Route::get('grap_asset/{type?}', [AssetController::class, 'getAssetWH']);  // Get Asset Warehouse
+
+         //Create CRMD Customer Record
+         Route::post('crmd', [TestController::class, 'cstore']); // Not Yet Implemented
+         Route::get('grap_feeder/{type?}', [FeederController::class, 'index']); //Get Feeder Warehouse
+         Route::get('/payments', [PaymentController::class, 'getPayments']);
+         Route::get('/paymentDetails/{FAccount?}/{Token?}/{type?}', [PaymentController::class, 'getPaymentDetails']);
+         Route::get('transmission_stations', [InjectionSubStationController::class, 'getTransmissionStations']);
         
     });
 });

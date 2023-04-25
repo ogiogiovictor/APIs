@@ -4,9 +4,10 @@ namespace App\Services;
 use App\Models\DimensionCustomer;
 use App\Models\ZoneCustomer;
 use App\Models\ECMICustomer;
-use DB;
+use Illuminate\Support\Facades\DB;
 use App\Models\ZoneBills;
 use App\Helpers\StringHelper;
+use Carbon\Carbon;
 
 
 
