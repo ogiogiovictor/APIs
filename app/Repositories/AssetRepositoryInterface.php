@@ -7,9 +7,12 @@ Interface AssetRepositoryInterface
     
     public function allDTs();
     public function storeDTs($data, $assetType);
-    public function allFeeders();
+    //public function allFeeders();
     // public function storeFeeder($data, $assetType);
      public function allServiceUnit();
+     public function getAllDSSW();
+     public function getAllEleven();
+     public function getAllThirty();
     // public function storeServiceUnit($data);
     // public function allInjectionStations();
     // public function storeInjectionStations($data);

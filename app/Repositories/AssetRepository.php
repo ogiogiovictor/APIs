@@ -49,6 +49,9 @@ class AssetRepository implements AssetRepositoryInterface
 
    //Get Asset From Warehouse
    public function getAllDSSW() {
+    $elevenDt = DTWarehouse::where('assettype', AssetEnum::DT_eleven()->value)->count();
+    $thirtyDt = DTWarehouse::where('assettype', AssetEnum::DT_thirty_three()->value)->count();
+    $dtTotal = DTWarehouse::count();
 
     $getDTs = DTWarehouse::withCount('getCustomerCount')->paginate(20);
 

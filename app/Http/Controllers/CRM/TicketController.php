@@ -7,8 +7,10 @@ use Illuminate\Http\Request;
 use App\Models\Tickets;
 use App\Http\Requests\TicketRequest;
 use App\Services\TicketService;
+use App\Http\Controllers\BaseApiController;
+use Symfony\Component\HttpFoundation\Response;
 
-class TicketController extends Controller
+class TicketController extends BaseApiController
 {
     public function index(){
         $ticketData = (new TicketService)->ticketStats();

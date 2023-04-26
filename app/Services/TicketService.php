@@ -34,7 +34,7 @@ class TicketService
 
     public function ticketStats(){
 
-        $allTicket = Tickets::paginate(20);
+        $tickets = Tickets::paginate(20);
         $closedTicket = Tickets::where('status', 'closed')->count();
         $openTickets = Tickets::where('status', 'open')->count();
         $unassignedTickets = Tickets::where('unassigned', 1)->count();
