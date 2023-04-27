@@ -12,6 +12,7 @@ use App\Http\Resources\CustomerResource;
 use App\Models\CRMUser;
 use App\Models\MsmsCustomer;
 use App\Helpers\StringHelper;
+use App\Services\AmiService;
 
 
 
@@ -145,8 +146,17 @@ class CustomerService
        "lga", "contact_no", "email", "means_of_id", "o_account_no", "service_center", "unique_code",
        "debt", "debt_date", "debt_type")
        ->where('o_account_no', $changeAccountNumber)->first();
+       
        if($msmsMeters){
         $customer->msmsCustomerInfo = $msmsMeters;
+       }
+
+       //Use the account number to return the meter number
+       $getMeterNo = DimensionCustomer::where('AccountNo', $changeAccountNumber)->value('MeterNo');
+
+       $amiEvents = (new AmiService)->getAmiReading($getMeterNo);
+       if($amiEvents){
+        $customer->amiEvents = $amiEvents;
        }
 
       

@@ -17,6 +17,7 @@ use App\Http\Controllers\Customer\CustomerOveriewController;
 use App\Http\Controllers\Bills\CustomerBills;
 use App\Http\Controllers\IBEDCENGINE\PaymentController;
 use App\Http\Controllers\ACE\InjectionSubStationController;
+use App\Http\Controllers\OPS\Disconnection;
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -100,6 +101,8 @@ Route::group(['prefix' => 'v1', 'namespace' => 'Api\v1', 'middleware' => 'OAuth'
          Route::get('/paymentDetails/{FAccount?}/{Token?}/{type?}', [PaymentController::class, 'getPaymentDetails']);
          Route::get('transmission_stations', [InjectionSubStationController::class, 'getTransmissionStations']);
         
+         Route::get('all_disconnections', [Disconnection::class, 'index']);
+         
          
     });
 });
