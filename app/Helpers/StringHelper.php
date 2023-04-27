@@ -65,6 +65,18 @@ class StringHelper
         return number_format((float) $number, 2, '.', ',');
     } 
 
+
+    public static function formatAmount($amount)
+    {
+        function naira_format($number, $decimals = 2, $decimalPoint = '.', $thousandsSeparator = ',')
+        {
+            return '₦'. number_format($number, $decimals, $decimalPoint, $thousandsSeparator);
+        }
+
+        $formattedAmount = naira_format($amount);
+        return $formattedAmount;
+    }
+
     
   
 

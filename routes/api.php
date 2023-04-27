@@ -100,6 +100,7 @@ Route::group(['prefix' => 'v1', 'namespace' => 'Api\v1', 'middleware' => 'OAuth'
          Route::get('/paymentDetails/{FAccount?}/{Token?}/{type?}', [PaymentController::class, 'getPaymentDetails']);
          Route::get('transmission_stations', [InjectionSubStationController::class, 'getTransmissionStations']);
         
+         
     });
 });
 
@@ -150,6 +151,8 @@ Route::group(['prefix' => 'v2', 'namespace' => 'Api\v2', 'middleware' => 'OAuth'
          Route::get('/payments', [TestController::class, 'getPayments']);
          Route::get('/paymentDetails/{FAccount?}/{Token?}/{type?}', [TestController::class, 'getPaymentDetails']);
          Route::get('transmission_stations', [TestController::class, 'getTransmissionStations']);
+
+         Route::get('billDetails/{billID?}', [TestController::class, 'getBillDetails']); 
       
     });
 });

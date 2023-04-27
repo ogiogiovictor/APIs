@@ -31,6 +31,8 @@ use App\Http\Requests\TicketRequest;
 use App\Http\Requests\RecordRequest;
 use App\Http\Resources\EcmiPaymentResource;
 use App\Models\Test\TransmissionStation;
+use App\Models\Test\ServiceUnit;
+use App\Models\Test\MsmsMeters;
 
 
 
@@ -79,17 +81,17 @@ class TestController extends BaseApiController
 
 
         $data = [
-            'total_dss' => $TotalDSS,
-            'total_customers' => $TotalCustomers, //DB::connection('stagging')->table("ems_customers")->count(),
-            'feeder_11' => $TotalFeederEl, //DB::connection('stagging')->table("gis_11KV Feeder")->count(),
-            'feeder_33' => $TotalFeederThirty, //DB::connection('stagging')->table("gis_33KV Feeder")->count(),
-           'crm_tickets' => $TotalTickets,  //DB::connection('crm')->table("tickets")->count(), // Access denied issue to be fixed by infrastructure  //$TotalTickets
+            'total_dss' => number_format_short($TotalDSS),
+            'total_customers' => number_format_short($TotalCustomers), //DB::connection('stagging')->table("ems_customers")->count(),
+            'feeder_11' => ($TotalFeederEl), //DB::connection('stagging')->table("gis_11KV Feeder")->count(),
+            'feeder_33' => ($TotalFeederThirty), //DB::connection('stagging')->table("gis_33KV Feeder")->count(),
+           'crm_tickets' => number_format_short($TotalTickets),  //DB::connection('crm')->table("tickets")->count(), // Access denied issue to be fixed by infrastructure  //$TotalTickets
            'customer_by_region' => $CustomerByRegion,
            'recent_customers' => $recentCustomers,
            "total_staff" => 0,
            "outsourced_staff" => 0,
-           "msms_meters" => 0,
-           "service_centers" => 0,
+           "msms_meters" => number_format_short(MsmsMeters::count()),
+           "service_centers" => number_format_short(ServiceUnit::count()),
         ];
 
         return $this->sendSuccess($data, "Asset Information Saved Successfully", Response::HTTP_OK);
@@ -115,15 +117,16 @@ class TestController extends BaseApiController
     public function allCustomers(Request $request){
 
         $postpaid = DimensionCustomer::selectRaw('StatusCode, count(*) as total')
-        ->where("AccountType", 'Postpaid')->groupBy('StatusCode')->get();
+        ->where("AccountType", 'Postpaid')->orderBy("SetupDate", "desc")->groupBy('StatusCode')->get();
 
         $prepaid = DimensionCustomer::selectRaw('StatusCode, count(*) as total')
-        ->where("AccountType", 'Prepaid')->groupBy('StatusCode')->get();
+        ->where("AccountType", 'Prepaid')->orderBy("SetupDate", "desc")->groupBy('StatusCode')->get();
 
 
         if($request->type == 'Postpaid'){
 
-           $customers = DimensionCustomer::whereIn('StatusCode', ['A', 'S'])->where("AccountType", $request->type)->paginate(20); //getPostpaid
+           $customers = DimensionCustomer::whereIn('StatusCode', ['A', 'S'])->where("AccountType", $request->type)
+           ->orderBy("SetupDate", "desc")->paginate(20); //getPostpaid
            
            $data = [
             'customers' => CustomerResource::collection($customers)->response()->getData(true),
@@ -136,7 +139,9 @@ class TestController extends BaseApiController
 
         } else if($request->type == 'Prepaid'){
 
-            $customers = DimensionCustomer::whereIn('StatusCode', ['0', '1'])->where("AccountType", $request->type)->paginate(20); //getPrepaid
+            
+            $customers = DimensionCustomer::whereIn('StatusCode', ['0', '1'])->where("AccountType", $request->type)
+            ->orderBy("SetupDate", "desc")->paginate(20); //getPrepaid
             
             $data = [
                 'customers' => CustomerResource::collection($customers)->response()->getData(true),
@@ -148,9 +153,10 @@ class TestController extends BaseApiController
 
         }else {
 
-            $customers = DimensionCustomer::select('SetupDate', 'AccountNo', 'BookNo', 'MeterNo', 'Mobile', 'OldAccountNo', 'TariffID', 'Surname', 'FirstName', 'OtherNames', 'AcctTypeDesc',
+            $customers = DimensionCustomer::select('SetupDate', 'DistributionID', 'CustomerSK', 'AccountNo', 'BookNo', 'MeterNo', 'Mobile', 'OldAccountNo', 'TariffID', 'Surname', 'FirstName', 'OtherNames', 'AcctTypeDesc',
             'OldTariffCode', 'TarriffCode', 'AccountType', 'Address', 'BUID', 'BusinessHub', 'service_center', 'UTID',
-            'ConnectionType', 'ArrearsBalance', 'State', 'City', 'StatusCode')->whereIn("StatusCode", ['A', 'S', '1', '0'])->paginate(15); //getAll
+            'ConnectionType', 'ArrearsBalance', 'State', 'City', 'StatusCode')->whereIn("StatusCode", ['A', 'S', '1', '0'])
+            ->orderBy("SetupDate", "desc")->paginate(20); //getAll
 
             $data = [
                 'customers' => CustomerResource::collection($customers)->response()->getData(true),
@@ -183,9 +189,9 @@ class TestController extends BaseApiController
 
             $data =[
                 'allDt' => $getDTs,
-                'elevenDt' => $elevenDt,
-                'thirtyDt' => $thirtyDt,
-                'dtTotal' => $dtTotal,
+                'elevenDt' => number_format_short($elevenDt),
+                'thirtyDt' => number_format_short($thirtyDt),
+                'dtTotal' => number_format_short($dtTotal),
             ];
 
             return $this->sendSuccess($data, "DSS Successfully Loaded", Response::HTTP_OK);
@@ -198,9 +204,9 @@ class TestController extends BaseApiController
 
             $data =[
                 'allDt' => $getDTs,
-                'elevenDt' => $elevenDt,
-                'thirtyDt' => $thirtyDt,
-                'dtTotal' => $dtTotal,
+                'elevenDt' => number_format_short($elevenDt),
+                'thirtyDt' => number_format_short($thirtyDt),
+                'dtTotal' => number_format_short($dtTotal),
             ];
 
             return $this->sendSuccess($data, "DSS Successfully Loaded", Response::HTTP_OK);
@@ -211,9 +217,9 @@ class TestController extends BaseApiController
 
             $data =[
                 'allDt' => $getDTs,
-                'elevenDt' => $elevenDt,
-                'thirtyDt' => $thirtyDt,
-                'dtTotal' => $dtTotal,
+                'elevenDt' => number_format_short($elevenDt),
+                'thirtyDt' => number_format_short($thirtyDt),
+                'dtTotal' => number_format_short($dtTotal),
             ];
 
             return $this->sendSuccess($data, "DSS Successfully Loaded", Response::HTTP_OK);
@@ -279,11 +285,11 @@ class TestController extends BaseApiController
 
        
         $data = [
-            'ecmi_payment' => $ecmi_payment,
-            'ems_payment' => $ems_payment,
-            'total_payments' => $total_payments,
+            'ecmi_payment' => naira_format($ecmi_payment),
+            'ems_payment' => naira_format($ems_payment),
+            'total_payments' => naira_format($total_payments),
             'payments' => $bothpayment,
-            'today_payments' => $today_payment_ecmi + $today_payment_ems,
+            'today_payments' => naira_format($today_payment_ecmi + $today_payment_ems),
         ];
 
         return $this->sendSuccess($data, "Payment Successfully Loaded", Response::HTTP_OK);
@@ -315,10 +321,10 @@ class TestController extends BaseApiController
 
         $data = [
             'tickets' => $tickets,
-            'totalTicket' => $tickets->count(),
-            'closedTicket' => $closedTicket,
-            'openTicket' => $openTickets,
-            'unassigned' => $unassignedTickets,
+            'totalTicket' => number_format_short($tickets->count()),
+            'closedTicket' => number_format_short($closedTicket),
+            'openTicket' => number_format_short($openTickets),
+            'unassigned' => number_format_short($unassignedTickets),
         ];
 
         if($tickets){
@@ -361,13 +367,25 @@ class TestController extends BaseApiController
 
            $changeAccountNumber = StringHelper::formatAccountNumber($acctionNo);
 
-            $customer = DimensionCustomer::with('bills')->where('AccountNo', $changeAccountNumber)->first();
+           // $customer = DimensionCustomer::with('bills')->where('AccountNo', $changeAccountNumber)->first();
+
+            $customer = DimensionCustomer::with(['bills' => function ($query) {
+                $query->orderByDesc('Billdate');
+            }])->where('AccountNo', $changeAccountNumber)->first();
 
             if ($customer->AccountType == 'Postpaid') {
-                $customer->load('payments');
+                //$customer->load('payments');
+                $customer->load(['payments' => function ($query) {
+                    $query->orderBy('PayDate', 'desc');
+                }]);
             } elseif ($customer->AccountType == 'Prepaid') {
-                $customer->load('transactions');
+               // $customer->load('transactions');
+                $customer->load(['payments' => function ($query) {
+                    $query->orderBy('TransactionDateTime', 'desc');
+                }]);
             }
+
+            
            
 
             if($dss){
@@ -448,10 +466,10 @@ class TestController extends BaseApiController
             $bills  = ZoneBills::orderBy('BillDate', 'desc')->paginate(30);
 
             $data = [
-                'thisMonthBills' => StringHelper::formatNumber($thisMonthBills),
-                'lastMonthBills' => StringHelper::formatNumber($lastMonthBill),
+                'thisMonthBills' => naira_format($thisMonthBills),
+                'lastMonthBills' => naira_format($lastMonthBill),
                 'bills' => $bills,
-                'totalHighestBill' => StringHelper::formatNumber($totalBilled),
+                'totalHighestBill' => naira_format($totalBilled),
                 'highestBilledCustomers' => $topCustomers,
             ];
             
@@ -470,6 +488,19 @@ class TestController extends BaseApiController
                 return $this->sendSuccess($transmissionStations, "Transmission Stations Loaded", Response::HTTP_OK);
             }catch(\Exception $e) {
                 return $this->sendError("No Transmission Stations", $e , Response::HTTP_UNAUTHORIZED);
+            }
+    }
+
+
+    public function getBillDetails($billID){
+            
+            try{
+    
+                $billDetails = ZoneBills::where('BillID', $billID)->first();
+    
+                return $this->sendSuccess($billDetails, "Bill Details Loaded", Response::HTTP_OK);
+            }catch(\Exception $e) {
+                return $this->sendError("No Bill Details", $e , Response::HTTP_UNAUTHORIZED);
             }
     }
 

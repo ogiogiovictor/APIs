@@ -4,8 +4,8 @@ namespace App\Http\Resources;
 
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
-//use App\Models\Test\DimensionCustomer;
-use App\Models\DimensionCustomer;
+use App\Models\Test\DimensionCustomer;
+//use App\Models\DimensionCustomer;
 use App\Helpers\StringHelper;
 
 class EcmiPaymentResource extends JsonResource

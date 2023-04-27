@@ -44,13 +44,13 @@ class PaymentController extends BaseApiController
       
        
         $data = [
-            'ecmi_payment' => $ecmi_payment,
-            'ems_payment' => $ems_payment,
-            'total_payments' => $total_payments,
+            'ecmi_payment' => naira_format($ecmi_payment),
+            'ems_payment' => naira_format($ems_payment),
+            'total_payments' => naira_format($total_payments),
             //'payments' => $bothpayment,
             'payments' => EcmiPaymentResource::collection($selectECMI)->response()->getData(true),
             'postpaid_payment' => ZoneResource::collection($selectEMS)->response()->getData(true),
-            'today_payments' => $today_payment_ecmi + $today_payment_ems,
+            'today_payments' => naira_format($today_payment_ecmi + $today_payment_ems),
         ];
 
         return $this->sendSuccess($data, "Payment Successfully Loaded", Response::HTTP_OK);
