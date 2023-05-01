@@ -156,6 +156,10 @@ Route::group(['prefix' => 'v2', 'namespace' => 'Api\v2', 'middleware' => 'OAuth'
          Route::get('transmission_stations', [TestController::class, 'getTransmissionStations']);
 
          Route::get('billDetails/{billID?}', [TestController::class, 'getBillDetails']); 
+         Route::get('get_crmd', [TestController::class, 'getCrmd']);
+
+         Route::post('add_assets', [TestController::class, 'storeAsset']); //API Resource for Asset
+
       
     });
 });

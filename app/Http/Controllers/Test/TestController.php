@@ -33,6 +33,7 @@ use App\Http\Resources\EcmiPaymentResource;
 use App\Models\Test\TransmissionStation;
 use App\Models\Test\ServiceUnit;
 use App\Models\Test\MsmsMeters;
+use Illuminate\Support\Facades\Http;
 
 
 
@@ -340,6 +341,10 @@ class TestController extends BaseApiController
 
 
         $ticket = Tickets::where('ticket_no', $request->ticketid)->first();
+
+        if(!$ticket){
+            return $this->sendError("No Data", "No Ticket Found" , Response::HTTP_NO_CONTENT);
+        }
         //Get the Customer Details in CRM
         $getAccountNo = CRMUsers::where('id', $ticket->user_id)->first();
        // Now Get the Customer Information.
@@ -353,7 +358,7 @@ class TestController extends BaseApiController
         ];
 
         if($ticket){
-            return $this->sendSuccess($data, "Customer 360 Loaded", Response::HTTP_OK);
+            return $this->sendSuccess($data, "Tickets and Customer Information Fully Loaded", Response::HTTP_OK);
         }else {
             return $this->sendError("No Data", "No data Found" , Response::HTTP_NO_CONTENT);
         } 
@@ -505,9 +510,49 @@ class TestController extends BaseApiController
     }
 
 
-
     public function cstore(RecordRequest $request){
-        //To be continued
+       
+        $response = Http::post('http://localhost:8001/api/v1/post_customer_crmd', $request->all());
+
+        try{
+            if($response['data'] == '201'){
+                return $this->sendSuccess($response->json(), "Customer Created", Response::HTTP_OK);
+            }else{
+                return $this->sendError("Error", $response->json() , Response::HTTP_UNAUTHORIZED);
+            }
+
+        }catch(\Exception $err){
+            return $this->sendError("Error", $err , Response::HTTP_UNAUTHORIZED);
+        }
+        
+        
+    }
+    public function getCrmd(){
+
+        $response = Http::get('http://localhost:8001/api/v1/get_customers');
+
+        return $this->sendSuccess($response->json(), "CRMD Loaded", Response::HTTP_OK);
+
+    }
+
+
+    public function storeAsset(AssetRequest $request){
+       
+        // DTWarehouse::create($request->all());
+        try {
+            $request['AssetName'] = $request['DSS_11KV_415V_Name'];
+
+            $assetData = AssetHelper::dataRequest($request);
+
+            $storeAsset =  DTWarehouse::create($assetData);
+
+          //  $storeAsset =  $this->AssetRepository->storeDTs($assetData, $request->assettype);
+            return $this->sendSuccess($storeAsset, "Asset Information Saved Successfully", Response::HTTP_OK);
+
+        }catch(\Exception $e){
+            return $this->sendError($e->getmessage(), "No Result Found", Response::HTTP_BAD_REQUEST);
+        }
+       
     }
 
 

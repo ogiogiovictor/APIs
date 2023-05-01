@@ -1,5 +1,7 @@
 <?php
 
+CONST url = "http://localhost:8001/api/v1/";
+
 if (!function_exists('naira_format')) {
     function naira_format($number, $decimals = 2, $decimalPoint = '.', $thousandsSeparator = ',')
     {

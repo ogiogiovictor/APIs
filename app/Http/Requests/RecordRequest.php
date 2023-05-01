@@ -24,13 +24,13 @@ class RecordRequest extends FormRequest
         return [
             'ticketid' => 'required',
             'accountNo' => 'required|string|max:16',
-            'address' => 'required|string',
-            'firstname' => 'required|string',
-            'lastname' => 'required|string',
-            'new_accountNo' => 'string|max:16',
-            'new_firstname' => 'string',
-            'new_lastname'  => 'string',
-            'new_address' => 'string',
+            // 'address' => 'required|string',
+            // 'firstname' => 'required|string',
+            // 'lastname' => 'required|string',
+            // 'new_accountNo' => 'string|max:16',
+            // 'new_firstname' => 'string',
+            // 'new_lastname'  => 'string',
+            // 'new_address' => 'string',
         ];
     }
 }
