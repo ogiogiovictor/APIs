@@ -530,8 +530,9 @@ class TestController extends BaseApiController
     public function getCrmd(){
 
         $response = Http::get('http://localhost:8001/api/v1/get_customers');
+        $data = $response->json();
 
-        return $this->sendSuccess($response->json(), "CRMD Loaded", Response::HTTP_OK);
+        return $this->sendSuccess($data, "CRMD Loaded", Response::HTTP_OK);
 
     }
 
@@ -553,6 +554,28 @@ class TestController extends BaseApiController
             return $this->sendError($e->getmessage(), "No Result Found", Response::HTTP_BAD_REQUEST);
         }
        
+    }
+
+
+    public function updateStatus(Request $request){
+        
+       // $array =  $request->all();
+        //$array['userid'] = 1; //this will be the person logged in
+     
+        try{
+
+            $response = Http::post('http://localhost:8001/api/v1/update_crmd_doc', $request->all());
+           
+            if($response){
+                return $this->sendSuccess($response, "Customer CRMD Approved Successfully", Response::HTTP_OK);
+            }
+         
+
+        }catch(\Exception $e){
+            return $this->sendError($e->getmessage(), "No Result Found", Response::HTTP_BAD_REQUEST);
+        }
+
+     
     }
 
 
