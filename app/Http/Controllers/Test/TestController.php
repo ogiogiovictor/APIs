@@ -34,7 +34,7 @@ use App\Models\Test\TransmissionStation;
 use App\Models\Test\ServiceUnit;
 use App\Models\Test\MsmsMeters;
 use Illuminate\Support\Facades\Http;
-
+use App\Http\Requests\FeederRequest;
 
 
 
@@ -576,6 +576,23 @@ class TestController extends BaseApiController
         }
 
      
+    }
+
+
+    public function addFeeder(FeederRequest $request){
+
+        $request['AssetName'] = $request['F11kvFeeder_Name'];
+        $assetData = AssetHelper::dataRequest($request);
+
+        if($request->assettype == "11KV Feeder"){
+
+            $createFeeder = FeederEleven::create($assetData);
+            
+        }else {
+            $createFeeder = FeederThirty::create($assetData);
+        }
+
+        return $this->sendSuccess($createFeeder, "Asset Information Saved Successfully", Response::HTTP_OK);
     }
 
 

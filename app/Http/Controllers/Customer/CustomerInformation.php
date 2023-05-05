@@ -13,6 +13,7 @@ use App\Http\Requests\CustomerRequest;
 use App\Http\Resources\NewResource;
 use App\Http\Resources\ZoneResource;
 use App\Models\ZoneCustomer;
+use App\Http\Requests\RecordRequest;
 
 class CustomerInformation extends BaseApiController
 {
@@ -108,4 +109,56 @@ class CustomerInformation extends BaseApiController
         }
 
     }
+
+
+
+    public function cstore(RecordRequest $request) {
+        $response = Http::post('http://localhost:8001/api/v1/post_customer_crmd', $request->all());
+
+        try{
+            if($response['data'] == '201'){
+                return $this->sendSuccess($response->json(), "Customer Created", Response::HTTP_OK);
+            }else{
+                return $this->sendError("Error", $response->json() , Response::HTTP_UNAUTHORIZED);
+            }
+
+        }catch(\Exception $err){
+            return $this->sendError("Error", $err , Response::HTTP_UNAUTHORIZED);
+        }
+    }
+
+
+    public function getCrmd() {
+
+        $response = Http::get('http://localhost:8001/api/v1/get_customers');
+        $data = $response->json();
+
+        return $this->sendSuccess($data, "CRMD Loaded", Response::HTTP_OK);
+
+    }
+
+
+    public function updateStatus(Request $request){
+        
+        // $array =  $request->all();
+         //$array['userid'] = 1; //this will be the person logged in
+      
+         try{
+ 
+             $response = Http::post('http://localhost:8001/api/v1/update_crmd_doc', $request->all());
+            
+             if($response){
+                 return $this->sendSuccess($response, "Customer CRMD Approved Successfully", Response::HTTP_OK);
+             }
+          
+ 
+         }catch(\Exception $e){
+             return $this->sendError($e->getmessage(), "No Result Found", Response::HTTP_BAD_REQUEST);
+         }
+ 
+      
+     }
+ 
+
+
 }

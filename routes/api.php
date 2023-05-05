@@ -44,6 +44,9 @@ Route::middleware(['auth:sanctum'])->group(function() {
     |-------------------------------------------------------------------------- */
         Route::apiResource('meter_consumption', AmiController::class)->only([ 'store' ]);
         Route::post('load_summary', [AmiController::class, 'loadSummary'])->name('loadSummary');
+        Route::get('get_summary', [AmiController::class, 'getSummary'])->name('getSummary');  // Not implemented Yet in React
+        Route::get('get_all_connection', [AmiController::class, 'getAll'])->name('getAll');  // Not implemented Yet in React
+        Route::get('event_up_down', [AmiController::class, 'eventUpDown'])->name('eventUpDown');  // Not implemented Yet in React
     /*|--------------------------------------------------------------------------
     | CUSTOMER API INTEGRATION - LIFAN
     |-------------------------------------------------------------------------- */
@@ -95,13 +98,18 @@ Route::group(['prefix' => 'v1', 'namespace' => 'Api\v1', 'middleware' => 'OAuth'
          Route::get('grap_asset/{type?}', [AssetController::class, 'getAssetWH']);  // Get Asset Warehouse
 
          //Create CRMD Customer Record
-         Route::post('crmd', [TestController::class, 'cstore']); // Not Yet Implemented
+         Route::post('crmd', [CustomerInformation::class, 'cstore']); // Not Yet Implemented
          Route::get('grap_feeder/{type?}', [FeederController::class, 'index']); //Get Feeder Warehouse
          Route::get('/payments', [PaymentController::class, 'getPayments']);
          Route::get('/paymentDetails/{FAccount?}/{Token?}/{type?}', [PaymentController::class, 'getPaymentDetails']);
          Route::get('transmission_stations', [InjectionSubStationController::class, 'getTransmissionStations']);
         
          Route::get('all_disconnections', [Disconnection::class, 'index']);
+
+         Route::get('billDetails/{billID?}', [CustomerBills::class, 'getBillDetails']); 
+         Route::get('get_crmd/pending', [CustomerInformation::class, 'getCrmd']);
+
+         Route::post('updatecrmdstate', [CustomerInformation::class, 'updateStatus']);
          
          
     });
@@ -158,9 +166,11 @@ Route::group(['prefix' => 'v2', 'namespace' => 'Api\v2', 'middleware' => 'OAuth'
          Route::get('billDetails/{billID?}', [TestController::class, 'getBillDetails']); 
          Route::get('get_crmd/pending', [TestController::class, 'getCrmd']);
 
-         Route::post('add_assets', [TestController::class, 'storeAsset']); //API Resource for Asset
+         Route::post('add_assets', [TestController::class, 'storeAsset']); //API Resource for Asset already in v1
 
          Route::post('updatecrmdstate', [TestController::class, 'updateStatus']);
+
+         Route::post('grap_feeder', [TestController::class, 'addFeeder']); 
          //
 
       

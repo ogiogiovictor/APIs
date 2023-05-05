@@ -13,14 +13,14 @@ use Illuminate\Support\Facades\Auth;
 
 class LoginController extends BaseApiController
 {
-    public function login(LoginRequest $request): Object
+    public function login(LoginRequest $request)
     {
 
         if($request->expectsJson()) {
 
             $userStatus = User::where('email', $request->email)->value('status');
 
-            if($userStatus == 0 || $userStatus == 'NULL'){
+            if($userStatus == 0 || $userStatus == '0'){
                 return $this->sendError('Invalid Status', "No Activation Included in the account", Response::HTTP_UNAUTHORIZED);
             }
 

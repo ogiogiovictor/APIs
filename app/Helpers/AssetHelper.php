@@ -32,7 +32,7 @@ class AssetHelper
         $assetData['x_image'] = 0;
         $assetData['y_image'] = 0;
         $assetData['Capture DateTime'] = $date;
-        $assetData['AssetName'] = $request['DSS_11KV_415V_Name'];
+       // $assetData['AssetName'] = $request['DSS_11KV_415V_Name'];
         
 
         return $assetData;
