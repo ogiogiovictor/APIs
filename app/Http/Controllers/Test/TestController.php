@@ -596,6 +596,14 @@ class TestController extends BaseApiController
     }
 
 
+    public function searchRecords($type=""){
+        
+        if($type == ""){
+            return $this->sendError("Error", "Please a type is mandatory, please contact developer", Response::HTTP_BAD_REQUEST);
+        }
+    }   
+
+
 
 
 }

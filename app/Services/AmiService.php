@@ -113,4 +113,6 @@ class AmiService
         return $getConnection;
     }
 
+    //select * from ecmi.database order by transactionno offset 10000 ROWS FETCH NEXT 20000 ROWS ONLY
+
 }

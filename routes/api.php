@@ -18,6 +18,7 @@ use App\Http\Controllers\Bills\CustomerBills;
 use App\Http\Controllers\IBEDCENGINE\PaymentController;
 use App\Http\Controllers\ACE\InjectionSubStationController;
 use App\Http\Controllers\OPS\Disconnection;
+use App\Http\Controllers\Search\SearchController;
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -110,6 +111,8 @@ Route::group(['prefix' => 'v1', 'namespace' => 'Api\v1', 'middleware' => 'OAuth'
          Route::get('get_crmd/pending', [CustomerInformation::class, 'getCrmd']);
 
          Route::post('updatecrmdstate', [CustomerInformation::class, 'updateStatus']);
+
+         Route::post('search_any', [SearchController::class, 'searching']);
          
          
     });
@@ -172,6 +175,8 @@ Route::group(['prefix' => 'v2', 'namespace' => 'Api\v2', 'middleware' => 'OAuth'
 
          Route::post('grap_feeder', [TestController::class, 'addFeeder']); 
          //
+
+         Route::post('search_any', [TestController::class, 'searchRecords']);
 
       
     });
