@@ -117,17 +117,49 @@ class TestController extends BaseApiController
 
     public function allCustomers(Request $request){
 
-        $postpaid = DimensionCustomer::selectRaw('StatusCode, count(*) as total')
-        ->where("AccountType", 'Postpaid')->orderBy("SetupDate", "desc")->groupBy('StatusCode')->get();
+          // $postpaid = DimensionCustomer::selectRaw('StatusCode, count(*) as total')
+        // ->where("AccountType", 'Postpaid')->orderBy("SetupDate", "desc")->groupBy('StatusCode')->get();
 
-        $prepaid = DimensionCustomer::selectRaw('StatusCode, count(*) as total')
-        ->where("AccountType", 'Prepaid')->orderBy("SetupDate", "desc")->groupBy('StatusCode')->get();
+        $postpaid = DimensionCustomer::selectRaw('
+        CASE 
+            WHEN StatusCode = "A" THEN "Active"
+            WHEN StatusCode = "C" THEN "Close"
+            WHEN StatusCode = "I" THEN "Inactive"
+            WHEN StatusCode = "S" THEN "Suspended"
+        END AS StatusCode,
+        COUNT(*) AS total')
+        ->where("AccountType", 'Postpaid')
+        ->orderBy("SetupDate", "desc")
+        ->groupBy('StatusCode')
+        ->get();
 
+        // $prepaid = DimensionCustomer::selectRaw('StatusCode, count(*) as total')
+        // ->where("AccountType", 'Prepaid')->orderBy("SetupDate", "desc")->groupBy('StatusCode')->get();
+
+        $prepaid = DimensionCustomer::selectRaw('
+        CASE 
+            WHEN StatusCode = "1" THEN "Active"
+            WHEN StatusCode = "0" THEN "Inactive"
+        END AS StatusCode,
+        COUNT(*) AS total')
+        ->where("AccountType", 'Prepaid')
+        ->orderBy("SetupDate", "desc")
+        ->groupBy('StatusCode')
+        ->get();
 
         if($request->type == 'Postpaid'){
 
-           $customers = DimensionCustomer::whereIn('StatusCode', ['A', 'S'])->where("AccountType", $request->type)
-           ->orderBy("SetupDate", "desc")->paginate(20); //getPostpaid
+            if(isset($request->status) &&  $request->status != 'null'){
+
+            $StatusCode =  substr($request->status, 0, 1);
+
+            $customers = DimensionCustomer::where("StatusCode", $StatusCode)
+            ->where("AccountType", 'Postpaid')->orderBy("SetupDate", "desc")->paginate(20); 
+                
+            } else{
+            $customers = DimensionCustomer::whereIn('StatusCode', ['A', 'S'])->where("AccountType", $request->type)
+            ->orderBy("SetupDate", "desc")->paginate(20); //getPostpaid
+            }
            
            $data = [
             'customers' => CustomerResource::collection($customers)->response()->getData(true),
@@ -140,9 +172,24 @@ class TestController extends BaseApiController
 
         } else if($request->type == 'Prepaid'){
 
+            if(isset($request->status) &&  $request->status != 'null'){
+
+                $StatusCode =  substr($request->status, 0, 1);
+                $map = [
+                    'A' => '1',
+                    'I' => '0',
+                    // add other mappings here if needed
+                ];
+                $StatusCode = $map[$StatusCode] ?? $StatusCode;
+
+                $customers = DimensionCustomer::where('StatusCode', $StatusCode)->where("AccountType", $request->type)
+                ->orderBy("SetupDate", "desc")->paginate(20); //getPrepaid
+
+            }else {
             
             $customers = DimensionCustomer::whereIn('StatusCode', ['0', '1'])->where("AccountType", $request->type)
             ->orderBy("SetupDate", "desc")->paginate(20); //getPrepaid
+            }
             
             $data = [
                 'customers' => CustomerResource::collection($customers)->response()->getData(true),
@@ -602,6 +649,36 @@ class TestController extends BaseApiController
             return $this->sendError("Error", "Please a type is mandatory, please contact developer", Response::HTTP_BAD_REQUEST);
         }
     }   
+
+
+    public function customerByStatus($status, $postpaid='Postpaid') {
+
+        $postpaid = DimensionCustomer::selectRaw('
+        CASE 
+            WHEN StatusCode = "A" THEN "Active"
+            WHEN StatusCode = "C" THEN "Close"
+            WHEN StatusCode = "I" THEN "Inactive"
+            WHEN StatusCode = "S" THEN "Suspended"
+        END AS StatusCode,
+        COUNT(*) AS total')
+        ->where("AccountType", 'Postpaid')
+        ->orderBy("SetupDate", "desc")
+        ->groupBy('StatusCode')
+        ->get();
+            
+        $StatusCode =  substr($status, 0, 1);
+
+        $customers = DimensionCustomer::where("StatusCode", $StatusCode)
+        ->where("AccountType", 'Postpaid')->orderBy("SetupDate", "desc")->paginate(20); //getPostpaid
+
+        $data = [
+         'customers' => CustomerResource::collection($customers)->response()->getData(true),
+         'postpaid' => $postpaid
+        ];
+
+        
+         return $this->sendSuccess($data, "Customer Successfully Loaded", Response::HTTP_OK);
+    }
 
 
 

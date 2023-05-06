@@ -134,7 +134,9 @@ Route::group(['prefix' => 'v2', 'namespace' => 'Api\v2', 'middleware' => 'OAuth'
 
         Route::get('get_dashboard_stats', [TestController::class, 'stats']);
 
-        Route::get('grap_customers/{type?}', [TestController::class, 'allCustomers']);  // Get Customers
+        //Route::get('grap_customers/{type?}', [TestController::class, 'allCustomers']);  // Get Customers
+
+        Route::get('grap_customers/{type?}/{status?}', [TestController::class, 'allCustomers']);  // testing
             
         Route::get('tickets', [TestController::class, 'tindex']);
 
@@ -177,6 +179,8 @@ Route::group(['prefix' => 'v2', 'namespace' => 'Api\v2', 'middleware' => 'OAuth'
          //
 
          Route::post('search_any', [TestController::class, 'searchRecords']);
+
+         Route::get('grap_customers_status/{statusCode?}/{postpaid?}', [TestController::class, 'customerByStatus']);  
 
       
     });
