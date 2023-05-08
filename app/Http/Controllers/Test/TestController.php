@@ -35,6 +35,7 @@ use App\Models\Test\ServiceUnit;
 use App\Models\Test\MsmsMeters;
 use Illuminate\Support\Facades\Http;
 use App\Http\Requests\FeederRequest;
+use App\Helpers\AssetHelper;
 
 
 
@@ -287,13 +288,15 @@ class TestController extends BaseApiController
         $eleven = FeederEleven::select('11KV feeder.Assetid', 'serviceunits.Name', 'serviceunits.Biz_Hub',  'serviceunits.Region', '11KV feeder.naccode', '11KV feeder.assettype', '11KV feeder.Capture DateTime', 
         '11KV feeder.Synced DateTime', '11KV feeder.latitude', '11KV feeder.longtitude', '11KV feeder.F11kvFeeder_Name', '11KV feeder.F11kvFeeder_parent')
         ->leftjoin('gis_dss', '11KV feeder.F11kvFeeder_parent', '=', 'gis_dss.Assetid')
-        ->leftjoin('serviceunits', 'gis_dss.DSS_11KV_415V_Owner', '=', 'serviceunits.Name');
+        ->leftjoin('serviceunits', 'gis_dss.DSS_11KV_415V_Owner', '=', 'serviceunits.Name')
+        ->orderByDesc('11KV feeder.Capture DateTime');;
         
 
         $thirty = Feederthirty::select('33KV feeder.Assetid', 'serviceunits.Name',  'serviceunits.Biz_Hub', 'serviceunits.Region', '33KV feeder.naccode', '33KV feeder.assettype', '33KV feeder.Capture DateTime',
          '33KV feeder.Synced DateTime', '33KV feeder.latitude', '33KV feeder.longtitude', '33KV feeder.F33kv_Feeder_Name', '33KV feeder.F33kv_Feeder_parent')
         ->leftjoin('gis_dss', '33KV feeder.F33kv_Feeder_parent', '=', 'gis_dss.Assetid')
         ->leftjoin('serviceunits', 'gis_dss.DSS_11KV_415V_Owner', '=', 'serviceunits.Name');
+        //->orderByDesc('33KV feeder.Capture DateTime');
         
 
         $feeders = $eleven->unionAll($thirty)->paginate(20);
@@ -636,7 +639,14 @@ class TestController extends BaseApiController
             $createFeeder = FeederEleven::create($assetData);
             
         }else {
-            $createFeeder = FeederThirty::create($assetData);
+
+            $createFeeder = FeederThirty::create([
+                'F33kv_Feeder_Name' => $assetData['F11kvFeeder_Name'],
+                'assettype' => $assetData['assettype'],
+                'latitude' => $assetData['latitude'],
+                'longtitude' => $assetData['longtitude'],
+                'naccode' => $assetData['naccode'],
+            ]);
         }
 
         return $this->sendSuccess($createFeeder, "Asset Information Saved Successfully", Response::HTTP_OK);

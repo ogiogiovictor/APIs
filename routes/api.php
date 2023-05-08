@@ -81,7 +81,7 @@ Route::group(['prefix' => 'v1', 'namespace' => 'Api\v1', 'middleware' => 'OAuth'
         Route::post('tickets', [TicketController::class, 'show']);
 
         // Only for Administrative Users
-      /*  Route::prefix('iroles')->middleware('role:admin')->group(function() {
+      /*  Route::prefix('roles')->middleware('role:admin')->group(function() {
          
             Route::apiResource('roles', RoleController::class);
             Route::apiResource('permissions', PermissionController::class);
