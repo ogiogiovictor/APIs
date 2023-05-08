@@ -19,6 +19,8 @@ use App\Http\Controllers\IBEDCENGINE\PaymentController;
 use App\Http\Controllers\ACE\InjectionSubStationController;
 use App\Http\Controllers\OPS\Disconnection;
 use App\Http\Controllers\Search\SearchController;
+use App\Http\Controllers\Authenticate\SocialController;
+
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -36,6 +38,9 @@ use App\Http\Controllers\Search\SearchController;
 
 
 Route::post('auth_login', [LoginController::class, 'login']);
+Route::get('social-auth/{provider}/callback', [SocialController::class, 'providerCallback']);
+Route::get('social-auth/{provider}', [SocialController::class, 'redirectoToProvider'])->name('social-redirect');
+
 
 Route::middleware(['auth:sanctum'])->group(function() {
     //Route::group(['prefix' => 'v1', 'namespace' => 'Api\v1', 'middleware' => 'OAuth'], function () {
@@ -113,7 +118,8 @@ Route::group(['prefix' => 'v1', 'namespace' => 'Api\v1', 'middleware' => 'OAuth'
          Route::post('updatecrmdstate', [CustomerInformation::class, 'updateStatus']);
 
          Route::post('search_any', [SearchController::class, 'searching']);
-         
+
+       
          
     });
 });

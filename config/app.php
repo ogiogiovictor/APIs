@@ -197,6 +197,8 @@ return [
         App\Providers\TelescopeServiceProvider::class,
         Spatie\Permission\PermissionServiceProvider::class,
 
+        \SocialiteProviders\Manager\ServiceProvider::class, // add
+
     ],
 
     /*
@@ -212,6 +214,7 @@ return [
 
     'aliases' => Facade::defaultAliases()->merge([
         // 'ExampleClass' => App\Example\ExampleClass::class,
+        'Socialite' => Laravel\Socialite\Facades\Socialite::class,
         'AuthorityEnum' => App\Enums\AuthorityEnum::class,
         'StatusEnum' => App\Enums\StatusEnum::class,
     ])->toArray(),

@@ -66,4 +66,8 @@ class User extends Authenticatable
     {
         return $this->authority->value == AuthorityEnum::SERVICECENTER->value;
     }
+
+    public function socialAccounts(){
+        return $this->hasMany(SocialAccount::class);
+    }
 }
