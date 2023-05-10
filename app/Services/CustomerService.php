@@ -13,6 +13,7 @@ use App\Models\CRMUser;
 use App\Models\MsmsCustomer;
 use App\Helpers\StringHelper;
 use App\Services\AmiService;
+use App\Models\ZoneBills;
 
 
 
@@ -164,6 +165,44 @@ class CustomerService
        return $customer;
 
 
+    }
+
+
+
+    public function getDisconnections(){
+        $year =  Date('Y');
+        $month = Date('m') -1;
+
+      
+
+        $results = DimensionCustomer::select(
+            'c.AccountNo',
+            'c.Surname',
+            'c.FirstName',
+            'c.OtherNames',
+            'c.AccountType',
+            'b.TotalDue',
+            'b.GrandTotaldue',
+            'b.Payment',
+            DB::raw('(b.GrandTotaldue - b.Payment) AS AmountOwed'),
+            DB::raw('b.GrandTotaldue * 0.2 as ExpectedPayment'),
+            'b.BillYear',
+            'b.BillMonth'
+        )
+            ->from('main_warehouse.dbo.Dimension_customers as c')
+            ->join('MAIN_WAREHOUSE.dbo.FactBill as b', 'c.AccountNo', '=', 'b.AccountNo')
+            ->whereRaw('b.GrandTotaldue * 0.2 > b.Payment')
+            ->where('b.BillYear', '=',  $year)
+            ->where('b.BillMonth', '=', $month)
+            ->where('AccountType', 'Postpaid')
+            ->paginate(200);
+    
+        
+            return   $results;
+        
+
+      
+        
     }
 
 

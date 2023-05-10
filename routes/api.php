@@ -37,8 +37,10 @@ use App\Http\Controllers\Authenticate\SocialController;
 // });
 
 
-Route::post('auth_login', [LoginController::class, 'login']);
-Route::get('social-auth/{provider}/callback', [SocialController::class, 'providerCallback']);
+Route::post('auth_login', [LoginController::class, 'login']); // normal login
+Route::post('authenticate_with_ad', [SocialController::class, 'authenticate']); // with on-prem
+
+Route::get('social-auth/{provider}/callback', [SocialController::class, 'providerCallback']); // with azure or any other social network
 Route::get('social-auth/{provider}', [SocialController::class, 'redirectoToProvider'])->name('social-redirect');
 
 
@@ -119,6 +121,11 @@ Route::group(['prefix' => 'v1', 'namespace' => 'Api\v1', 'middleware' => 'OAuth'
 
          Route::post('search_any', [SearchController::class, 'searching']);
 
+         Route::post('search_any', [SearchController::class, 'searching']);
+
+         Route::get('get_owing_customers', [CustomerInformation::class, 'percentageOwed']);
+
+         
        
          
     });

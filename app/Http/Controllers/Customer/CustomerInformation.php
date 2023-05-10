@@ -158,6 +158,12 @@ class CustomerInformation extends BaseApiController
  
       
      }
+
+     public function percentageOwed(){
+
+        $customer = (new CustomerService)->getDisconnections();
+        return $this->sendSuccess($customer, "All Customers To Disconnection", Response::HTTP_OK);
+     }
  
 
 
