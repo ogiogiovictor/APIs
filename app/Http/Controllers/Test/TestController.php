@@ -641,12 +641,25 @@ class TestController extends BaseApiController
         }else {
 
             $createFeeder = FeederThirty::create([
-                'F33kv_Feeder_Name' => $assetData['F11kvFeeder_Name'],
+                'F33kv_Feeder_Name' => $assetData['F33kv_Feeder_Name'],
                 'assettype' => $assetData['assettype'],
                 'latitude' => $assetData['latitude'],
                 'longtitude' => $assetData['longtitude'],
                 'naccode' => $assetData['naccode'],
+                'F33kv_Regional_Name' => $assetData['F33kv_Regional_Name'],
+                'F33kv_Business_Hub_Name' => $assetData['F33kv_Business_Hub_Name'],
+                'F33kV_Feeder_Circuit_Breaker_Make' => $assetData['F33kV_Feeder_Circuit_Breaker_Make'],
+                'F33kV_Feeder_Circuit_Breaker_Type' => $assetData['F33kV_Feeder_Circuit_Breaker_Type'],
+                'F33kV_Upriser_Cable_Type' => $assetData['F33kV_Upriser_Cable_Type'],
+                'F33kv_Teeoffs' => $assetData['F33kv_Teeoffs'],
+                'F33kv_Tee_offs_Coordinate' => $assetData['F33kv_Tee_offs_Coordinate'],
+                'F33kv_Substations_capacity' => $assetData['F33kv_Substations_capacity'],
+                'F33kv_lineload_coordinate' => $assetData['F33kv_lineload_coordinate'],
+                'F33kv_Conductor_Size' => $assetData['F33kv_Conductor_Size'],
+                'F33kv_Aluminium_Conductor' => $assetData['F33kv_Aluminium_Conductor'],
+                'F33kv_Commisioning' => $assetData['F33kv_Commisioning'],
             ]);
+
         }
 
         return $this->sendSuccess($createFeeder, "Asset Information Saved Successfully", Response::HTTP_OK);

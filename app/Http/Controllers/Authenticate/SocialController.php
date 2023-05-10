@@ -30,5 +30,23 @@ class SocialController extends BaseApiController
         }catch(\Exception $e){
             return $this->sendError("Error", $e->getMessage(), Response::HTTP_INTERNAL_SERVER_ERROR);
         }
+    }  //sudo yum install php-ldap
+
+    public function authenticate(Request $request){
+
+        $credentials = $request->only('email', 'password');
+
+        if(Auth::guard('ad')->attempt($credentials)){
+            $authUser = Auth::guard('ad')->user();
+
+            $success['Authorization'] = $authUser->createToken('Sanctom+Socialite')->plainTextToken;
+            $success['user'] = $authUser;
+
+            $token = $user->createToken('authToken')->accessToken;
+            return $this->sendSuccess($success, "Authorization Successufully Generated", Response::HTTP_CREATED);
+         }else {
+            return $this->sendError('Invalid Login', "Check your credentials and try again", Response::HTTP_UNAUTHORIZED);
+        }
+
     }
 }

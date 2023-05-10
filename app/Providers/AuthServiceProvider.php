@@ -5,6 +5,7 @@ namespace App\Providers;
 // use Illuminate\Support\Facades\Gate;
 use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvider;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Auth;
 
 class AuthServiceProvider extends ServiceProvider
 {
@@ -26,5 +27,12 @@ class AuthServiceProvider extends ServiceProvider
         Gate::define('region', fn($user) => $user->isRegion());
         Gate::define('business_hub', fn($user) => $user->isBhub());
         Gate::define('service_center', fn($user) => $user->isSCenter());
+
+        //AD Integration with on-prem Local IP
+        $this->registerPolicies();
+        Auth::viaRequest('adldap', function ($request) {
+            return Auth::guard('ad')->user();
+        });
+
     }
 }

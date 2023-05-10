@@ -2,12 +2,12 @@
 
 namespace App\Repositories;
 
-use App\Repositories\AssetRepositoryInterface;
+use App\Repositories\FeederRepositoryInterface;
 use App\Models\FeederEleven;
 use App\Models\FeederThirty;
 use App\Enums\FeederEnum;
 
-class AssetRepository implements AssetRepositoryInterface
+class FeederRepository implements FeederRepositoryInterface
 {
    
 

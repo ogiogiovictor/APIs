@@ -40,6 +40,11 @@ return [
             'driver' => 'session',
             'provider' => 'users',
         ],
+
+        'ad' => [
+            'driver' => 'adldap',
+            'provider' => 'adldap',
+        ],
     ],
 
     /*
@@ -62,6 +67,11 @@ return [
     'providers' => [
         'users' => [
             'driver' => 'eloquent',
+            'model' => App\Models\User::class,
+        ],
+
+        'adldap' => [
+            'driver' => 'adldap',
             'model' => App\Models\User::class,
         ],
 
