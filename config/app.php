@@ -198,6 +198,8 @@ return [
         Spatie\Permission\PermissionServiceProvider::class,
 
         \SocialiteProviders\Manager\ServiceProvider::class, // add
+        Adldap\Laravel\AdldapServiceProvider::class,
+
 
     ],
 

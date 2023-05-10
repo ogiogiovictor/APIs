@@ -9,6 +9,8 @@ use App\Models\User;
 use App\Http\Controllers\BaseApiController;
 use Symfony\Component\HttpFoundation\Response;
 use Illuminate\Support\Facades\Auth;
+use Adldap\Laravel\Facades\Adldap;
+
 
 class SocialController extends BaseApiController
 {
@@ -34,15 +36,18 @@ class SocialController extends BaseApiController
 
     public function authenticate(Request $request){
 
+         
+        return $user = Adldap::search()->users()->find('ogiogio victor');
+
         $credentials = $request->only('email', 'password');
 
-        if(Auth::guard('ad')->attempt($credentials)){
-            $authUser = Auth::guard('ad')->user();
+        if(Auth::guard('ldap')->attempt($credentials)){
+            $authUser = Auth::guard('ldap')->user();
 
             $success['Authorization'] = $authUser->createToken('Sanctom+Socialite')->plainTextToken;
             $success['user'] = $authUser;
 
-            $token = $user->createToken('authToken')->accessToken;
+            $token = $authUser->createToken('authToken')->accessToken;
             return $this->sendSuccess($success, "Authorization Successufully Generated", Response::HTTP_CREATED);
          }else {
             return $this->sendError('Invalid Login', "Check your credentials and try again", Response::HTTP_UNAUTHORIZED);

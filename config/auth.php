@@ -41,10 +41,11 @@ return [
             'provider' => 'users',
         ],
 
-        'ad' => [
-            'driver' => 'adldap',
-            'provider' => 'adldap',
+        'ldap' => [
+            'driver' => 'ldap',
         ],
+        
+
     ],
 
     /*
@@ -70,10 +71,10 @@ return [
             'model' => App\Models\User::class,
         ],
 
-        'adldap' => [
-            'driver' => 'adldap',
-            'model' => App\Models\User::class,
-        ],
+        // 'adldap' => [
+        //     'driver' => 'ldap',
+        //     'model' => App\Models\User::class,
+        // ],
 
         // 'users' => [
         //     'driver' => 'database',

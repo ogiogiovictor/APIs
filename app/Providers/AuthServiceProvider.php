@@ -31,7 +31,7 @@ class AuthServiceProvider extends ServiceProvider
         //AD Integration with on-prem Local IP
         $this->registerPolicies();
         Auth::viaRequest('adldap', function ($request) {
-            return Auth::guard('ad')->user();
+            return Auth::guard('ad')->user() ?: null;
         });
 
     }
