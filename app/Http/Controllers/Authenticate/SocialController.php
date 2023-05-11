@@ -24,8 +24,8 @@ class SocialController extends BaseApiController
     public function redirectoToProvider(String $provider){
 
         try {
-          // $social_user = \Socialite::driver($provider)->user();
-          $social_user = \Socialite::driver($provider)->stateless()->user();
+           $social_user = \Socialite::driver($provider)->user();
+         //$social_user = \Socialite::driver($provider)->stateless()->user();
 
             return $this->sendSuccess($social_user, "Authorization Successufully Generated", Response::HTTP_CREATED);
 

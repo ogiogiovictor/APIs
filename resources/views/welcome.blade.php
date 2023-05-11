@@ -128,6 +128,8 @@
                                 </svg>
                                 Sponsor | &nbsp;
                                 <a href="{{ route('social-redirect', 'azure') }}" class="font-semibold text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white focus:outline focus:outline-2 focus:rounded-sm focus:outline-red-500">Staff Login</a>
+                                &nbsp;
+                                <a href="{{ route('social-redirect', 'google') }}" class="font-semibold text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white focus:outline focus:outline-2 focus:rounded-sm focus:outline-red-500">Google Login</a>
                             </a>
                         </div>
                     </div>

@@ -39,5 +39,10 @@ return [
        //'proxy' => env('PROXY')  // optionally
       ],
       
+      'google' => [
+        'client_id'     => env('GOOGLE_CLIENT_ID'),
+        'client_secret' => env('GOOGLE_CLIENT_SECRET'),
+        'redirect'      => env('GOOGLE_URL'),
+    ],
 
 ];
