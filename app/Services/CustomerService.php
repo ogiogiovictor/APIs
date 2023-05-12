@@ -48,18 +48,50 @@ class CustomerService
     }
 
 
-    public function getPostpaid($requestType) {
+    public function getPostpaid($request) {
 
-        $customers = DimensionCustomer::whereIn('StatusCode', ['A', 'S'])->where("AccountType", $requestType)->paginate(20);
+        if(isset($request->status) &&  $request->status != 'null'){
+
+            $StatusCode =  substr($request->status, 0, 1);
+
+            $customers = DimensionCustomer::where("StatusCode", $StatusCode)
+            ->where("AccountType", 'Postpaid')->orderBy("SetupDate", "desc")->paginate(20); 
+                
+            } else{
+
+            $customers = DimensionCustomer::whereIn('StatusCode', ['A', 'S'])->where("AccountType", $request->type)
+            ->orderBy("SetupDate", "desc")->paginate(20); //getPostpaid
+        }
+
+       // $customers = DimensionCustomer::whereIn('StatusCode', ['A', 'S'])->where("AccountType", $requestType)->paginate(20);
 
         return CustomerResource::collection($customers)->response()->getData(true);
 
     }
 
 
-    public function getPrepaid($requestType) {
+    public function getPrepaid($request) {
         
-        $customers = DimensionCustomer::whereIn('StatusCode', ['0', '1'])->where("AccountType", $requestType)->paginate(20);
+        if(isset($request->status) &&  $request->status != 'null'){
+
+            $StatusCode =  substr($request->status, 0, 1);
+            $map = [
+                'A' => '1',
+                'I' => '0',
+                // add other mappings here if needed
+            ];
+            $StatusCode = $map[$StatusCode] ?? $StatusCode;
+
+            $customers = DimensionCustomer::where('StatusCode', $StatusCode)->where("AccountType", $request->type)
+            ->orderBy("SetupDate", "desc")->paginate(20); //getPrepaid
+
+        }else {
+        
+        $customers = DimensionCustomer::whereIn('StatusCode', ['0', '1'])->where("AccountType", $request->type)
+        ->orderBy("SetupDate", "desc")->paginate(20); //getPrepaid
+        }
+
+       // $customers = DimensionCustomer::whereIn('StatusCode', ['0', '1'])->where("AccountType", $requestType)->paginate(20);
 
         return CustomerResource::collection($customers)->response()->getData(true);
 

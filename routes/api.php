@@ -81,7 +81,7 @@ Route::group(['prefix' => 'v1', 'namespace' => 'Api\v1', 'middleware' => 'OAuth'
 
         Route::get('get_dashboard_stats', [AssetController::class, 'stats']);
 
-        Route::get('grap_customers/{type?}', [CustomerInformation::class, 'allCustomers']);  // Get Customers
+        Route::get('grap_customers/{type?}/{status?}', [CustomerInformation::class, 'allCustomers']);  // Get Customers
             
         Route::get('tickets', [TicketController::class, 'index']);
 
@@ -103,7 +103,7 @@ Route::group(['prefix' => 'v1', 'namespace' => 'Api\v1', 'middleware' => 'OAuth'
 
          //Get Bill
          Route::get('getbills', [CustomerBills::class, 'getBills']);
-         Route::get('grap_asset/{type?}', [AssetController::class, 'getAssetWH']);  // Get Asset Warehouse
+         Route::get('grap_asset/{type?}/{atype}', [AssetController::class, 'getAssetWH']);  // Get Asset Warehouse
 
          //Create CRMD Customer Record
          Route::post('crmd', [CustomerInformation::class, 'cstore']); // Not Yet Implemented
@@ -149,8 +149,6 @@ Route::group(['prefix' => 'v2', 'namespace' => 'Api\v2', 'middleware' => 'OAuth'
 
         //Route::get('grap_customers/{type?}', [TestController::class, 'allCustomers']);  // Get Customers
 
-        Route::get('grap_customers/{type?}/{status?}', [TestController::class, 'allCustomers']);  // testing
-            
         Route::get('tickets', [TestController::class, 'tindex']);
 
         Route::post('tickets', [TestController::class, 'tshow']);
@@ -170,9 +168,6 @@ Route::group(['prefix' => 'v2', 'namespace' => 'Api\v2', 'middleware' => 'OAuth'
 
          //Get Bill
          Route::get('getbills', [TestController::class, 'getBills']);
-         Route::get('grap_asset/{type?}', [TestController::class, 'getAssetWH']);  // Get Asset Warehouse
-
-
 
          //Create CRMD Customer Record
          Route::post('crmd', [TestController::class, 'cstore']);
@@ -193,7 +188,12 @@ Route::group(['prefix' => 'v2', 'namespace' => 'Api\v2', 'middleware' => 'OAuth'
 
          Route::post('search_any', [TestController::class, 'searchRecords']);
 
-         Route::get('grap_customers_status/{statusCode?}/{postpaid?}', [TestController::class, 'customerByStatus']);  
+         
+        Route::get('grap_customers/{type?}/{status?}', [TestController::class, 'allCustomers']);  // testing
+            
+        Route::get('grap_asset/{type?}', [TestController::class, 'getAssetWH']);  // Get Asset Warehouse
+
+        Route::get('grap_customers_status/{statusCode?}/{postpaid?}', [TestController::class, 'customerByStatus']);  
 
       
     });

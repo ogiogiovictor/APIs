@@ -229,18 +229,21 @@ class TestController extends BaseApiController
         $dtTotal = DTWarehouse::count();
         //$dtByBhub = DTWarehouse::selectRaw('BusinessHub, count(*) as total')->groupBy('BusinessHub')->get();
 
+        //return $request->type . '--'. AssetEnum::DT_eleven()->value;
 
-        if($request->type == AssetEnum::DT_eleven()->value){
-            
+        if($request->type == 'Distribution Sub Station 11KV_415V'){
+        
             $getDTs = DTWarehouse::withCount('getCustomerCount')
-            ->where('assettype', AssetEnum::DT_eleven()->value)
-            ->paginate(20);
+             ->where('assettype', AssetEnum::DT_eleven()->value)
+             ->paginate(20);
+
 
             $data =[
                 'allDt' => $getDTs,
                 'elevenDt' => number_format_short($elevenDt),
                 'thirtyDt' => number_format_short($thirtyDt),
                 'dtTotal' => number_format_short($dtTotal),
+               
             ];
 
             return $this->sendSuccess($data, "DSS Successfully Loaded", Response::HTTP_OK);
