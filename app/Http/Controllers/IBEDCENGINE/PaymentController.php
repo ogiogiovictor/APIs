@@ -12,21 +12,34 @@ use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use App\Http\Resources\EcmiPaymentResource;
 use App\Http\Resources\ZoneResource;
-
+use App\Models\ZoneBills;
 
 class PaymentController extends BaseApiController
 {
     public function getPayments(){
 
-
       
-
         $newpayment = new ECMIPayment();
-        $ecmi_payment = $newpayment->paymentCount();
-        $ems_payment = ZonePayments::count();
+        
+        //$ecmi_payment = $newpayment->paymentCount();
+        //$ems_payment = ZonePayments::count();
+
+        $ecmi_payment = $newpayment->whereYear('TransactionDateTime', '=', now()->year)
+                                          ->whereMonth('TransactionDateTime', '=', now()->month)
+                                          ->sum('Amount');
+
+        $ems_payment = ZonePayments::whereYear('PayYear', '=', now()->year)
+                                          ->whereMonth('PayMonth', '=', now()->month)
+                                          ->sum('Payments');
+
+        $specBill = ZoneBills::whereYear('Billdate', '=', now()->year)
+        ->whereMonth('Billdate', '=', now()->subMonth()->month)
+        ->sum('Payment');
+
+        //This has to do with payment
         $total_payments = $ecmi_payment + $ems_payment;
-        $today_payment_ecmi = $newpayment->whereDate('TransactionDateTime', Carbon::today())->count();
-        $today_payment_ems = ZonePayments::whereDate('PayDate', Carbon::today())->count();
+        $today_payment_ecmi = $newpayment->whereDate('TransactionDateTime', now()->toDateString())->sum('Amount');
+        $today_payment_ems = ZonePayments::whereDate('PayDate', now()->toDateString())->sum('Payments');
 
         $selectECMI = ECMIPayment::select("TransactionDateTime", "BUID", "TransactionNo", "Token", 
         "AccountNo", "MeterNo", "Amount",  DB::raw("'prepaid' as CSPClientID"))
@@ -44,10 +57,10 @@ class PaymentController extends BaseApiController
       
        
         $data = [
-            'ecmi_payment' => naira_format($ecmi_payment),
-            'ems_payment' => naira_format($ems_payment),
-            'total_payments' => naira_format($total_payments),
-            //'payments' => $bothpayment,
+            'ecmi_payment' => naira_format($today_payment_ecmi),
+            'ems_payment' => naira_format($today_payment_ems),
+            'total_payments' => naira_format($ecmi_payment + $ems_payment),
+            'spec_bills' => naira_format($specBill),
             'payments' => EcmiPaymentResource::collection($selectECMI)->response()->getData(true),
             'postpaid_payment' => ZoneResource::collection($selectEMS)->response()->getData(true),
             'today_payments' => naira_format($today_payment_ecmi + $today_payment_ems),

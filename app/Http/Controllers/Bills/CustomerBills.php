@@ -21,7 +21,8 @@ class CustomerBills extends BaseApiController
         try{
 
             $bills = (new BillService)->getBills($currentMonth, $currentYear);
-            return $this->sendSuccess($data, "Bills Loaded", Response::HTTP_OK);
+            
+            return $this->sendSuccess($bills, "Bills Loaded", Response::HTTP_OK);
 
         }catch(\Exception $e) {
 

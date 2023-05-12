@@ -16,4 +16,10 @@ class FactBill extends Model
     protected $table = "MAIN_WAREHOUSE.dbo.FactBill";
 
     public $timestamps = false;
+
+    public function customer()
+    {
+        
+        return $this->belongsTo(DimensionCustomer::class, 'AccountNo');
+    }
 }

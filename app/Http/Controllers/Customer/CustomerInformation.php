@@ -63,27 +63,30 @@ class CustomerInformation extends BaseApiController
 
     public function allCustomers(Request $request){
 
+         
+
         $postpaid = DimensionCustomer::selectRaw('
         CASE 
-            WHEN StatusCode = "A" THEN "Active"
-            WHEN StatusCode = "C" THEN "Close"
-            WHEN StatusCode = "I" THEN "Inactive"
-            WHEN StatusCode = "S" THEN "Suspended"
+            WHEN StatusCode = \'A\' THEN \'Active\'
+            WHEN StatusCode = \'C\' THEN \'Close\'
+            WHEN StatusCode = \'I\' THEN \'Inactive\'
+            WHEN StatusCode = \'S\' THEN \'Suspended\'
         END AS StatusCode,
         COUNT(*) AS total')
         ->where("AccountType", 'Postpaid')
-        ->orderBy("SetupDate", "desc")
         ->groupBy('StatusCode')
         ->get();
 
-       $prepaid = DimensionCustomer::selectRaw('
+
+
+
+        $prepaid = DimensionCustomer::selectRaw('
         CASE 
-            WHEN StatusCode = "1" THEN "Active"
-            WHEN StatusCode = "0" THEN "Inactive"
+            WHEN StatusCode = \'1\' THEN \'Active\'
+            WHEN StatusCode = \'0\' THEN \'Inactive\'
         END AS StatusCode,
         COUNT(*) AS total')
         ->where("AccountType", 'Prepaid')
-        ->orderBy("SetupDate", "desc")
         ->groupBy('StatusCode')
         ->get();
 

@@ -14,6 +14,8 @@ use App\Models\MsmsCustomer;
 use App\Helpers\StringHelper;
 use App\Services\AmiService;
 use App\Models\ZoneBills;
+use App\Models\MsmsMeters;
+use App\Models\ServiceUnit;
 
 
 
@@ -110,17 +112,17 @@ class CustomerService
 
 
     $data = [
-        'total_dss' => $TotalDSS,   //StringHelper::formatNumber($TotalDSS),
-        'total_customers' => $TotalCustomers, //DB::connection('stagging')->table("ems_customers")->count(),
-        'feeder_11' => $TotalFeederEl, //DB::connection('stagging')->table("gis_11KV Feeder")->count(),
-        'feeder_33' => $TotalFeederThirty, //DB::connection('stagging')->table("gis_33KV Feeder")->count(),
-       'crm_tickets' => $TotalTickets,  //DB::connection('crm')->table("tickets")->count(), // Access denied issue to be fixed by infrastructure  //$TotalTickets
-        'customer_by_region' => $CustomerByRegion,
-        'recent_customers' => $recentCustomers,
-        "total_staff" => 0,
-        "outsourced_staff" => 0,
-        "msms_meters" => 0,
-        "service_centers" => 0,
+        'total_dss' => number_format_short($TotalDSS),
+        'total_customers' => number_format_short($TotalCustomers), //DB::connection('stagging')->table("ems_customers")->count(),
+        'feeder_11' => ($TotalFeederEl), //DB::connection('stagging')->table("gis_11KV Feeder")->count(),
+        'feeder_33' => ($TotalFeederThirty), //DB::connection('stagging')->table("gis_33KV Feeder")->count(),
+       'crm_tickets' => number_format_short($TotalTickets),  //DB::connection('crm')->table("tickets")->count(), // Access denied issue to be fixed by infrastructure  //$TotalTickets
+       'customer_by_region' => $CustomerByRegion,
+       'recent_customers' => $recentCustomers,
+       "total_staff" => 0,
+       "outsourced_staff" => 0,
+       "msms_meters" => number_format_short(MsmsMeters::count()),
+       "service_centers" => number_format_short(ServiceUnit::count()),
     ];
 
     return $data;

@@ -11,7 +11,6 @@ use Carbon\Carbon;
 
 
 
-
 class BillService
 {
    
@@ -28,32 +27,43 @@ class BillService
             ->where('BillYear', $currentYear)
             ->sum('CurrentChgTotal');
 
-        //Top 100 Highest Billed Customers
-        $topCustomers = DimensionCustomer::with(['zoneBills' => function($query) {
-            $query->select('AccountNo', DB::raw('SUM(CurrentChgTotal) as total_billed'))
-                ->groupBy('AccountNo');
-        }])
-        ->select('AccountNo')
-        //->orderByDesc('spectrumbill.total_billed')
-        ->take(100)
-        ->get();
 
-        $totalBilled = $topCustomers->sum(function($customer) {
-            return $customer->zoneBills->sum('total_billed');
-        });
+        // $topCustomers = ZoneBills::where('BillMonth', $lastMonth)
+        //     ->where('BillYear', $currentYear)
+        //     ->orderByDesc('CurrentChgTotal', 'desc')
+        //     ->sum('CurrentChgTotal');
 
+            $topCustomers = ZoneBills::where('BillMonth', $lastMonth)
+            ->where('BillYear', $currentYear)
+            ->orderByDesc('CurrentChgTotal')
+            ->take(100)
+            ->get()
+            ->sum('CurrentChgTotal');
 
-        $bills  = ZoneBills::paginate(30);
+    
+        
 
-        $data = [
-            'thisMonthBills' => StringHelper::formatNumber($thisMonthBills),
-            'lastMonthBills' => StringHelper::formatNumber($lastMonthBill),
+        $totalAmountOwed = DimensionCustomer::selectRaw('SUM(b.GrandTotaldue - b.Payment) AS TotalAmountOwed')
+            ->from('main_warehouse.dbo.Dimension_customers as c')
+            ->join('MAIN_WAREHOUSE.dbo.FactBill as b', 'c.AccountNo', '=', 'b.AccountNo')
+            ->whereRaw('b.GrandTotaldue * 0.2 > b.Payment')
+            ->where('b.BillYear', '=',  $currentYear)
+            ->where('b.BillMonth', '=', $currentMonth)
+            ->where('AccountType', 'Postpaid')
+            ->value('TotalAmountOwed');
+        
+
+       $bills  = ZoneBills::orderBy("BillYear", "desc")->paginate(30);
+
+      return  $data = [
+            'thisMonthBills' => naira_format($thisMonthBills),
+            'lastMonthBills' => naira_format($lastMonthBill),
             'bills' => $bills,
-            'totalHighestBill' => StringHelper::formatNumber($totalBilled),
-            'highestBilledCustomers' => $topCustomers,
+           'totalHighestBill' => $totalAmountOwed,
+            'highestBilledCustomers' => naira_format($topCustomers),
         ];
         
 
-         return $data;
+         //return $data;
     }
 }

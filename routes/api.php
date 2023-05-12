@@ -103,7 +103,7 @@ Route::group(['prefix' => 'v1', 'namespace' => 'Api\v1', 'middleware' => 'OAuth'
 
          //Get Bill
          Route::get('getbills', [CustomerBills::class, 'getBills']);
-         Route::get('grap_asset/{type?}/{atype}', [AssetController::class, 'getAssetWH']);  // Get Asset Warehouse
+         Route::get('grap_asset/{type?}', [AssetController::class, 'getAssetWH']);  // Get Asset Warehouse
 
          //Create CRMD Customer Record
          Route::post('crmd', [CustomerInformation::class, 'cstore']); // Not Yet Implemented
