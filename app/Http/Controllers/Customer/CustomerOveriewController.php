@@ -11,7 +11,7 @@ use Symfony\Component\HttpFoundation\Response;
 
 class CustomerOveriewController extends BaseApiController
 {
-    public function customer360($acctionNo, $dss){
+    public function customer360($acctionNo, $dss="null"){
 
         try{
 

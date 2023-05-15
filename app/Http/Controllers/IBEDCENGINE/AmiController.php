@@ -47,16 +47,16 @@ class AmiController extends BaseApiController
 
     public function getSummary(Request $request){
         
-        if($request->expectsJson()) {
+      //  if($request->expectsJson()) {
 
-            $getRequest = (new AmiService)->getMeterReading(2023, 2); // $request->year, $request->month; and
+            $getRequest = (new AmiService)->getMeterReading(2023, 5); // $request->year, $request->month; and
 
             $newResource = AmiminiResource::collection($getRequest); // $request->year, $request->month; and
 
             return $this->sendSuccess($newResource, "Data Successfully Loaded - ". count($getRequest), Response::HTTP_OK);
-        }else {
-            return $this->sendError("Error", "Error Loading Data, Something went wrong", Response::HTTP_INTERNAL_SERVER_ERROR);
-        }
+        // }else {
+        //     return $this->sendError("Error", "Error Loading Data, Something went wrong", Response::HTTP_INTERNAL_SERVER_ERROR);
+        // }
     }
 
     public function getAll(){

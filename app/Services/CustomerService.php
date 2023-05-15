@@ -161,7 +161,7 @@ class CustomerService
       
         if($dss){
             $distribution = DTWarehouse::select('Assetid', 'assettype', 'AssetName', 'DSS_11KV_415V_Make',
-            'DSS_11KV_415V_Rating', 'DSS_11KV_415V_Address', 'DSS_11KV_415V_Owner', 
+            'DSS_11KV_415V_Rating', 'DSS_11KV_415V_Address', 'DSS_11KV_415V_Owner', 'hub_name', 'Status',
             'DSS_11KV_415V_parent', 'longtitude', 'latitude', 'naccode')->where('Assetid', $dss)->first();
             $customer->distribution = $distribution;
         }
@@ -193,6 +193,36 @@ class CustomerService
        if($amiEvents){
         $customer->amiEvents = $amiEvents;
        }
+
+       //Get Disconnections
+       if($changeAccountNumber){
+        $year =  Date('Y');
+        $month = Date('m') -1;
+        $disconnections =  DimensionCustomer::select(
+            'c.AccountNo',
+            'c.Surname',
+            'c.FirstName',
+            'c.OtherNames',
+            'c.AccountType',
+            'b.TotalDue',
+            'b.GrandTotaldue',
+            'b.Payment',
+            DB::raw('(b.GrandTotaldue - b.Payment) AS AmountOwed'),
+            DB::raw('b.GrandTotaldue * 0.2 as ExpectedPayment'),
+            'b.BillYear',
+            'b.BillMonth'
+        )
+            ->from('main_warehouse.dbo.Dimension_customers as c')
+            ->join('MAIN_WAREHOUSE.dbo.FactBill as b', 'c.AccountNo', '=', 'b.AccountNo')
+            ->whereRaw('b.GrandTotaldue * 0.2 > b.Payment')
+            ->where('b.AccountNo', '=',  $changeAccountNumber)
+            ->where('b.BillYear', '=',  $year)
+            ->where('b.BillMonth', '=', $month)
+            ->where('AccountType', 'Postpaid')
+            ->first();
+            $customer->disconnections = $disconnections;
+       }
+      
 
       
 
