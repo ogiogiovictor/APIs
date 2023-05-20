@@ -121,8 +121,6 @@ Route::group(['prefix' => 'v1', 'namespace' => 'Api\v1', 'middleware' => 'OAuth'
 
          Route::post('search_any', [SearchController::class, 'searching']);
 
-         Route::post('search_any', [SearchController::class, 'searching']);
-
          Route::get('get_owing_customers', [CustomerInformation::class, 'percentageOwed']);
 
          Route::get('get_events', [AmiController::class, 'getSummary'])->name('getEvents');  // Not implemented Yet in React

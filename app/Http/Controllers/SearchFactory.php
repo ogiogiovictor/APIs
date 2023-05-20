@@ -11,7 +11,7 @@ class SearchFactory extends Controller
         switch ($request->type) {
             case 'customers':
                 return new SearchRepository($request);
-            case 'asset':
+            case 'dt_asset':
                 return null;
             case 'tickets':
                 return '';

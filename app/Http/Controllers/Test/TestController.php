@@ -669,13 +669,6 @@ class TestController extends BaseApiController
     }
 
 
-    public function searchRecords($type=""){
-        
-        if($type == ""){
-            return $this->sendError("Error", "Please a type is mandatory, please contact developer", Response::HTTP_BAD_REQUEST);
-        }
-    }   
-
 
     public function customerByStatus($status, $postpaid='Postpaid') {
 
@@ -706,6 +699,58 @@ class TestController extends BaseApiController
          return $this->sendSuccess($data, "Customer Successfully Loaded", Response::HTTP_OK);
     }
 
+
+
+    public function searchRecords(Request $request){
+        
+        if($request->hiddenField == "dt_asset"){
+            $searchQuery = $request->searchQuery;
+
+            $search = DTWarehouse::where(function ($query) use ($request) {
+                $searchQuery = $request->searchQuery;
+
+                $query->where('DSS_11KV_415V_Name', 'LIKE', '%' .  $searchQuery . '%')
+                ->orWhere('Assetid', 'LIKE', '%' .  $searchQuery . '%')
+                ->orWhere('DSS_11KV_415V_Owner', 'LIKE', '%' .  $searchQuery . '%')
+                ->orWhere('DSS_11KV_415V_Address', 'LIKE', '%' .  $searchQuery . '%')
+                ->orWhere('hub_name', 'LIKE', '%' .  $searchQuery . '%');
+            })->paginate(100);
+
+            $elevenDt = DTWarehouse::where(function ($query) use ($request) {
+                $searchQuery = $request->searchQuery;
+
+                $query->where('DSS_11KV_415V_Name', 'LIKE', '%' .  $searchQuery . '%')
+                ->where('assettype', AssetEnum::DT_eleven()->value)
+                ->orWhere('Assetid', 'LIKE', '%' .  $searchQuery . '%')
+                ->orWhere('DSS_11KV_415V_Owner', 'LIKE', '%' .  $searchQuery . '%')
+                ->orWhere('DSS_11KV_415V_Address', 'LIKE', '%' .  $searchQuery . '%')
+                ->orWhere('hub_name', 'LIKE', '%' .  $searchQuery . '%');
+            })->count();
+
+            $thirtyDt = DTWarehouse::where(function ($query) use ($request) {
+                $searchQuery = $request->searchQuery;
+                $query->where('DSS_11KV_415V_Name', 'LIKE', '%' .  $searchQuery . '%')
+                ->where('assettype', AssetEnum::DT_thirty_three()->value)
+                ->orWhere('Assetid', 'LIKE', '%' .  $searchQuery . '%')
+                ->orWhere('DSS_11KV_415V_Owner', 'LIKE', '%' .  $searchQuery . '%')
+                ->orWhere('DSS_11KV_415V_Address', 'LIKE', '%' .  $searchQuery . '%')
+                ->orWhere('hub_name', 'LIKE', '%' .  $searchQuery . '%');
+            })->count();
+
+        $dtTotal = DTWarehouse::count();
+
+            $data =[
+                'allDt' => $search,
+                'elevenDt' => $elevenDt,
+                'thirtyDt' => $thirtyDt,
+                'dtTotal' => $dtTotal,
+            ];
+
+            return $this->sendSuccess($data, "Search Asset Succesfuly Found", Response::HTTP_OK);
+        }else {
+            return $this->sendError("No Result", "No Result Found", Response::HTTP_BAD_REQUEST);
+        }
+    }   
 
 
 
