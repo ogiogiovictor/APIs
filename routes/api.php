@@ -77,15 +77,46 @@ Route::group(['prefix' => 'v1', 'namespace' => 'Api\v1', 'middleware' => 'OAuth'
 
     Route::middleware(['auth:sanctum'])->group(function() {
 
+        //User
         Route::get('get_user', [UserController::class, 'getUser']);
 
+        //Dashboard
         Route::get('get_dashboard_stats', [AssetController::class, 'stats']);
 
+        //Customers
         Route::get('grap_customers/{type?}/{status?}', [CustomerInformation::class, 'allCustomers']);  // Get Customers
-            
-        Route::get('tickets', [TicketController::class, 'index']);
+        Route::get('customer360/{account?}/{dss?}', [CustomerOveriewController::class, 'customer360']);
+        Route::get('all_disconnections', [Disconnection::class, 'index']);
+        Route::get('get_owing_customers', [CustomerInformation::class, 'percentageOwed']);
 
+        //Tickets
+        Route::get('tickets', [TicketController::class, 'index']);
         Route::post('tickets', [TicketController::class, 'show']);
+        
+        //Create CRMD Customer Record
+        Route::post('crmd', [CustomerInformation::class, 'cstore']); // Not Yet Implemented
+        Route::get('get_crmd/pending', [CustomerInformation::class, 'getCrmd']);
+        Route::post('updatecrmdstate', [CustomerInformation::class, 'updateStatus']);
+
+        //Customer Bill
+        Route::get('getbills', [CustomerBills::class, 'getBills']);
+        Route::get('billDetails/{billID?}', [CustomerBills::class, 'getBillDetails']); 
+
+        //Customer Payment
+        Route::get('/payments', [PaymentController::class, 'getPayments']);
+        Route::get('/paymentDetails/{FAccount?}/{Token?}/{type?}', [PaymentController::class, 'getPaymentDetails']);
+       
+
+        //Assets
+        Route::get('grap_asset/{type?}', [AssetController::class, 'getAssetWH']);  // Get Asset Warehouse
+        Route::get('grap_feeder/{type?}', [FeederController::class, 'index']); //Get Feeder Warehouse
+        Route::get('transmission_stations', [InjectionSubStationController::class, 'getTransmissionStations']);
+
+        //AMI
+        Route::get('get_events', [AmiController::class, 'getSummary'])->name('getEvents');  // Not implemented Yet in React
+
+        //General
+        Route::post('search_any', [SearchController::class, 'searching']);
 
         // Only for Administrative Users
       /*  Route::prefix('roles')->middleware('role:admin')->group(function() {
@@ -95,36 +126,6 @@ Route::group(['prefix' => 'v1', 'namespace' => 'Api\v1', 'middleware' => 'OAuth'
 
         });
         */
-
-         //Customer 360
-         Route::get('customer360/{account?}/{dss?}', [CustomerOveriewController::class, 'customer360']);
-
-        // Route::apiResource('get_customers', CustomerInformation::class)->only(['index', 'store'])->middleware(['throttle:10,1']);
-
-         //Get Bill
-         Route::get('getbills', [CustomerBills::class, 'getBills']);
-         Route::get('grap_asset/{type?}', [AssetController::class, 'getAssetWH']);  // Get Asset Warehouse
-
-         //Create CRMD Customer Record
-         Route::post('crmd', [CustomerInformation::class, 'cstore']); // Not Yet Implemented
-         Route::get('grap_feeder/{type?}', [FeederController::class, 'index']); //Get Feeder Warehouse
-         Route::get('/payments', [PaymentController::class, 'getPayments']);
-         Route::get('/paymentDetails/{FAccount?}/{Token?}/{type?}', [PaymentController::class, 'getPaymentDetails']);
-         Route::get('transmission_stations', [InjectionSubStationController::class, 'getTransmissionStations']);
-        
-         Route::get('all_disconnections', [Disconnection::class, 'index']);
-
-         Route::get('billDetails/{billID?}', [CustomerBills::class, 'getBillDetails']); 
-         Route::get('get_crmd/pending', [CustomerInformation::class, 'getCrmd']);
-
-         Route::post('updatecrmdstate', [CustomerInformation::class, 'updateStatus']);
-
-         Route::post('search_any', [SearchController::class, 'searching']);
-
-         Route::get('get_owing_customers', [CustomerInformation::class, 'percentageOwed']);
-
-         Route::get('get_events', [AmiController::class, 'getSummary'])->name('getEvents');  // Not implemented Yet in React
-         
        
          
     });
@@ -183,17 +184,18 @@ Route::group(['prefix' => 'v2', 'namespace' => 'Api\v2', 'middleware' => 'OAuth'
          Route::post('updatecrmdstate', [TestController::class, 'updateStatus']);
 
          Route::post('grap_feeder', [TestController::class, 'addFeeder']); 
-         //
-
-         Route::post('search_any', [TestController::class, 'searchRecords']);
-
-         
+        
         Route::get('grap_customers/{type?}/{status?}', [TestController::class, 'allCustomers']);  // testing
             
         Route::get('grap_asset/{type?}', [TestController::class, 'getAssetWH']);  // Get Asset Warehouse
 
         Route::get('grap_customers_status/{statusCode?}/{postpaid?}', [TestController::class, 'customerByStatus']);  
 
+        Route::post('search_any', [TestController::class, 'searchRecords']);
+        Route::post('export_dt', [TestController::class, 'exportExcel']);
+
+        Route::get('all_users', [TestController::class, 'getAllUsers']);
+        
       
     });
 });

@@ -36,6 +36,9 @@ use App\Models\Test\MsmsMeters;
 use Illuminate\Support\Facades\Http;
 use App\Http\Requests\FeederRequest;
 use App\Helpers\AssetHelper;
+use App\Exports\DataExport;
+use Maatwebsite\Excel\Facades\Excel;
+use Illuminate\Support\Facades\Storage;
 
 
 
@@ -751,6 +754,51 @@ class TestController extends BaseApiController
             return $this->sendError("No Result", "No Result Found", Response::HTTP_BAD_REQUEST);
         }
     }   
+
+
+
+    public function exportExcel(Request $request){
+
+        if($request->has('export_dt')){
+            $startDate = $request->start_date;
+            $startEndData = $request->end_date;
+            $BusinessHub = $request->business_hub;
+        }
+
+        $fileName = 'data.xlsx';
+
+        $export = new DataExport();
+    
+        $path = storage_path('app/public/exported-files/' . $fileName);
+    
+        Excel::store($export, $path);
+    
+        $downloadLink = Storage::url('public/exported-files/' . $fileName);
+    
+        return $this->sendSuccess($downloadLink, "download_link", Response::HTTP_OK);
+     
+       
+       
+    }
+
+
+    public function getAllUsers(){
+
+        $users = User::paginate(20);
+        // Modify the date format and status values
+        $users->getCollection()->transform(function ($user) {
+            // Convert created_at to human-readable date format
+            $user->created_at = Carbon::parse($user->created_at)->format('Y-m-d H:i:s');
+           // $user->created_at = Carbon::parse($user->created_at)->diffForHumans();
+
+            // Convert status values to human-readable strings
+            $user->status = $user->status == 1 ? 'Active' : 'Inactive';
+
+            return $user;
+        });
+
+        return $this->sendSuccess($users, "Users Loaded", Response::HTTP_OK);
+    }
 
 
 

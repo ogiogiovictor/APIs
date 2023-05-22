@@ -197,8 +197,10 @@ return [
         App\Providers\TelescopeServiceProvider::class,
         Spatie\Permission\PermissionServiceProvider::class,
 
+       // Maatwebsite\Excel\ExcelServiceProvider::class,
       //  \SocialiteProviders\Manager\ServiceProvider::class, // add
         Adldap\Laravel\AdldapServiceProvider::class,
+
 
 
     ],
@@ -219,6 +221,7 @@ return [
         'Socialite' => Laravel\Socialite\Facades\Socialite::class,
         'AuthorityEnum' => App\Enums\AuthorityEnum::class,
         'StatusEnum' => App\Enums\StatusEnum::class,
+       // 'Excel' => Maatwebsite\Excel\Facades\Excel::class,
     ])->toArray(),
 
 ];
