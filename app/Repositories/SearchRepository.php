@@ -4,6 +4,7 @@ namespace App\Repositories;
 
 use App\Repositories\SearchRepositoryInterface;
 use App\Models\DimensionCustomer;
+use App\Models\DTWarehouse;
 
 
 
@@ -32,5 +33,7 @@ class SearchRepository implements SearchRepositoryInterface
        // Execute search implementation here
         return $customers;
     }
+
+   
 
 }

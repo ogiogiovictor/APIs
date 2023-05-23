@@ -235,7 +235,7 @@ class CustomerService
 
     public function getDisconnections(){
         $year =  Date('Y');
-        $month = Date('m') -1;
+        $month = Date('m');
 
       
 

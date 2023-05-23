@@ -7,5 +7,5 @@ Interface SearchRepositoryInterface
     
    
     public function search();
-
+   
 }
