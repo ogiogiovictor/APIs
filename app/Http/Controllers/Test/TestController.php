@@ -39,6 +39,7 @@ use App\Helpers\AssetHelper;
 use App\Exports\DataExport;
 use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Hash;
 
 
 
@@ -799,6 +800,38 @@ class TestController extends BaseApiController
 
         return $this->sendSuccess($users, "Users Loaded", Response::HTTP_OK);
     }
+
+
+    public function addUser(Request $request){
+
+       
+
+        $validator = Validator::make($request->all(), [
+            'name' => 'required',
+            'email' => 'required|unique:users|max:255',
+            'password' => 'required',
+            'role' => 'required',
+        ]);
+
+        if ($validator->fails()) {
+            return $this->sendError("Validation Error", $validator->errors(), Response::HTTP_BAD_REQUEST);
+        }
+
+        $user = User::create([
+            'name' => $request->name,
+            'email' => $request->email,
+            'status' => 1,
+            'authority' => $request->business_hub,
+            'password' => Hash::make($request->password),
+        ]);
+
+          //Atach User to a Role
+          $user->assignRole('admin');
+
+        return $this->sendSuccess($user, "User Created Successfully", Response::HTTP_OK);
+    }
+
+    
 
 
 

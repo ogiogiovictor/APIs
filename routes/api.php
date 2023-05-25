@@ -195,6 +195,7 @@ Route::group(['prefix' => 'v2', 'namespace' => 'Api\v2', 'middleware' => 'OAuth'
         Route::post('export_dt', [TestController::class, 'exportExcel']);
 
         Route::get('all_users', [TestController::class, 'getAllUsers']);
+        Route::post('reg_users', [TestController::class, 'addUser']);
         
       
     });
