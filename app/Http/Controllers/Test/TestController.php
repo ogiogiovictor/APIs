@@ -708,7 +708,7 @@ class TestController extends BaseApiController
     public function searchRecords(Request $request){
         
         if($request->hiddenField == "dt_asset"){
-            $searchQuery = $request->searchQuery;
+            $searchQuery = $request->DT;
 
             $search = DTWarehouse::where(function ($query) use ($request) {
                 $searchQuery = $request->searchQuery;

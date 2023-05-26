@@ -19,34 +19,40 @@ class PaymentController extends BaseApiController
     public function getPayments(){
 
       
+      
         $newpayment = new ECMIPayment();
         
-        //$ecmi_payment = $newpayment->paymentCount();
-        //$ems_payment = ZonePayments::count();
-
+        //ECMI Payment For the Current Month
         $ecmi_payment = $newpayment->whereYear('TransactionDateTime', '=', now()->year)
                                           ->whereMonth('TransactionDateTime', '=', now()->month)
                                           ->sum('Amount');
 
-        $ems_payment = ZonePayments::whereYear('PayYear', '=', now()->year)
-                                          ->whereMonth('PayMonth', '=', now()->month)
+        //EMS Payment for the CurrentMonth
+        $ems_payment = ZonePayments::whereYear('PayDate', '=', now()->year)
+                                          ->whereMonth('PayDate', '=', now()->month)
                                           ->sum('Payments');
 
+                                    
+        // Payment from Spectrum Bill now()->subMonth()->month
         $specBill = ZoneBills::whereYear('Billdate', '=', now()->year)
-        ->whereMonth('Billdate', '=', now()->subMonth()->month)
+        ->whereMonth('Billdate', '=', now()->month)
         ->sum('Payment');
 
-        //This has to do with payment
+        //Total Payment for Both ECMI and EMS
         $total_payments = $ecmi_payment + $ems_payment;
+
+        //Today's payment
         $today_payment_ecmi = $newpayment->whereDate('TransactionDateTime', now()->toDateString())->sum('Amount');
         $today_payment_ems = ZonePayments::whereDate('PayDate', now()->toDateString())->sum('Payments');
 
+
+        //ECMI PAYMENT LIST PAGINATED
         $selectECMI = ECMIPayment::select("TransactionDateTime", "BUID", "TransactionNo", "Token", 
         "AccountNo", "MeterNo", "Amount",  DB::raw("'prepaid' as CSPClientID"))
         ->orderBy("TransactionDateTime", "desc")->paginate(20);
 
-
-      $selectEMS = ZonePayments::select("PayDate", "BusinessUnit", "PaymentID", "receiptnumber", 
+        // EMS PAYMENT LIST PAGINATED
+        $selectEMS = ZonePayments::select("PayDate", "BusinessUnit", "PaymentID", "receiptnumber", 
        "AccountNo", "MeterNo", "Payments",  DB::raw("'postpaid' as PaymentSource"))
        ->orderBy("PayDate", "desc")->paginate(20);
      
@@ -57,13 +63,13 @@ class PaymentController extends BaseApiController
       
        
         $data = [
-            'ecmi_payment' => naira_format($today_payment_ecmi),
-            'ems_payment' => naira_format($today_payment_ems),
+            'ecmi_payment' => naira_format($ecmi_payment),
+            'ems_payment' => naira_format($ems_payment),
             'total_payments' => naira_format($ecmi_payment + $ems_payment),
             'spec_bills' => naira_format($specBill),
             'payments' => EcmiPaymentResource::collection($selectECMI)->response()->getData(true),
             'postpaid_payment' => ZoneResource::collection($selectEMS)->response()->getData(true),
-            'today_payments' => naira_format($today_payment_ecmi + $today_payment_ems),
+            'today_payments' => naira_format($today_payment_ecmi + $today_payment_ems), 
         ];
 
         return $this->sendSuccess($data, "Payment Successfully Loaded", Response::HTTP_OK);

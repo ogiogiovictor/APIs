@@ -79,6 +79,8 @@ Route::group(['prefix' => 'v1', 'namespace' => 'Api\v1', 'middleware' => 'OAuth'
 
         //User
         Route::get('get_user', [UserController::class, 'getUser']);
+        Route::get('all_users', [UserController::class, 'getAllUsers']);
+        Route::post('reg_users', [UserController::class, 'addUser']);
 
         //Dashboard
         Route::get('get_dashboard_stats', [AssetController::class, 'stats']);

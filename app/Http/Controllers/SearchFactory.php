@@ -16,7 +16,7 @@ class SearchFactory extends Controller
                 return new SearchRepository($request);
             case 'dt_asset':
                return new SearchAssetRepository($request);
-            case 'tickets':
+            case 'dt_feeder':
                 return '';
             case 'feeder':
                 return '';
