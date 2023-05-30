@@ -53,7 +53,6 @@ Route::middleware(['auth:sanctum'])->group(function() {
         Route::apiResource('meter_consumption', AmiController::class)->only([ 'store' ]);
         Route::post('load_summary', [AmiController::class, 'loadSummary'])->name('loadSummary');
         Route::get('get_summary', [AmiController::class, 'getSummary'])->name('getSummary');  // Not implemented Yet in React
-        Route::get('get_all_connection', [AmiController::class, 'getAll'])->name('getAll');  // Not implemented Yet in React
         Route::get('event_up_down', [AmiController::class, 'eventUpDown'])->name('eventUpDown');  // Not implemented Yet in React
     /*|--------------------------------------------------------------------------
     | CUSTOMER API INTEGRATION - LIFAN
@@ -115,7 +114,8 @@ Route::group(['prefix' => 'v1', 'namespace' => 'Api\v1', 'middleware' => 'OAuth'
         Route::get('transmission_stations', [InjectionSubStationController::class, 'getTransmissionStations']);
 
         //AMI
-        Route::get('get_events', [AmiController::class, 'getSummary'])->name('getEvents');  // Not implemented Yet in React
+        Route::get('get_events', [AmiController::class, 'getSummary'])->name('getEvents');  
+        Route::get('get_all_connection', [AmiController::class, 'getAll'])->name('getAll');  
 
         //General
         Route::post('search_any', [SearchController::class, 'searching']);

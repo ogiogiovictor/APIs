@@ -17,7 +17,7 @@ class TicketService
 
     public function getTicket($ticket)
     {
-        $getAccountNo = CRMUsers::where('id', $ticket->user_id)->first();
+        $getAccountNo = CRMUser::where('id', $ticket->user_id)->first();
         // Now Get the Customer Information.
          $customer = DimensionCustomer::where('AccountNo', $getAccountNo->accountno)
          ->orWhere('MeterNo', $getAccountNo->accountno)->first();

@@ -14,6 +14,7 @@ use App\Http\Resources\NewResource;
 use App\Http\Resources\ZoneResource;
 use App\Models\ZoneCustomer;
 use App\Http\Requests\RecordRequest;
+use Illuminate\Support\Facades\Http;
 
 class CustomerInformation extends BaseApiController
 {
@@ -133,7 +134,7 @@ class CustomerInformation extends BaseApiController
 
 
     public function cstore(RecordRequest $request) {
-        $response = Http::post('http://localhost:8001/api/v1/post_customer_crmd', $request->all());
+        $response = Http::post('http://localhost:8005/api/v1/post_customer_crmd', $request->all());
 
         try{
             if($response['data'] == '201'){

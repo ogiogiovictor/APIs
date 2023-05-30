@@ -19,7 +19,6 @@ class PaymentController extends BaseApiController
     public function getPayments(){
 
       
-      
         $newpayment = new ECMIPayment();
         
         //ECMI Payment For the Current Month

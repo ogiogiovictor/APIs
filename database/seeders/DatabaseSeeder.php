@@ -6,6 +6,8 @@ namespace Database\Seeders;
 use Illuminate\Database\Seeder;
 use Database\Seeders\RoleSeeder;
 use Database\Seeders\AdminSeeder;
+use Database\Seeders\MenuSeeder;
+use Database\Seeders\SubMenuSeeder;
 
 class DatabaseSeeder extends Seeder
 {
@@ -17,8 +19,10 @@ class DatabaseSeeder extends Seeder
         // \App\Models\User::factory(10)->create();
 
         $this->call([
-            RoleSeeder::class,
-            AdminSeeder::class,
+           // RoleSeeder::class,
+           // AdminSeeder::class,
+           // MenuSeeder::class,
+            SubMenuSeeder::class
         ]);
     }
 }
