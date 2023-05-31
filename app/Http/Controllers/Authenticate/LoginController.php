@@ -28,6 +28,7 @@ class LoginController extends BaseApiController
                 $authUser = Auth::user();
                 $success['Authorization'] = $authUser->createToken('Sanctom+Socialite')->plainTextToken;
                 $success['user'] = $authUser;
+               
                 return $this->sendSuccess($success, "Authorization Successufully Generated", Response::HTTP_CREATED);
             }else {
                 return $this->sendError('Invalid Login', "Check your credentials and try again", Response::HTTP_UNAUTHORIZED);
@@ -38,6 +39,7 @@ class LoginController extends BaseApiController
         }
 
     }
+
 
 
 

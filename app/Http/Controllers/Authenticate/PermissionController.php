@@ -20,13 +20,19 @@ class PermissionController extends BaseApiController
 
     public function store(Request $request) {
 
-        $validate = $request->validate(['name' => ['required', 'min:3'] ]);
-        $newRole = Permission::create([$validate]);
+        $validate = $request->validate([
+            'name' => ['required', 'min:3']
+        ]);
 
+       
         try{
-            return $this->sendSuccess($newRole, "Roles Information", Response::HTTP_OK);
+            $newRole = Permission::create([
+                'name' => $validate['name']
+            ]);
+
+            return $this->sendSuccess($newRole, "Permission Successfully Added", Response::HTTP_OK);
         }catch(\Exception $e){
-            return $this->sendError("Error", "Error Loading Data, Something went wrong", Response::HTTP_INTERNAL_SERVER_ERROR);
+            return $this->sendError("Error", $e, Response::HTTP_INTERNAL_SERVER_ERROR);
         }
         
 

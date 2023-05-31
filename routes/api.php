@@ -155,14 +155,6 @@ Route::group(['prefix' => 'v2', 'namespace' => 'Api\v2', 'middleware' => 'OAuth'
 
         Route::post('tickets', [TestController::class, 'tshow']);
 
-       // Only for Administrative Users
-        Route::prefix('roles')->middleware('role:admin')->group(function() {
-         
-            Route::apiResource('roles', RoleController::class);
-            Route::apiResource('permissions', PermissionController::class);
-
-        });
-
          //Customer 360
          Route::get('customer360/{account?}/{dss?}', [TestController::class, 'customer360']);
 
@@ -198,6 +190,19 @@ Route::group(['prefix' => 'v2', 'namespace' => 'Api\v2', 'middleware' => 'OAuth'
 
         Route::get('all_users', [TestController::class, 'getAllUsers']);
         Route::post('reg_users', [TestController::class, 'addUser']);
+
+
+        // Only for Administrative Users
+        //Route::prefix('roles')->middleware('role:admin')->group(function() {
+        Route::prefix('roles')->group(function() {
+         
+        Route::apiResource('roles', RoleController::class);
+        Route::post('assign_roles', [RoleController::class, 'assignMenuRole']);
+        Route::post('permissions', [PermissionController::class, 'store']);
+        Route::get('permissions', [PermissionController::class, 'index']);
+        
+        });
+
         
       
     });

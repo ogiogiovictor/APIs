@@ -8,6 +8,9 @@ use Illuminate\Support\Carbon;
 use Spatie\Permission\Models\Role;
 use Spatie\Permission\Models\Permission;
 use Illuminate\Support\Facades\Auth;
+use App\Models\MenuRole;
+use App\Models\MenuAccess;
+use App\Models\SubMenu;
 
 class UserResource extends JsonResource
 {
@@ -28,7 +31,17 @@ class UserResource extends JsonResource
             "role" => $this->roles->first()->name, //$this->roles->pluck('name')->toArray(), //$user->load('roles'), // Auth::user()->load('roles'),
              "status" => $this->status,
             "time_ago" => Carbon::parse($this->created_at)->subMinutes(2)->diffForHumans(),
+            "menus" => $this->menuAccess($this->roles->first()->id),
+
         ];
         //return parent::toArray($request);
     }
+
+    public function menuAccess($role) {
+
+        return MenuRole::where("role_id", $role)->first()->menu_id;
+    }
+
+    
+   
 }

@@ -13,8 +13,8 @@ return new class extends Migration
     {
         Schema::create('menu_role', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('menu_id')->nullable();
-            $table->foreign('menu_id')->references('id')->on('menu');
+            $table->json('menu_id')->nullable();
+            //$table->foreign('menu_id')->references('id')->on('menu');
             $table->json('role_id')->nullable();
             $table->json('permission_id')->nullable();
             $table->timestamps();
