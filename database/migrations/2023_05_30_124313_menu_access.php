@@ -15,6 +15,7 @@ return new class extends Migration
             $table->id();
             $table->string('menu_name')->nullable();
             $table->string('menu_url')->nullable();
+            $table->string('menu_icon')->nullable();
             $table->string('menu_status')->nullable();
             $table->timestamps();
         });

@@ -128,6 +128,12 @@ Route::group(['prefix' => 'v1', 'namespace' => 'Api\v1', 'middleware' => 'OAuth'
 
         });
         */
+
+        Route::prefix('stsix')->group(function() {
+         
+            Route::post('kctgeneration', [CustomerInformation::class, 'generatekct']);
+            
+        });
        
          
     });

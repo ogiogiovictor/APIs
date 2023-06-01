@@ -38,8 +38,41 @@ class UserResource extends JsonResource
     }
 
     public function menuAccess($role) {
+        //User Role
+        $menu = MenuRole::where("role_id", $role)->first()->menu_id;
+        
+        //Remove the square bracket from the string
+        $menuString = trim($menu, '[]');
+        //Split the string into an array using commas as the delimiter
+        $menuArray = explode(',', $menuString);
+        //Convert the array values from string to integers
+        $menuArray = array_map('intval', $menuArray);
 
-        return MenuRole::where("role_id", $role)->first()->menu_id;
+        $menuName = MenuAccess::whereIn("id", $menuArray)->where("menu_status", "on")->get()->toArray();
+
+        $menuIds = array_column($menuName, 'id');
+        $subMenus = SubMenu::whereIn("menu_id", $menuIds)->get();
+
+         // User Permission
+        $permission = array_map('intval', explode(',', trim(MenuRole::where("role_id", $role)->first()->permission_id, '[]')));
+        $permissions = Permission::whereIn("id", $permission)->get()->keyBy('id');
+
+        $result = [];
+        foreach($menuName as $navbar){
+            $submenu = $subMenus->where('menu_id', $navbar['id'])->toArray();
+
+            $result[] = [
+                'id' => $navbar['id'],
+                'menu_name' => $navbar['menu_name'],
+                'menu_url' => $navbar['menu_url'],
+                'submenu' => $submenu,
+               'permission' => $permissions->get($navbar['id'])
+            ];
+
+        }
+
+        return $result;
+       
     }
 
     

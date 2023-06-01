@@ -15,6 +15,7 @@ use App\Http\Resources\ZoneResource;
 use App\Models\ZoneCustomer;
 use App\Http\Requests\RecordRequest;
 use Illuminate\Support\Facades\Http;
+use App\Models\KCTGenerator;
 
 class CustomerInformation extends BaseApiController
 {
@@ -184,6 +185,21 @@ class CustomerInformation extends BaseApiController
 
         $customer = (new CustomerService)->getDisconnections();
         return $this->sendSuccess($customer, "All Customers To Disconnection", Response::HTTP_OK);
+     }
+
+
+
+     public function generatekct(Request $request) {
+
+        $data = KCTGenerator::where("meter_number", $request->meter_number)->value("kct_code");
+
+        if($data){
+            return $this->sendSuccess($data, "KCT Value Successfully Generated", Response::HTTP_OK);
+        } else  {
+            return $this->sendError("Error", "No Record Found" , Response::HTTP_UNAUTHORIZED);
+        }
+
+        
      }
  
 
