@@ -11,13 +11,17 @@ use Symfony\Component\HttpFoundation\Response;
 
 class CustomerOveriewController extends BaseApiController
 {
-    public function customer360($acctionNo, $dss="null"){
+    public function customer360($acctionNo, $dss, $accountType, $MeterNo){
 
         try{
 
-            $changeAccountNumber = StringHelper::formatAccountNumber($acctionNo);
+            if($accountType == 'Postpaid'){
+                $changeAccountNumber = StringHelper::formatAccountNumber($acctionNo);
+            }else {
+                $changeAccountNumber = $acctionNo;
+            }
 
-            $customer = (new CustomerService)->customer360($changeAccountNumber, $dss);
+            $customer = (new CustomerService)->customer360($changeAccountNumber, $dss, $accountType, $MeterNo);
 
             return $this->sendSuccess($customer, "Customer 360 Loaded", Response::HTTP_OK);
             

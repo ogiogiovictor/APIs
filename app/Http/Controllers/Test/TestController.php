@@ -423,17 +423,25 @@ class TestController extends BaseApiController
     }
 
 
-    public function customer360($acctionNo, $dss){
+    public function customer360($acctionNo, $dss, $accountType, $MeterNo){
 
         try {
 
-           $changeAccountNumber = StringHelper::formatAccountNumber($acctionNo);
+            if($accountType == 'Postpaid'){
+                $changeAccountNumber = StringHelper::formatAccountNumber($acctionNo);
+                $customer = DimensionCustomer::with(['bills' => function ($query) {
+                    $query->orderByDesc('Billdate');
+                }])->where('AccountNo', $changeAccountNumber)->first();
+            }else {
+                $changeAccountNumber = $MeterNo;
+                $customer = DimensionCustomer::with(['bills' => function ($query) {
+                    $query->orderByDesc('Billdate');
+                }])->where('MeterNo', $changeAccountNumber)->first();
+            }
 
-           // $customer = DimensionCustomer::with('bills')->where('AccountNo', $changeAccountNumber)->first();
-
-            $customer = DimensionCustomer::with(['bills' => function ($query) {
-                $query->orderByDesc('Billdate');
-            }])->where('AccountNo', $changeAccountNumber)->first();
+            // $customer = DimensionCustomer::with(['bills' => function ($query) {
+            //     $query->orderByDesc('Billdate');
+            // }])->where('AccountNo', $changeAccountNumber)->first();
 
             if ($customer->AccountType == 'Postpaid') {
                 //$customer->load('payments');
@@ -442,7 +450,7 @@ class TestController extends BaseApiController
                 }]);
             } elseif ($customer->AccountType == 'Prepaid') {
                // $customer->load('transactions');
-                $customer->load(['payments' => function ($query) {
+                $customer->load(['transactions' => function ($query) {
                     $query->orderBy('TransactionDateTime', 'desc');
                 }]);
             }

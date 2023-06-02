@@ -3,6 +3,7 @@
 namespace App\Services;
 use App\Models\DimensionCustomer;
 use App\Models\ZoneCustomer;
+use App\Models\ECMIPayment;
 use DB;
 use App\Models\DTWarehouse;
 use App\Models\FeederEleven;
@@ -148,9 +149,19 @@ class CustomerService
     }
 
 
-    public function customer360($changeAccountNumber, $dss){
+    public function customer360($changeAccountNumber, $dss, $accountType, $MeterNo){
 
-        $customer = DimensionCustomer::with('bills')->where('AccountNo', $changeAccountNumber)->first();
+       
+        //$customer = DimensionCustomer::with('bills')->where('AccountNo', $changeAccountNumber)->first();
+        if($accountType == 'Postpaid'){
+            $customer = DimensionCustomer::with(['bills' => function ($query) {
+                $query->orderByDesc('Billdate');
+            }])->where('AccountNo', $changeAccountNumber)->first();
+        }else {
+            $customer = DimensionCustomer::with(['bills' => function ($query) {
+                $query->orderByDesc('Billdate');
+            }])->where('MeterNo', $MeterNo)->first();
+        }
 
         if ($customer->AccountType == 'Postpaid') {
             $customer->load('payments');
@@ -167,12 +178,13 @@ class CustomerService
         }
        
 
-       $crm_user = CRMUser::where('accountno', $changeAccountNumber)->first();
+       $newFormatedNumber = StringHelper::formatAccountNumber($changeAccountNumber);
+       $crm_user = CRMUser::where('accountno', $newFormatedNumber)->first();
 
        if($crm_user){
         //Get the Tickets
-       $tickets = Tickets::where('user_id', $crm_user->id)->get();
-       $customer->tickets = $tickets;
+        $tickets = Tickets::where('user_id', $crm_user->id)->get();
+        $customer->tickets = $tickets;
        }
        
 
@@ -180,14 +192,14 @@ class CustomerService
        ->select("id", "title", "surname", "firstname", "other_names", "supply_address",
        "lga", "contact_no", "email", "means_of_id", "o_account_no", "service_center", "unique_code",
        "debt", "debt_date", "debt_type")
-       ->where('o_account_no', $changeAccountNumber)->first();
+       ->where('o_account_no', $newFormatedNumber)->first();
        
        if($msmsMeters){
         $customer->msmsCustomerInfo = $msmsMeters;
        }
 
        //Use the account number to return the meter number
-       $getMeterNo = DimensionCustomer::where('AccountNo', $changeAccountNumber)->value('MeterNo');
+       $getMeterNo = DimensionCustomer::where('AccountNo', $newFormatedNumber)->value('MeterNo');
 
        $amiEvents = (new AmiService)->getAmiReading($getMeterNo);
        if($amiEvents){
@@ -215,7 +227,7 @@ class CustomerService
             ->from('main_warehouse.dbo.Dimension_customers as c')
             ->join('MAIN_WAREHOUSE.dbo.FactBill as b', 'c.AccountNo', '=', 'b.AccountNo')
             ->whereRaw('b.GrandTotaldue * 0.2 > b.Payment')
-            ->where('b.AccountNo', '=',  $changeAccountNumber)
+            ->where('b.AccountNo', '=',  $newFormatedNumber)
             ->where('b.BillYear', '=',  $year)
             ->where('b.BillMonth', '=', $month)
             ->where('AccountType', 'Postpaid')

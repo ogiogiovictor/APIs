@@ -11,6 +11,7 @@ use App\Http\Requests\AmiRequest;
 use App\Services\AmiService;
 use App\Http\Resources\AmiResource;
 use App\Http\Resources\AmiminiResource;
+use Illuminate\Support\Facades\Cache;
 
 class AmiController extends BaseApiController
 {
@@ -47,27 +48,51 @@ class AmiController extends BaseApiController
 
     public function getSummary(Request $request){
         
-      //  if($request->expectsJson()) {
+        $cacheKey = 'ami_event_summary_mdacustomers';
+        $minutes = 5;
+        
 
-            $getRequest = (new AmiService)->getMeterReading(2023, 5); // $request->year, $request->month; and
+        $cachedSummary = Cache::remember($cacheKey, $minutes, function () use ($request) {
+            $year = $request->year ?? Date('Y');
+            $month = $request->month ?? Date('m');
 
+            $getRequest = (new AmiService)->getMeterReading($year, $month); // $request->year, $request->month; and
             $newResource = AmiminiResource::collection($getRequest); // $request->year, $request->month; and
+            return $newResource;
+        });
 
-            return $this->sendSuccess($newResource, "Data Successfully Loaded - ". count($getRequest), Response::HTTP_OK);
-        // }else {
-        //     return $this->sendError("Error", "Error Loading Data, Something went wrong", Response::HTTP_INTERNAL_SERVER_ERROR);
-        // }
+          //  $getRequest = (new AmiService)->getMeterReading(2023, 5); // $request->year, $request->month; and
+
+        //    $newResource = AmiminiResource::collection($getRequest); // $request->year, $request->month; and
+
+        return $this->sendSuccess($cachedSummary, "Data Successfully Loaded - ", Response::HTTP_OK);
+      
     }
 
     public function getAll(){
-        $group = (new AmiService)->allConnectionsgroups();
 
-        $getRequest = (new AmiService)->allConnections();
+        $cacheKey = 'ami_event_getAll';
+        $minutes = 5;
 
-        $data = [
-            'group' => $group,
-            'ami_data' => $getRequest,
-        ];
+        $data = Cache::remember($cacheKey, $minutes, function () {
+            $group = (new AmiService)->allConnectionsgroups();
+            $getRequest = (new AmiService)->allConnections();
+
+        return [
+                'group' => $group,
+                'ami_data' => $getRequest,
+            ];
+
+        });
+
+        //$group = (new AmiService)->allConnectionsgroups();
+
+      //  $getRequest = (new AmiService)->allConnections();
+
+        // $data = [
+        //     'group' => $group,
+        //     'ami_data' => $getRequest,
+        // ];
         return $this->sendSuccess($data, "Data Loaded - ". count($data), Response::HTTP_OK);
         
     }

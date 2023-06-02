@@ -13,6 +13,7 @@ use App\Models\ZoneCustomer;
 use App\Models\DimensionCustomer;
 use App\Services\CustomerService;
 use App\Enums\AssetEnum;
+use Illuminate\Support\Facades\Cache;
 
 
 
@@ -51,7 +52,14 @@ class AssetController extends BaseApiController
 
     public function stats() {
 
-        $customers = (new CustomerService)->getWarehouseDashboard();
+        $cacheKey = 'warehouse_dashboard_stats';
+        $minutes = 5;
+
+        $customers = Cache::remember($cacheKey, $minutes, function () {
+            return (new CustomerService)->getWarehouseDashboard();
+        });
+
+       // $customers = (new CustomerService)->getWarehouseDashboard();
 
         return $this->sendSuccess($customers, "Asset Information Saved Successfully", Response::HTTP_OK);
 

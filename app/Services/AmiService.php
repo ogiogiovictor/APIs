@@ -32,7 +32,7 @@ class AmiService
          ->join("PowerSys.dbo.ACHV_CUSTOMER AS CUS", "CUS.ID", "POC.Customer_ID")
          ->join("PowerSys.dbo.SYS_BASE AS SYS", "SYS.Key", "CUS.CustomerType")
          ->selectRaw("SYS.Value AS AssetType, COUNT(DISTINCT FDAY.MSNO) as total")
-         ->whereNotNull("FDAY.KWH_ABS")
+         //->whereNotNull("FDAY.KWH_ABS")
          ->where("SYS.Tag", "=", "CustomerType")
          ->groupBy("SYS.Value")
          ->get();

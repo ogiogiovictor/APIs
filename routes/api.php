@@ -86,7 +86,7 @@ Route::group(['prefix' => 'v1', 'namespace' => 'Api\v1', 'middleware' => 'OAuth'
 
         //Customers
         Route::get('grap_customers/{type?}/{status?}', [CustomerInformation::class, 'allCustomers']);  // Get Customers
-        Route::get('customer360/{account?}/{dss?}', [CustomerOveriewController::class, 'customer360']);
+        Route::get('customer360/{account?}/{dss?}/{AccountType?}/{MeterNo?}', [CustomerOveriewController::class, 'customer360']);
         Route::get('all_disconnections', [Disconnection::class, 'index']);
         Route::get('get_owing_customers', [CustomerInformation::class, 'percentageOwed']);
 
@@ -162,7 +162,7 @@ Route::group(['prefix' => 'v2', 'namespace' => 'Api\v2', 'middleware' => 'OAuth'
         Route::post('tickets', [TestController::class, 'tshow']);
 
          //Customer 360
-         Route::get('customer360/{account?}/{dss?}', [TestController::class, 'customer360']);
+         Route::get('customer360/{account?}/{dss?}/{accountType}/{MeterNo}', [TestController::class, 'customer360']);
 
          //Route::apiResource('get_customers', CustomerInformation::class)->only(['index', 'store'])->middleware(['throttle:10,1']);
 
