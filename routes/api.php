@@ -121,19 +121,23 @@ Route::group(['prefix' => 'v1', 'namespace' => 'Api\v1', 'middleware' => 'OAuth'
         Route::post('search_any', [SearchController::class, 'searching']);
 
         // Only for Administrative Users
-      /*  Route::prefix('roles')->middleware('role:admin')->group(function() {
+        Route::prefix('roles')->group(function() {
          
-            Route::apiResource('roles', RoleController::class);
-            Route::apiResource('permissions', PermissionController::class);
-
+           // Route::apiResource('roles', RoleController::class);
+            Route::get('get_roles', [RoleController::class, 'getRole']);
+            Route::post('assign_roles', [RoleController::class, 'assignMenuRole']);
+            Route::post('permissions', [PermissionController::class, 'store']);
+            Route::get('permissions', [PermissionController::class, 'index']);
+            
         });
-        */
 
         Route::prefix('stsix')->group(function() {
          
             Route::post('kctgeneration', [CustomerInformation::class, 'generatekct']);
             
         });
+
+      //  Route::get('get_roles', [TestController::class, 'getRole']);
        
          
     });
@@ -202,12 +206,15 @@ Route::group(['prefix' => 'v2', 'namespace' => 'Api\v2', 'middleware' => 'OAuth'
         //Route::prefix('roles')->middleware('role:admin')->group(function() {
         Route::prefix('roles')->group(function() {
          
-        Route::apiResource('roles', RoleController::class);
+        //Route::apiResource('roles', RoleController::class);
+        Route::get('get_roles', [RoleController::class, 'getRole']);
         Route::post('assign_roles', [RoleController::class, 'assignMenuRole']);
         Route::post('permissions', [PermissionController::class, 'store']);
         Route::get('permissions', [PermissionController::class, 'index']);
         
         });
+
+       
 
         
       

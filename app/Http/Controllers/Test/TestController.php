@@ -40,6 +40,7 @@ use App\Exports\DataExport;
 use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Hash;
+use Spatie\Permission\Models\Role;
 
 
 
@@ -837,6 +838,13 @@ class TestController extends BaseApiController
           $user->assignRole('admin');
 
         return $this->sendSuccess($user, "User Created Successfully", Response::HTTP_OK);
+    }
+
+
+    public function getRole() {
+
+        $getRoles = Role::all();
+        return $this->sendSuccess($getRoles, "All Roles", Response::HTTP_OK);
     }
 
     

@@ -74,4 +74,14 @@ class RoleController extends BaseApiController
 
 
     }
+
+
+    public function getRole() {
+
+        $getRoles = Role::all();
+        return $this->sendSuccess($getRoles, "All Roles", Response::HTTP_OK);
+    }
+
+
+    
 }
