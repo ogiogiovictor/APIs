@@ -91,7 +91,7 @@ Route::group(['prefix' => 'v1', 'namespace' => 'Api\v1', 'middleware' => 'OAuth'
         Route::get('get_owing_customers', [CustomerInformation::class, 'percentageOwed']);
 
         //Tickets
-        Route::get('tickets', [TicketController::class, 'index']);
+        Route::get('tickets', [TicketController::class, 'index'])->middleware('before');
         Route::post('tickets', [TicketController::class, 'show']);
         
         //Create CRMD Customer Record
@@ -152,6 +152,7 @@ Route::post('auth_login_test', [TestController::class, 'login']);
 
 /////////////////////////////////////// API FOR CUSTOMER MANAGEMEMENT SYSTEM ///////////////////////////////////  'middleware' => 'oAuth'
 Route::group(['prefix' => 'v2', 'namespace' => 'Api\v2', 'middleware' => 'OAuth'], function () {
+//Route::group(['prefix' => 'v2', 'namespace' => 'Api\v2', 'middleware' => ['OAuth', 'before'] ], function () {
 
     Route::middleware(['auth:sanctum'])->group(function() {
 
@@ -211,6 +212,9 @@ Route::group(['prefix' => 'v2', 'namespace' => 'Api\v2', 'middleware' => 'OAuth'
         Route::get('permissions', [PermissionController::class, 'index']);
         
         });
+
+
+        Route::get('get_acccess', [TestController::class, 'getAccess']);
 
        
 

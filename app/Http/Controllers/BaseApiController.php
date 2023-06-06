@@ -33,6 +33,21 @@ class BaseApiController extends Controller
     }
 
 
+    public function rejectError($error, $errorMessages = [], $responseCode)
+    {
+        $response = [
+            'success' => false,
+            'message' => $error,
+        ];
+
+        if(!empty($errorMessages)){
+            $response['data'] = $errorMessages;
+        }
+
+        return response()->json($response, $responseCode);
+    }
+
+
    public static function logIssuess($request){
             
         //"-".Request::route()->getName()

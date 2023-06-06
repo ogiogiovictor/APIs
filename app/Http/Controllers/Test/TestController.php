@@ -41,6 +41,8 @@ use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Hash;
 use Spatie\Permission\Models\Role;
+use App\Models\MenuRole;
+use App\Models\SubMenu;
 
 
 
@@ -842,10 +844,26 @@ class TestController extends BaseApiController
     }
 
 
-    public function getRole() {
+    public function getAccess() {
 
-        $getRoles = Role::all();
-        return $this->sendSuccess($getRoles, "All Roles", Response::HTTP_OK);
+        //$getRoles = Role::all();
+        //  return $this->sendSuccess($getRoles, "All Roles", Response::HTTP_OK);
+        $userRole = Auth::user()->roles->pluck('id')->first();
+
+        //Check if the user Role have access to the menu/submenu
+        $menuRole = MenuRole::where('role_id', $userRole)->get();
+        $userResource = new UserResource(Auth::user());
+        $userResource->menuAccess($userRole);
+
+        $menuRole = MenuRole::where('role_id', $userRole)->first()->menu_id;
+        $menuString = array_map('intval', explode(',', trim($menuRole, '[]')));
+
+       return $hasAccess = SubMenu::whereIn('menu_id', $menuString)->get();
+
+        $hasAccess = SubMenu::whereIn('menu_id', $menuString)->exists();
+
+
+        return $this->sendSuccess($hasAccess, "Successfully", Response::HTTP_OK);
     }
 
     
