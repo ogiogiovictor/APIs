@@ -830,12 +830,13 @@ class TestController extends BaseApiController
             'name' => $request->name,
             'email' => $request->email,
             'status' => 1,
-            'authority' => $request->business_hub,
+            'authority' => $request->authority,
             'password' => Hash::make($request->password),
+            'level' => $request->level ?? []
         ]);
 
           //Atach User to a Role
-          $user->assignRole('admin');
+          $user->assignRole($request->role);
 
         return $this->sendSuccess($user, "User Created Successfully", Response::HTTP_OK);
     }

@@ -156,13 +156,11 @@ Route::group(['prefix' => 'v2', 'namespace' => 'Api\v2', 'middleware' => 'OAuth'
     Route::middleware(['auth:sanctum'])->group(function() {
 
         Route::get('get_user', [TestController::class, 'getUser']);
-
         Route::get('get_dashboard_stats', [TestController::class, 'stats']);
 
         //Route::get('grap_customers/{type?}', [TestController::class, 'allCustomers']);  // Get Customers
 
         Route::get('tickets', [TestController::class, 'tindex']);
-
         Route::post('tickets', [TestController::class, 'tshow']);
 
          //Customer 360

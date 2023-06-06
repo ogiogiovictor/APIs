@@ -48,7 +48,7 @@ class UserController extends Controller
 
     public function addUser(Request $request) {
 
-
+        
         $validator = Validator::make($request->all(), [
             'name' => 'required',
             'email' => 'required|unique:users|max:255',
@@ -64,12 +64,16 @@ class UserController extends Controller
             'name' => $request->name,
             'email' => $request->email,
             'status' => 1,
-            'authority' => $request->business_hub,
+            'authority' => $request->authority,
             'password' => Hash::make($request->password),
+            'level' => $request->level ?? []
         ]);
 
+        // $request->business_hub, $request->region, $request->service_center
+
           //Atach User to a Role
-          $user->assignRole('admin');
+          //$user->assignRole('admin');
+          $user->assignRole($request->role);
 
         return $this->sendSuccess($user, "User Created Successfully", Response::HTTP_OK);
     }
