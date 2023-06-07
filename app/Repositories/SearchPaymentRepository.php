@@ -5,6 +5,13 @@ namespace App\Repositories;
 use App\Repositories\SearchRepositoryInterface;
 use App\Models\DimensionCustomer;
 use App\Models\DTWarehouse;
+use Symfony\Component\HttpFoundation\Response;
+use App\Models\ECMIPayment;
+use App\Models\ZonePayments;
+use Carbon\Carbon;
+use Illuminate\Support\Facades\DB;
+use App\Http\Resources\EcmiPaymentResource;
+use App\Http\Resources\ZoneResource;
 
 
 
@@ -21,17 +28,40 @@ class SearchRepository implements SearchRepositoryInterface
 
     public function search(){
 
-       $search_term =  $this->request->AccountNo;
+       $search_term =  $this->request->Payment;
 
-        $customers =  DimensionCustomer::select('*')->where(function ($query) use ($search_term ) {
-            //$query->whereNotIn("StatusCode", ["0, I, C, N"]);
-           // $query->where('Surname', $search_term);
-            $query->where('AccountNo', 'like', '%'. $search_term .  '%');
-            $query->orWhere('MeterNo', $search_term );
-            $query->orWhere('Surname', $search_term);
-        })->get();  //first();
-       // Execute search implementation here
-        return $customers;
+       //ECMI PAYMENT LIST PAGINATED
+       $selectECMI = ECMIPayment::select("TransactionDateTime", "BUID", "TransactionNo", "Token", 
+       "AccountNo", "MeterNo", "Amount",  DB::raw("'prepaid' as CSPClientID"))
+       ->where("AccountNo", "LIKE", "%{$search_term}%")
+       ->orWhere("MeterNo", "LIKE", "%{$search_term}%")
+       ->orWhere("TransactionNo", "LIKE", "%{$search_term}%")
+       ->orWhere("Token", "LIKE", "%{$search_term}%")
+       ->orderBy("TransactionDateTime", "DESC")->paginate(20);
+
+       // EMS PAYMENT LIST PAGINATED
+       $selectEMS = ZonePayments::select("PayDate", "BusinessUnit", "PaymentID", "receiptnumber", 
+      "AccountNo", "MeterNo", "Payments",  DB::raw("'postpaid' as PaymentSource"))
+        ->where("AccountNo", "LIKE", "%{$search_term}%")
+        ->orWhere("MeterNo", "LIKE", "%{$search_term}%")
+        ->orWhere("receiptnumber", "LIKE", "%{$search_term}%")
+      ->orderBy("PayDate", "DESC")->paginate(20);
+
+       $data = [
+        //'ecmi_payment' => naira_format($ecmi_payment),
+        //'ems_payment' => naira_format($ems_payment),
+        //'total_payments' => naira_format($ecmi_payment + $ems_payment),
+        //'spec_bills' => naira_format($specBill),
+        //'spec_bill_lastMonth' => naira_format($specBillLastMonth),
+        //'last_month_prepaid' => naira_format($ecmi_payment_lastMonth),
+        'payments' => EcmiPaymentResource::collection($selectECMI)->response()->getData(true),
+        'postpaid_payment' => ZoneResource::collection($selectEMS)->response()->getData(true),
+        //'today_payments' => naira_format($today_payment_ecmi + $today_payment_ems), 
+    ];
+
+    return $this->sendSuccess($data, "Payment Successfully Loaded", Response::HTTP_OK);
+
+       
     }
 
    
