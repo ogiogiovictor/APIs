@@ -13,6 +13,7 @@ use Illuminate\Support\Facades\DB;
 use App\Http\Resources\EcmiPaymentResource;
 use App\Http\Resources\ZoneResource;
 use App\Models\ZoneBills;
+use App\Helpers\StringHelper;
 
 class PaymentController extends BaseApiController
 {
@@ -86,16 +87,16 @@ class PaymentController extends BaseApiController
     }
 
 
-    public function getPaymentDetails($account, $Token, $CSPClientID){
-        //$formattedAccount = StringHelper::formatAccountNumber($account);
-         //   return  $formattedAccount;
-        if($CSPClientID == "prepaid"){
-           // $payment = ECMIPayment::where('AccountNo', $formattedAccount)->where('Token', $Token)->first();
-            $payment = new EcmiPaymentResource(ECMIPayment::where('Token', $Token)->first());
+    public function getPaymentDetails($FAccountNo, $Token, $meterNo){
+        $formattedAccount = StringHelper::formatAccountNumber($FAccountNo);
+        
+        if($Token && $Token != "undefined"){
+            //$payment = ECMIPayment::where('AccountNo', $formattedAccount)->where('Token', $Token)->first();
+           $payment = new EcmiPaymentResource(ECMIPayment::where('Token', $Token)->first());
           
         }else {
-            //$payment = ZonePayment::where('AccountNo', $account)->where('receiptnumber', $Token)->first();
-            $payment = new ZoneResource(ZonePayments::where('receiptnumber', $Token)->first());
+            $payment = ZonePayment::where('AccountNo', $account)->where('AccountNo',  $formattedAccount)->first();
+           // $payment = new ZoneResource(ZonePayments::where('receiptnumber', $Token)->first());
         }
 
         return $this->sendSuccess($payment, "Payment Successfully Loaded", Response::HTTP_OK);

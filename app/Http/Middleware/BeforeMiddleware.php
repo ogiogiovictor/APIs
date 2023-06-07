@@ -23,6 +23,7 @@ class BeforeMiddleware  extends BaseApiController
     {
        
        $requestUrl = $request->getRequestUri();
+       $requestMethod = $request->getMethod();
        $replacedUrl = str_replace('/api/v1/', '', $requestUrl);
              
         $userRole = Auth::user()->roles->pluck('id')->first();
@@ -31,23 +32,32 @@ class BeforeMiddleware  extends BaseApiController
        // return $this->rejectError($request, "You do not have access to this resource", Response::HTTP_UNAUTHORIZED);
 
         if (!$menuRole) {
-            return $this->rejectError('Error', "You do not have access to this resource", Response::HTTP_UNAUTHORIZED);
+            return $this->rejectError('no_access', "You do not have access to this resource", Response::HTTP_UNAUTHORIZED);
             //throw new HttpException(403, 'You do not have access to this resource.');
         }
 
       
         $menuId = $menuRole->menu_id;
-        $menuString = array_map('intval', explode(',', trim($menuRole, '[]')));
+        $menuString = array_map('intval', explode(',', trim($menuId, '[]')));
 
-        $hasAccess = SubMenu::whereIn('menu_id', $menuString)->exists();
+        //Get the ID of the route 
+        $getRouteID = intval(SubMenu::where("menu_url", $replacedUrl)->first()->menu_id);
 
-        return $this->rejectError($replacedUrl , "You do not have access to this resource", Response::HTTP_UNAUTHORIZED);
+        if (in_array($getRouteID, $menuString)) {
             
-        if($hasAccess){
             return $next($request);
+          // return $this->sendError('YES', "You don't have access", Response::HTTP_UNAUTHORIZED);
         }
         
-        return $this->sendError('Error', "You do not have access to this resource", Response::HTTP_UNAUTHORIZED);
+        //$hasAccess = SubMenu::whereIn('menu_id', $menuString)->exists();
+
+       // return $this->rejectError($getRouteID , $menuString, Response::HTTP_UNAUTHORIZED);
+            
+        // if($hasAccess){
+            
+        // }
+        
+        return $this->sendError('no_access', "You do not have access to this resource", Response::HTTP_UNAUTHORIZED);
         //throw new HttpException(403, 'You do not have access to this submenu.');
 
     }

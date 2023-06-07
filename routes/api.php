@@ -105,7 +105,7 @@ Route::group(['prefix' => 'v1', 'namespace' => 'Api\v1', 'middleware' => 'OAuth'
 
         //Customer Payment
         Route::get('/payments', [PaymentController::class, 'getPayments']);
-        Route::get('/paymentDetails/{FAccount?}/{Token?}/{type?}', [PaymentController::class, 'getPaymentDetails']);
+        Route::get('/paymentDetails/{FAccountNo?}/{Token?}/{type?}', [PaymentController::class, 'getPaymentDetails']);
        
 
         //Assets
