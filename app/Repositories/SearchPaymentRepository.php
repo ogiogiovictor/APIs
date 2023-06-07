@@ -15,7 +15,7 @@ use App\Http\Resources\ZoneResource;
 
 
 
-class SearchRepository implements SearchRepositoryInterface
+class SearchPaymentRepository implements SearchRepositoryInterface
 {
   
     private $request;
@@ -28,18 +28,28 @@ class SearchRepository implements SearchRepositoryInterface
 
     public function search(){
 
-       $search_term =  $this->request->Payment;
+      $search_term =  $this->request->Payment;
 
-       //ECMI PAYMENT LIST PAGINATED
-       $selectECMI = ECMIPayment::select("TransactionDateTime", "BUID", "TransactionNo", "Token", 
-       "AccountNo", "MeterNo", "Amount",  DB::raw("'prepaid' as CSPClientID"))
-       ->where("AccountNo", "LIKE", "%{$search_term}%")
-       ->orWhere("MeterNo", "LIKE", "%{$search_term}%")
-       ->orWhere("TransactionNo", "LIKE", "%{$search_term}%")
-       ->orWhere("Token", "LIKE", "%{$search_term}%")
-       ->orderBy("TransactionDateTime", "DESC")->paginate(20);
+     
+      $selectECMI = ECMIPayment::select('*')->where(function ($query) use ($search_term ) {
+        //$query->whereNotIn("StatusCode", ["0, I, C, N"]);
+       // $query->where('Surname', $search_term);
+        $query->where('AccountNo', 'like', '%'. $search_term .  '%');
+        $query->orWhere('MeterNo', $search_term );
+        $query->orWhere('Token', $search_term);
+    })->paginate(20); //first();
+   // Execute search implementation here
 
-       // EMS PAYMENT LIST PAGINATED
+   $selectEMS = ZonePayments::select('*')->where(function ($query) use ($search_term ) {
+    //$query->whereNotIn("StatusCode", ["0, I, C, N"]);
+   // $query->where('Surname', $search_term);
+    $query->where('AccountNo', 'like', '%'. $search_term .  '%');
+    $query->orWhere('MeterNo', $search_term );
+    $query->orWhere('receiptnumber', $search_term);
+})->orderBy("PayDate", "DESC")->paginate(20); //first();
+// Execute search implementation here
+
+       
        $selectEMS = ZonePayments::select("PayDate", "BusinessUnit", "PaymentID", "receiptnumber", 
       "AccountNo", "MeterNo", "Payments",  DB::raw("'postpaid' as PaymentSource"))
         ->where("AccountNo", "LIKE", "%{$search_term}%")
@@ -59,7 +69,7 @@ class SearchRepository implements SearchRepositoryInterface
         //'today_payments' => naira_format($today_payment_ecmi + $today_payment_ems), 
     ];
 
-    return $this->sendSuccess($data, "Payment Successfully Loaded", Response::HTTP_OK);
+    return response()->json($data);
 
        
     }

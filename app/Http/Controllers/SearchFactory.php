@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Repositories\SearchRepository;
 use App\Repositories\SearchAssetRepository;
+use App\Repositories\SearchPaymentRepository;
 
 class SearchFactory extends Controller
 {
@@ -17,7 +18,7 @@ class SearchFactory extends Controller
             case 'dt_asset':
                return new SearchAssetRepository($request);
             case 'search_payment':
-                return '';
+                return new SearchPaymentRepository($request);
             case 'feeder':
                 return '';
             default:
