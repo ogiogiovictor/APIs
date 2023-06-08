@@ -8,7 +8,7 @@ use App\Models\DTWarehouse;
 
 
 
-class SearchRepository implements SearchRepositoryInterface
+class SearchBillingRepository implements SearchRepositoryInterface
 {
   
     private $request;

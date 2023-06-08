@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Repositories\SearchRepository;
 use App\Repositories\SearchAssetRepository;
 use App\Repositories\SearchPaymentRepository;
+use App\Repositories\SearchBillingRepository;
 
 class SearchFactory extends Controller
 {
@@ -19,10 +20,12 @@ class SearchFactory extends Controller
                return new SearchAssetRepository($request);
             case 'search_payment':
                 return new SearchPaymentRepository($request);
-            case 'feeder':
-                return '';
+            case 'search_bills':
+                return new SearchBillingRepository($request);
+            case 'search_feeder':
+               return '';
             default:
-                throw new \InvalidArgumentException('Invalid payment type');
+                throw new \InvalidArgumentException('Invalid payment type');  
         }
     }
 }
