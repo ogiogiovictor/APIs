@@ -95,12 +95,14 @@ Route::group(['prefix' => 'v1', 'namespace' => 'Api\v1', 'middleware' => 'OAuth'
         Route::post('tickets', [TicketController::class, 'show']);
         
         //Create CRMD Customer Record
-        Route::post('crmd', [CustomerInformation::class, 'cstore']); // Not Yet Implemented
-        Route::get('get_crmd/pending', [CustomerInformation::class, 'getCrmd']);
-        Route::post('updatecrmdstate', [CustomerInformation::class, 'updateStatus']);
+        Route::middleware(['before'])->group(function () {
+            Route::post('crmd', [CustomerInformation::class, 'cstore']); // Not Yet Implemented
+            Route::get('get_crmd/pending', [CustomerInformation::class, 'getCrmd']);
+            Route::post('updatecrmdstate', [CustomerInformation::class, 'updateStatus']);
+        });
 
         //Customer Bill
-        Route::get('getbills', [CustomerBills::class, 'getBills']);
+        Route::get('getbills', [CustomerBills::class, 'getBills'])->middleware('before');;
         Route::get('billDetails/{billID?}', [CustomerBills::class, 'getBillDetails']); 
 
         //Customer Payment
