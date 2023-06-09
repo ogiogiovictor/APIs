@@ -37,7 +37,7 @@ class SearchPaymentRepository implements SearchRepositoryInterface
         $query->where('AccountNo', 'like', '%'. $search_term .  '%');
         $query->orWhere('MeterNo', $search_term );
         $query->orWhere('Token', $search_term);
-    })->paginate(20); //first();
+    })->paginate(60); //first();
    // Execute search implementation here
 
    $selectEMS = ZonePayments::select('*')->where(function ($query) use ($search_term ) {
@@ -46,7 +46,7 @@ class SearchPaymentRepository implements SearchRepositoryInterface
     $query->where('AccountNo', 'like', '%'. $search_term .  '%');
     $query->orWhere('MeterNo', $search_term );
     $query->orWhere('receiptnumber', $search_term);
-})->orderBy("PayDate", "DESC")->paginate(20); //first();
+})->orderBy("PayDate", "DESC")->paginate(60); //first();
 // Execute search implementation here
 
        
@@ -55,7 +55,7 @@ class SearchPaymentRepository implements SearchRepositoryInterface
         ->where("AccountNo", "LIKE", "%{$search_term}%")
         ->orWhere("MeterNo", "LIKE", "%{$search_term}%")
         ->orWhere("receiptnumber", "LIKE", "%{$search_term}%")
-      ->orderBy("PayDate", "DESC")->paginate(20);
+      ->orderBy("PayDate", "DESC")->paginate(60);
 
        $data = [
         //'ecmi_payment' => naira_format($ecmi_payment),

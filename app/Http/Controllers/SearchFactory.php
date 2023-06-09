@@ -7,6 +7,7 @@ use App\Repositories\SearchRepository;
 use App\Repositories\SearchAssetRepository;
 use App\Repositories\SearchPaymentRepository;
 use App\Repositories\SearchBillingRepository;
+use App\Repositories\SearchFeederRepository;
 
 class SearchFactory extends Controller
 {
@@ -23,7 +24,7 @@ class SearchFactory extends Controller
             case 'search_bills':
                 return new SearchBillingRepository($request);
             case 'search_feeder':
-               return '';
+                return new SearchFeederRepository($request);
             default:
                 throw new \InvalidArgumentException('Invalid payment type');  
         }

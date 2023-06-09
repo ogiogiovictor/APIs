@@ -4,7 +4,10 @@ namespace App\Repositories;
 
 use App\Repositories\SearchRepositoryInterface;
 use App\Models\DimensionCustomer;
-use App\Models\DTWarehouse;
+use App\Models\FeederEleven;
+use App\Models\FeederThirty;
+
+
 
 
 
@@ -21,16 +24,29 @@ class SearchFeederRepository implements SearchRepositoryInterface
 
     public function search(){
 
-       $search_term =  $this->request->AccountNo;
+       $search_term =  $this->request->Feeder;
 
-        $customers =  DimensionCustomer::select('*')->where(function ($query) use ($search_term ) {
-            //$query->whereNotIn("StatusCode", ["0, I, C, N"]);
-           // $query->where('Surname', $search_term);
-            $query->where('AccountNo', 'like', '%'. $search_term .  '%');
-            $query->orWhere('MeterNo', $search_term );
-            $query->orWhere('Surname', $search_term);
-        })->get();  //first();
-       // Execute search implementation here
+       $customers = null;
+
+        $feederElevenCustomers = FeederEleven::select('*')
+            ->where('Assetid', $search_term)
+            ->orWhere('F11kvFeeder_Name', $search_term)
+            ->paginate(50);
+
+        if ($feederElevenCustomers->count() > 0) {
+            $customers = $feederElevenCustomers;
+        } else {
+            $feederThirtyCustomers = FeederThirty::select('*')
+                ->where('Assetid', $search_term)
+                ->orWhere('F33kv_Feeder_Name', $search_term)
+                ->paginate(50);
+
+            if ($feederThirtyCustomers->count() > 0) {
+                $customers = $feederThirtyCustomers;
+            }
+        }
+
+
         return $customers;
     }
 
