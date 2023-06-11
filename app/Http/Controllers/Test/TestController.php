@@ -871,7 +871,10 @@ class TestController extends BaseApiController
        
         try{
 
-            $response = Http::post('http://localhost:8001/api/v1/add_customer', $request->all());
+            $baseUrl = env('CUSTOMER_API_URL');
+            $addCustomerUrl = $baseUrl . 'add_customer';
+
+            $response = Http::post($addCustomerUrl, $request->all());
 
             if ($response) {
                 return $this->sendSuccess($response, "Customer Successfully Created", Response::HTTP_OK);
@@ -886,13 +889,16 @@ class TestController extends BaseApiController
 
         $user = Auth::user();
 
+        $baseUrl = env('CUSTOMER_API_URL');
+        $addCustomerUrl = $baseUrl . 'pending_customers';
+
         try{
 
             if ($user->isHQ()) { 
                 $filters = [
                     'status' => 'pending'
                 ];
-                $response = Http::get('http://localhost:8007/api/v1/pending_customers', $filters);
+                $response = Http::get( $addCustomerUrl, $filters);
             } else if ($user->isRegion()) {
                 $checkLevel = Auth::user()->level;
                 $values = explode(", ", $checkLevel);
@@ -902,7 +908,7 @@ class TestController extends BaseApiController
                     'status' => 'pending'
                 ];
 
-                $response = Http::get('http://localhost:8007/api/v1/pending_customers', $filters);
+                $response = Http::get( $addCustomerUrl, $filters);
             } else if ($user->isBhub()) {
                 $checkLevel = Auth::user()->level;
                 $values = explode(", ", $checkLevel);
@@ -911,7 +917,7 @@ class TestController extends BaseApiController
                     'business_hub' => $desiredValue,
                     'status' => 'pending'
                 ];
-                $response = Http::get('http://localhost:8007/api/v1/pending_customers', $filters);
+                $response = Http::get( $addCustomerUrl, $filters);
             }  else if ($user->isSCenter()) {
                 $checkLevel = Auth::user()->level;
                 $values = explode(", ", $checkLevel);
@@ -920,7 +926,7 @@ class TestController extends BaseApiController
                     'service_center' =>  $filters,
                     'status' => 'pending'
                 ];
-                $response = Http::get('http://localhost:8007/api/v1/pending_customers', $filters);
+                $response = Http::get( $addCustomerUrl, $filters);
             } 
 
             return $response;
@@ -929,6 +935,31 @@ class TestController extends BaseApiController
             return $e->getmessage();
         }
     }
+
+
+
+
+
+    public function updateCustomer(Request $request){
+      
+         try{
+
+            $baseUrl = env('CUSTOMER_API_URL');
+            $addCustomerUrl = $baseUrl . 'update_customers_approve';
+ 
+             $response = Http::post($addCustomerUrl, $request->all());
+            
+             if($response){
+                 return $this->sendSuccess($response, "Customer Approved Successfully", Response::HTTP_OK);
+             }
+          
+ 
+         }catch(\Exception $e){
+             return $this->sendError($e->getmessage(), "No Result Found", Response::HTTP_BAD_REQUEST);
+         }
+
+     }
+ 
     
 
 
