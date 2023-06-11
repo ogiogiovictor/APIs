@@ -96,7 +96,8 @@ Route::group(['prefix' => 'v1', 'namespace' => 'Api\v1', 'middleware' => 'OAuth'
         
         //Create CRMD Customer Record
         Route::middleware(['before'])->group(function () {
-            Route::post('crmd', [CustomerInformation::class, 'cstore']); // Not Yet Implemented
+            Route::post('crmd', [CustomerInformation::class, 'cstore']); 
+            Route::post('add_customer', [CustomerInformation::class, 'addNewCustomer']); 
             Route::get('get_crmd/pending', [CustomerInformation::class, 'getCrmd']);
             Route::post('updatecrmdstate', [CustomerInformation::class, 'updateStatus']);
         });
@@ -217,6 +218,8 @@ Route::group(['prefix' => 'v2', 'namespace' => 'Api\v2', 'middleware' => 'OAuth'
 
 
         Route::get('get_acccess', [TestController::class, 'getAccess']);
+        Route::post('add_customer', [TestController::class, 'addNewCustomer']); 
+        Route::get('pending_customer_validation', [TestController::class, 'pendingCustomer']); 
 
        
 

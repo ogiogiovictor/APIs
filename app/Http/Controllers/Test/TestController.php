@@ -866,6 +866,69 @@ class TestController extends BaseApiController
         return $this->sendSuccess($hasAccess, "Successfully", Response::HTTP_OK);
     }
 
+
+    public function addNewCustomer(Request $request){
+       
+        try{
+
+            $response = Http::post('http://localhost:8001/api/v1/add_customer', $request->all());
+
+            if ($response) {
+                return $this->sendSuccess($response, "Customer Successfully Created", Response::HTTP_OK);
+            }
+
+        }catch(\Exception $e){
+            return $e->getmessage();
+        }
+    }
+
+    public function pendingCustomer(){
+
+        $user = Auth::user();
+
+        try{
+
+            if ($user->isHQ()) { 
+                $filters = [
+                    'status' => 'pending'
+                ];
+                $response = Http::get('http://localhost:8007/api/v1/pending_customers', $filters);
+            } else if ($user->isRegion()) {
+                $checkLevel = Auth::user()->level;
+                $values = explode(", ", $checkLevel);
+                $desiredValue = $values[0];
+                $filters = [
+                    'region' => $desiredValue,
+                    'status' => 'pending'
+                ];
+
+                $response = Http::get('http://localhost:8007/api/v1/pending_customers', $filters);
+            } else if ($user->isBhub()) {
+                $checkLevel = Auth::user()->level;
+                $values = explode(", ", $checkLevel);
+                $desiredValue = $values[1];
+                $filters = [
+                    'business_hub' => $desiredValue,
+                    'status' => 'pending'
+                ];
+                $response = Http::get('http://localhost:8007/api/v1/pending_customers', $filters);
+            }  else if ($user->isSCenter()) {
+                $checkLevel = Auth::user()->level;
+                $values = explode(", ", $checkLevel);
+                $desiredValue = $values[2];
+                $filters = [
+                    'service_center' =>  $filters,
+                    'status' => 'pending'
+                ];
+                $response = Http::get('http://localhost:8007/api/v1/pending_customers', $filters);
+            } 
+
+            return $response;
+
+        }catch(\Exception $e){
+            return $e->getmessage();
+        }
+    }
     
 
 

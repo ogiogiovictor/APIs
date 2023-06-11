@@ -149,6 +149,11 @@ class CustomerInformation extends BaseApiController
         }
     }
 
+    public function addNewCustomer(Request $request){
+        return $request;
+        
+    }
+
 
     public function getCrmd() {
 
