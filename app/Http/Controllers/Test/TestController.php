@@ -859,9 +859,10 @@ class TestController extends BaseApiController
         $menuRole = MenuRole::where('role_id', $userRole)->first()->menu_id;
         $menuString = array_map('intval', explode(',', trim($menuRole, '[]')));
 
-       return $hasAccess = SubMenu::whereIn('menu_id', $menuString)->get();
+      // $hasAccess = SubMenu::whereIn('menu_id', $menuString)->get();
+        $hasAccess = SubMenu::whereIn("menu_id", $menuString)->where("role_id", $userRole)->get();
 
-        $hasAccess = SubMenu::whereIn('menu_id', $menuString)->exists();
+      //  $hasAccess = SubMenu::whereIn('menu_id', $menuString)->exists();
 
 
         return $this->sendSuccess($hasAccess, "Successfully", Response::HTTP_OK);
@@ -978,6 +979,16 @@ class TestController extends BaseApiController
 
         return $this->sendSuccess($array, "Customer Approved Successfully", Response::HTTP_OK);
      }
+
+
+     public function getRolePermission($role_id) {
+
+        $hasAccess = SubMenu::where("role_id", $role_id)->get();
+
+        return $this->sendSuccess($hasAccess, "Successfully", Response::HTTP_OK);
+    }
+
+
 
 
 }
