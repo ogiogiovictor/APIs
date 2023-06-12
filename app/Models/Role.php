@@ -24,20 +24,23 @@ class Role extends Model
 
     public static function withUsersCount(): \Illuminate\Database\Eloquent\Collection
     {
-       /* return self::leftJoin('model_has_roles', 'roles.id', '=', 'model_has_roles.role_id')
-            ->where('model_has_roles.model_type', User::class)
-            ->select('roles.id', 'roles.name', 'roles.created_at', DB::raw('COUNT(model_has_roles.model_id) as users_count'))
-            ->groupBy('roles.id', 'roles.name', 'roles.created_at')
-            ->get();
-        */
-
-        return self::leftJoin('model_has_roles', function ($join) {
+      /*  return self::leftJoin('model_has_roles', function ($join) {
                 $join->on('roles.id', '=', 'model_has_roles.role_id')
                     ->where('model_has_roles.model_type', User::class);
             })
                 ->select('roles.id', 'roles.name', 'roles.created_at', DB::raw('COUNT(model_has_roles.model_id) as users_count'))
                 ->groupBy('roles.id', 'roles.name', 'roles.created_at')
                 ->get();
-    }
+        */
+    return self::leftJoin('model_has_roles', function ($join) {
+        $join->on('roles.id', '=', 'model_has_roles.role_id')
+            ->where('model_has_roles.model_type', User::class);
+        })
+        ->leftJoin('users', 'model_has_roles.model_id', '=', 'users.id')
+        ->select('roles.id', 'roles.name', 'roles.created_at', DB::raw('COUNT(model_has_roles.model_id) as users_count'))
+        ->groupBy('roles.id', 'roles.name', 'roles.created_at')
+        ->with('users') // Load the associated users
+        ->get();
+        }
 
 }
