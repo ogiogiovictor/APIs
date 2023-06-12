@@ -222,6 +222,7 @@ Route::group(['prefix' => 'v2', 'namespace' => 'Api\v2', 'middleware' => 'OAuth'
         Route::get('pending_customer_validation', [TestController::class, 'pendingCustomer']); 
 
         Route::post('updatenewlycreated', [TestController::class, 'updateCustomer']);
+        Route::get('access_control_list', [TestController::class, 'AccessControl']); 
 
        
 

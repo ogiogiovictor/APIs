@@ -43,6 +43,7 @@ use Illuminate\Support\Facades\Hash;
 use Spatie\Permission\Models\Role;
 use App\Models\MenuRole;
 use App\Models\SubMenu;
+use App\Models\MenuAccess;
 
 
 
@@ -961,7 +962,22 @@ class TestController extends BaseApiController
      }
  
     
+     public function AccessControl() {
+        $getMenu = MenuAccess::where("menu_status", "on")->get();
+        $getSubMenu = SubMenu::all();
 
+        $array = [];
+        foreach($getMenu as $get){
+            $array[] = [
+                'menu_id' => $get->id,
+                'menu_name' => $get->menu_name,
+                'menu_status' => $get->menu_status,
+                'submenu' => SubMenu::where('menu_id', $get->id)->get()
+            ];
+        }
+
+        return $this->sendSuccess($array, "Customer Approved Successfully", Response::HTTP_OK);
+     }
 
 
 }

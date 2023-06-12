@@ -7,9 +7,10 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\BaseApiController;
 use Symfony\Component\HttpFoundation\Response;
 use Illuminate\Support\Facades\Auth;
-use Spatie\Permission\Models\Role;
+//use Spatie\Permission\Models\Role;
 use App\Models\User;
 use App\Models\MenuRole;
+use App\Models\Role;
 
 class RoleController extends BaseApiController
 {
@@ -78,7 +79,8 @@ class RoleController extends BaseApiController
 
     public function getRole() {
 
-        $getRoles = Role::all();
+       // $getRoles = Role::all();
+        $getRoles = Role::withUsersCount();
         return $this->sendSuccess($getRoles, "All Roles", Response::HTTP_OK);
     }
 
