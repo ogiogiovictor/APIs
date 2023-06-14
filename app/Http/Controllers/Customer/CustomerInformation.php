@@ -17,6 +17,7 @@ use App\Http\Requests\RecordRequest;
 use Illuminate\Support\Facades\Http;
 use App\Models\KCTGenerator;
 use Illuminate\Support\Facades\Auth;
+use App\Services\GeneralService;
 
 class CustomerInformation extends BaseApiController
 {
@@ -66,32 +67,116 @@ class CustomerInformation extends BaseApiController
 
     public function allCustomers(Request $request){
 
+        $user = Auth::user();
+        $getSpecialRole =  (new GeneralService)->getSpecialRole();
+        $getUserRoleObject = (new GeneralService)->getUserLevelRole();
          
+        if(in_array($getUserRoleObject['role'], $getSpecialRole) && $user->isHQ()){
 
-        $postpaid = DimensionCustomer::selectRaw('
-        CASE 
-            WHEN StatusCode = \'A\' THEN \'Active\'
-            WHEN StatusCode = \'C\' THEN \'Close\'
-            WHEN StatusCode = \'I\' THEN \'Inactive\'
-            WHEN StatusCode = \'S\' THEN \'Suspended\'
-        END AS StatusCode,
-        COUNT(*) AS total')
-        ->where("AccountType", 'Postpaid')
-        ->groupBy('StatusCode')
-        ->get();
+            $postpaid = DimensionCustomer::selectRaw('
+            CASE 
+                WHEN StatusCode = \'A\' THEN \'Active\'
+                WHEN StatusCode = \'C\' THEN \'Close\'
+                WHEN StatusCode = \'I\' THEN \'Inactive\'
+                WHEN StatusCode = \'S\' THEN \'Suspended\'
+            END AS StatusCode,
+            COUNT(*) AS total')
+            ->where("AccountType", 'Postpaid')
+            ->groupBy('StatusCode')
+            ->get();
+
+            $prepaid = DimensionCustomer::selectRaw('
+            CASE 
+                WHEN StatusCode = \'1\' THEN \'Active\'
+                WHEN StatusCode = \'0\' THEN \'Inactive\'
+            END AS StatusCode,
+            COUNT(*) AS total')
+            ->where("AccountType", 'Prepaid')
+            ->groupBy('StatusCode')
+            ->get();
+
+        }else if($user->isRegion()){ 
+            $postpaid = DimensionCustomer::selectRaw('
+            CASE 
+                WHEN StatusCode = \'A\' THEN \'Active\'
+                WHEN StatusCode = \'C\' THEN \'Close\'
+                WHEN StatusCode = \'I\' THEN \'Inactive\'
+                WHEN StatusCode = \'S\' THEN \'Suspended\'
+            END AS StatusCode,
+            COUNT(*) AS total')
+            ->where("AccountType", 'Postpaid')
+            ->where("Region", $getUserRoleObject['region'])
+            ->groupBy('StatusCode')
+            ->get();
+
+            $prepaid = DimensionCustomer::selectRaw('
+            CASE 
+                WHEN StatusCode = \'1\' THEN \'Active\'
+                WHEN StatusCode = \'0\' THEN \'Inactive\'
+            END AS StatusCode,
+            COUNT(*) AS total')
+            ->where("AccountType", 'Prepaid')
+            ->where("Region", $getUserRoleObject['region'])
+            ->groupBy('StatusCode')
+            ->get();
+        }else if($user->isBhub()){
+            $postpaid = DimensionCustomer::selectRaw('
+            CASE 
+                WHEN StatusCode = \'A\' THEN \'Active\'
+                WHEN StatusCode = \'C\' THEN \'Close\'
+                WHEN StatusCode = \'I\' THEN \'Inactive\'
+                WHEN StatusCode = \'S\' THEN \'Suspended\'
+            END AS StatusCode,
+            COUNT(*) AS total')
+            ->where("AccountType", 'Postpaid')
+            ->where("Region", $getUserRoleObject['region'])
+            ->where("BusinessHub", $getUserRoleObject['business_hub'])->orWhere("BUID", $getUserRoleObject['business_hub'])
+            ->groupBy('StatusCode')
+            ->get();
+
+            $prepaid = DimensionCustomer::selectRaw('
+            CASE 
+                WHEN StatusCode = \'1\' THEN \'Active\'
+                WHEN StatusCode = \'0\' THEN \'Inactive\'
+            END AS StatusCode,
+            COUNT(*) AS total')
+            ->where("AccountType", 'Prepaid')
+            ->where("Region", $getUserRoleObject['region'])
+            ->where("BusinessHub", $getUserRoleObject['business_hub'])->orWhere("BUID", $getUserRoleObject['business_hub'])
+            ->groupBy('StatusCode')
+            ->get();
+        }else if($user->isSCenter()){ 
+            $postpaid = DimensionCustomer::selectRaw('
+            CASE 
+                WHEN StatusCode = \'A\' THEN \'Active\'
+                WHEN StatusCode = \'C\' THEN \'Close\'
+                WHEN StatusCode = \'I\' THEN \'Inactive\'
+                WHEN StatusCode = \'S\' THEN \'Suspended\'
+            END AS StatusCode,
+            COUNT(*) AS total')
+            ->where("AccountType", 'Postpaid')
+            ->where("Region", $getUserRoleObject['region'])
+            ->where("BusinessHub", $getUserRoleObject['business_hub'])
+            ->where("service_center", $getUserRoleObject['sc'])
+            ->groupBy('StatusCode')
+            ->get();
+
+            $prepaid = DimensionCustomer::selectRaw('
+            CASE 
+                WHEN StatusCode = \'1\' THEN \'Active\'
+                WHEN StatusCode = \'0\' THEN \'Inactive\'
+            END AS StatusCode,
+            COUNT(*) AS total')
+            ->where("AccountType", 'Prepaid')
+            ->where("Region", $getUserRoleObject['region'])
+            ->where("BusinessHub", $getUserRoleObject['business_hub'])
+            ->where("service_center", $getUserRoleObject['sc'])
+            ->groupBy('StatusCode')
+            ->get();
+        }
 
 
 
-
-        $prepaid = DimensionCustomer::selectRaw('
-        CASE 
-            WHEN StatusCode = \'1\' THEN \'Active\'
-            WHEN StatusCode = \'0\' THEN \'Inactive\'
-        END AS StatusCode,
-        COUNT(*) AS total')
-        ->where("AccountType", 'Prepaid')
-        ->groupBy('StatusCode')
-        ->get();
 
         if($request->type == 'Postpaid'){
 

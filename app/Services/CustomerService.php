@@ -18,6 +18,7 @@ use App\Models\ZoneBills;
 use App\Models\MsmsMeters;
 use App\Models\ServiceUnit;
 use Illuminate\Support\Facades\Auth;
+use App\Services\GeneralService;
 
 
 
@@ -54,16 +55,38 @@ class CustomerService
 
     public function getPostpaid($request) {
 
+        $user = Auth::user();
+        $getSpecialRole =  (new GeneralService)->getSpecialRole();
+        $getUserRoleObject = (new GeneralService)->getUserLevelRole();
+
         if(isset($request->status) &&  $request->status != 'null'){
 
             $StatusCode =  substr($request->status, 0, 1);
 
-            $customers = DimensionCustomer::where("StatusCode", $StatusCode)
-            ->where("AccountType", 'Postpaid')->orderBy("SetupDate", "desc")->paginate(20); 
+            if(in_array($getUserRoleObject['role'], $getSpecialRole) && $user->isHQ()){
+                $customers = DimensionCustomer::where("StatusCode", $StatusCode)
+                ->where("AccountType", 'Postpaid')->orderBy("SetupDate", "desc")->paginate(20); 
+            }else if($user->isRegion()){
+                $customers = DimensionCustomer::where("StatusCode", $StatusCode)
+                ->where("AccountType", 'Postpaid')->where("Region", $getUserRoleObject['region'])
+                ->orderBy("SetupDate", "desc")->paginate(20); 
+            }else if($user->isBhub()){
+                $customers = DimensionCustomer::where("StatusCode", $StatusCode)
+                ->where("AccountType", 'Postpaid')->where("Region", $getUserRoleObject['region'])
+                ->where("BusinessHub", $getUserRoleObject['business_hub'])->orWhere("BUID", $getUserRoleObject['business_hub'])
+                ->orderBy("SetupDate", "desc")->paginate(20); 
+            }else if($user->isSCenter()){
+                $customers = DimensionCustomer::where("StatusCode", $StatusCode)
+                ->where("AccountType", 'Postpaid')->where("Region", $getUserRoleObject['region'])
+                ->where("BusinessHub", $getUserRoleObject['business_hub'])->orWhere("BUID", $getUserRoleObject['business_hub'])
+                ->where("service_center", $getUserRoleObject['sc'])
+                ->orderBy("SetupDate", "desc")->paginate(20); 
+            }
                 
             } else{
 
-            $customers = DimensionCustomer::whereIn('StatusCode', ['A', 'S'])->where("AccountType", $request->type)
+            $customers = DimensionCustomer::whereIn('StatusCode', ['A', 'S'])
+            ->where("Region", $getUserRoleObject['region'])->where("AccountType", $request->type)
             ->orderBy("SetupDate", "desc")->paginate(20); //getPostpaid
         }
 
@@ -75,6 +98,9 @@ class CustomerService
 
 
     public function getPrepaid($request) {
+        $user = Auth::user();
+        $getSpecialRole =  (new GeneralService)->getSpecialRole();
+        $getUserRoleObject = (new GeneralService)->getUserLevelRole();
         
         if(isset($request->status) &&  $request->status != 'null'){
 
@@ -86,13 +112,30 @@ class CustomerService
             ];
             $StatusCode = $map[$StatusCode] ?? $StatusCode;
 
-            $customers = DimensionCustomer::where('StatusCode', $StatusCode)->where("AccountType", $request->type)
-            ->orderBy("SetupDate", "desc")->paginate(20); //getPrepaid
+            if(in_array($getUserRoleObject['role'], $getSpecialRole) && $user->isHQ()){
+
+                $customers = DimensionCustomer::where('StatusCode', $StatusCode)->where("AccountType", $request->type)
+                ->orderBy("SetupDate", "desc")->paginate(20); //getPrepaid
+            }else if($user->isRegion()) {
+                $customers = DimensionCustomer::where('StatusCode', $StatusCode)->where("AccountType", $request->type)
+                ->where("Region", $getUserRoleObject['region'])->orderBy("SetupDate", "desc")->paginate(20); //getPrepaid
+            }else if($user->isBhub()) {
+                $customers = DimensionCustomer::where('StatusCode', $StatusCode)->where("AccountType", $request->type)
+                ->where("Region", $getUserRoleObject['region'])
+                ->where("BusinessHub", $getUserRoleObject['business_hub'])->orWhere("BUID", $getUserRoleObject['business_hub'])
+                ->orderBy("SetupDate", "desc")->paginate(20); //getPrepaid
+            }else if($user->isSCenter()){
+                $customers = DimensionCustomer::where('StatusCode', $StatusCode)->where("AccountType", $request->type)
+                ->where("Region", $getUserRoleObject['region'])
+                ->where("BusinessHub", $getUserRoleObject['business_hub'])->orWhere("BUID", $getUserRoleObject['business_hub'])
+                ->where("service_center", $getUserRoleObject['sc'])->orderBy("SetupDate", "desc")->paginate(20); //getPrepaid
+            }
 
         }else {
         
-        $customers = DimensionCustomer::whereIn('StatusCode', ['0', '1'])->where("AccountType", $request->type)
-        ->orderBy("SetupDate", "desc")->paginate(20); //getPrepaid
+            $customers = DimensionCustomer::whereIn('StatusCode', ['0', '1'])
+            ->where("Region", $getUserRoleObject['region'])->where("AccountType", $request->type)
+            ->orderBy("SetupDate", "desc")->paginate(20); //getPrepaid
         }
 
        // $customers = DimensionCustomer::whereIn('StatusCode', ['0', '1'])->where("AccountType", $requestType)->paginate(20);
