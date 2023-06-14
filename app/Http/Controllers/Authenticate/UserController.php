@@ -8,8 +8,14 @@ use Illuminate\Support\Facades\Auth;
 use App\Http\Resources\UserResource;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Validator;
+use App\Models\MenuAccess;
+use App\Models\MenuRole;
+use App\Models\SubMenu;
+use App\Models\User;
+use App\Http\Controllers\BaseApiController;
+use Symfony\Component\HttpFoundation\Response;
 
-class UserController extends Controller
+class UserController extends BaseApiController
 {
     
     public function getUser(){
@@ -77,6 +83,56 @@ class UserController extends Controller
 
         return $this->sendSuccess($user, "User Created Successfully", Response::HTTP_OK);
     }
+
+
+
+
+    public function getAccess() {
+
+        $userRole = Auth::user()->roles->pluck('id')->first();
+
+        //Check if the user Role have access to the menu/submenu
+        $menuRole = MenuRole::where('role_id', $userRole)->get();
+        $userResource = new UserResource(Auth::user());
+        $userResource->menuAccess($userRole);
+
+        $menuRole = MenuRole::where('role_id', $userRole)->first()->menu_id;
+        $menuString = array_map('intval', explode(',', trim($menuRole, '[]')));
+
+      // $hasAccess = SubMenu::whereIn('menu_id', $menuString)->get();
+        $hasAccess = SubMenu::whereIn("menu_id", $menuString)->where("role_id", $userRole)->get();
+
+        return $this->sendSuccess($hasAccess, "Successfully", Response::HTTP_OK);
+    }
+
+
+    public function AccessControl() {
+        $getMenu = MenuAccess::where("menu_status", "on")->get();
+        $getSubMenu = SubMenu::all();
+
+        $array = [];
+        foreach($getMenu as $get){
+            $array[] = [
+                'menu_id' => $get->id,
+                'menu_name' => $get->menu_name,
+                'menu_status' => $get->menu_status,
+                'submenu' => SubMenu::where('menu_id', $get->id)->get()
+            ];
+        }
+
+        return $this->sendSuccess($array, "Customer Approved Successfully", Response::HTTP_OK);
+     }
+
+
+     public function getRolePermission($role_id) {
+
+        $hasAccess = SubMenu::where("role_id", $role_id)->get();
+
+        return $this->sendSuccess($hasAccess, "Successfully", Response::HTTP_OK);
+    }
+
+
+
 
 
 }

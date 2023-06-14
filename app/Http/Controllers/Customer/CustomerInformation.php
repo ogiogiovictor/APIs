@@ -16,6 +16,7 @@ use App\Models\ZoneCustomer;
 use App\Http\Requests\RecordRequest;
 use Illuminate\Support\Facades\Http;
 use App\Models\KCTGenerator;
+use Illuminate\Support\Facades\Auth;
 
 class CustomerInformation extends BaseApiController
 {
@@ -135,7 +136,10 @@ class CustomerInformation extends BaseApiController
 
 
     public function cstore(RecordRequest $request) {
-        $response = Http::post('http://localhost:8005/api/v1/post_customer_crmd', $request->all());
+        $baseUrl = env('CUSTOMER_API_URL');
+        $addCustomerUrl = $baseUrl . 'post_customer_crmd';
+
+        $response = Http::post($addCustomerUrl, $request->all());
 
         try{
             if($response['data'] == '201'){
@@ -157,10 +161,32 @@ class CustomerInformation extends BaseApiController
 
     public function getCrmd() {
 
-        $response = Http::get('http://localhost:8001/api/v1/get_customers');
-        $data = $response->json();
+        try{
 
-        return $this->sendSuccess($data, "CRMD Loaded", Response::HTTP_OK);
+            $baseUrl = env('CUSTOMER_API_URL');
+
+            $user = Auth::user();
+
+            if($user->isHQ()){
+                $addCustomerUrl = $baseUrl . 'get_customers/all';
+            }else if($user->isBhub()){  //This will be for teamlead i need to implement this functionality for permission
+                $addCustomerUrl = $baseUrl . 'get_customers/verify';
+            }else if ($user->isSCenter()){ //This will be for business hub manager i need to implement this functionality for permission
+                $addCustomerUrl = $baseUrl . 'get_customers/approve';
+            }else {
+                $addCustomerUrl = $baseUrl . 'get_customers';
+            }
+           
+
+            $response = Http::get($addCustomerUrl);
+            $data = $response->json();
+    
+            return $this->sendSuccess($data, "CRMD Loaded", Response::HTTP_OK);
+
+        }catch(\Exception $e){
+            return $this->sendError($e->getmessage(), "No Result Found", Response::HTTP_BAD_REQUEST);
+        }
+       
 
     }
 
@@ -171,8 +197,11 @@ class CustomerInformation extends BaseApiController
          //$array['userid'] = 1; //this will be the person logged in
       
          try{
+
+            $baseUrl = env('CUSTOMER_API_URL');
+            $addCustomerUrl = $baseUrl . 'update_crmd_doc';
  
-             $response = Http::post('http://localhost:8001/api/v1/update_crmd_doc', $request->all());
+             $response = Http::post($addCustomerUrl, $request->all());
             
              if($response){
                  return $this->sendSuccess($response, "Customer CRMD Approved Successfully", Response::HTTP_OK);
@@ -184,7 +213,7 @@ class CustomerInformation extends BaseApiController
          }
  
       
-     }
+    }
 
      public function percentageOwed(){
 
@@ -206,6 +235,105 @@ class CustomerInformation extends BaseApiController
 
         
      }
+
+
+
+     public function addNewCustomerCRMD(Request $request){
+       
+        try{
+
+            $baseUrl = env('CUSTOMER_API_URL');
+            $addCustomerUrl = $baseUrl . 'add_customer';
+
+            $response = Http::post($addCustomerUrl, $request->all());
+
+            if ($response) {
+                return $this->sendSuccess($response, "Customer Successfully Created", Response::HTTP_OK);
+            }
+
+        }catch(\Exception $e){
+            return $e->getmessage();
+        }
+    }
+
+
+
+
+    public function pendingCustomer(){
+
+        $user = Auth::user();
+
+        $baseUrl = env('CUSTOMER_API_URL');
+        $addCustomerUrl = $baseUrl . 'pending_customers';
+
+        try{
+
+            if ($user->isHQ()) { 
+                $filters = [
+                    'status' => 'pending'
+                ];
+                $response = Http::get( $addCustomerUrl, $filters);
+            } else if ($user->isRegion()) {
+                $checkLevel = Auth::user()->level;
+                $values = explode(", ", $checkLevel);
+                $desiredValue = $values[0];
+                $filters = [
+                    'region' => $desiredValue,
+                    'status' => 'pending'
+                ];
+
+                $response = Http::get( $addCustomerUrl, $filters);
+            } else if ($user->isBhub()) {
+                $checkLevel = Auth::user()->level;
+                $values = explode(", ", $checkLevel);
+                $desiredValue = $values[1];
+                $filters = [
+                    'business_hub' => $desiredValue,
+                    'status' => 'pending'
+                ];
+                $response = Http::get( $addCustomerUrl, $filters);
+            }  else if ($user->isSCenter()) {
+                $checkLevel = Auth::user()->level;
+                $values = explode(", ", $checkLevel);
+                $desiredValue = $values[2];
+                $filters = [
+                    'service_center' =>  $filters,
+                    'status' => 'pending'
+                ];
+                $response = Http::get( $addCustomerUrl, $filters);
+            } 
+
+            return $response;
+
+        }catch(\Exception $e){
+            return $e->getmessage();
+        }
+    }
+
+
+
+
+    public function updateCustomer(Request $request){
+      
+        try{
+
+           $baseUrl = env('CUSTOMER_API_URL');
+           $addCustomerUrl = $baseUrl . 'update_customers_approve';
+
+            $response = Http::post($addCustomerUrl, $request->all());
+           
+            if($response){
+                return $this->sendSuccess($response, "Customer Approved Successfully", Response::HTTP_OK);
+            }
+         
+
+        }catch(\Exception $e){
+            return $this->sendError($e->getmessage(), "No Result Found", Response::HTTP_BAD_REQUEST);
+        }
+
+    }
+
+     
  
 
 

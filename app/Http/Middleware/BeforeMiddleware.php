@@ -41,14 +41,36 @@ class BeforeMiddleware  extends BaseApiController
         $menuString = array_map('intval', explode(',', trim($menuId, '[]')));
 
         //Get the ID of the route 
-        $getRouteID = intval(SubMenu::where("menu_url", $replacedUrl)->first()->menu_id);
+        if($requestMethod == 'GET'){
 
-        if (in_array($getRouteID, $menuString)) {
-            
+            //For Roles
+            //$getRouteID = intval(SubMenu::where("menu_url", $replacedUrl)->where("menu_status", "sub")->first()->menu_id);
+
+            $getRouteID = 0; // Default value if the query doesn't return a valid result
+
+            $subMenu = SubMenu::where("menu_url", $replacedUrl)->where("menu_status", "sub")->first();
+            if ($subMenu) {
+                $getRouteID = intval($subMenu->menu_id);
+            }
+
+         
+            if (in_array($getRouteID, $menuString)) {
+                
+                return $next($request);
+            }
+
+              //For Permission
+            $getPermission = SubMenu::where("permission_id", [$userRole])->where("menu_status", "inner")->first()->permission_id;
+
+
+            if($getPermission){
+                return $next($request);
+            }
+
+
+        }else if($requestMethod == 'POST'){
             return $next($request);
-          // return $this->sendError('YES', "You don't have access", Response::HTTP_UNAUTHORIZED);
         }
-        
         //$hasAccess = SubMenu::whereIn('menu_id', $menuString)->exists();
 
        // return $this->rejectError($getRouteID , $menuString, Response::HTTP_UNAUTHORIZED);

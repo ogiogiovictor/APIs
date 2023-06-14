@@ -17,6 +17,7 @@ use App\Services\AmiService;
 use App\Models\ZoneBills;
 use App\Models\MsmsMeters;
 use App\Models\ServiceUnit;
+use Illuminate\Support\Facades\Auth;
 
 
 
@@ -103,7 +104,15 @@ class CustomerService
 
     public function getWarehouseDashboard() {
 
-    $TotalCustomers = DimensionCustomer::whereIn('statusCode', ['0', '1', 'A', 'S'])->count();
+    $roleName = ['project_office', 'billing', 'cfo', 'coo', 'admin', 'md'];
+
+    $role_name = Auth::user()->roles->pluck('name')->first();
+    $user = Auth::user();
+    $checkLevel = Auth::user()->level;
+
+    $this->getLevel($roleName, $user, $checkLevel, $role_name);
+
+    $TotalCustomers =  $this->getLevel($roleName, $user, $checkLevel, $role_name);
     $TotalDSS = DTWarehouse::count();
     $TotalFeederEl = FeederEleven::count();
     $TotalFeederThirty =  FeederThirty::count();
@@ -129,6 +138,41 @@ class CustomerService
     return $data;
     
 
+    }
+
+    private function getLevel($roleName, $user, $checkLevel, $role_name){
+
+        $values = explode(",", $checkLevel);  // ->where("service_center", $serviceCenter)
+        $region = $values[0];
+        $businessHub = $values[1];
+        $serviceCenter = $values[2];
+       
+
+        if(in_array($role_name, $roleName) && $user->isHQ()){
+           return  $result =  DimensionCustomer::whereIn('statusCode', ['0', '1', 'A', 'S'])->count(); 
+          }else {
+  
+              if($user->isRegion()){
+                  $values = explode(",", $checkLevel);
+                  $region = $values[0];
+                  return $result =  DimensionCustomer::where('Region', $region)->whereIn('statusCode', ['0', '1', 'A', 'S'])->count(); 
+              }else if($user->isBhub()){
+                  $values = explode(",", $checkLevel);
+                  $businessHub = $values[1];
+                  return  $result =  DimensionCustomer::where('BusinessHub', $businessHub)->orWhere("BUID", $businessHub)->whereIn('statusCode', ['0', '1', 'A', 'S'])->count(); 
+              }else if($user->isSCenter()){
+                  $values = explode(",", $checkLevel);
+                  $region = $values[0];
+                  $businessHub = $values[1];
+                  $serviceCenter = $values[2];
+                  return $result =  DimensionCustomer::where('Region', $region)->where("BUID", $businessHub)->where("service_center", $serviceCenter)->whereIn('statusCode', ['0', '1', 'A', 'S'])->count(); 
+              }else{
+                  $values = explode(", ", $checkLevel);
+                  $businessHub = $values[1];
+                 return  $result =  DimensionCustomer::where('BusinessHub', $businessHub)->orWhere("BUID", $businessHub)->whereIn('statusCode', ['0', '1', 'A', 'S'])->count(); 
+              }
+            }
+        
     }
 
 
@@ -280,6 +324,27 @@ class CustomerService
       
         
     }
+
+
+
+
+
+
+
+/************************************* IBEDC ALTERNATE PAYMENT SYSTEM **************************************************/
+
+    public function authenticateCustomers($meterNo, $accountType) {
+        $customers =  DimensionCustomer::select('*')->where(function ($query) use ($meterNo, $accountType) {
+            $query->whereNotIn("StatusCode", ["0, I, C, N"]);
+            $query->where('AccountNo', 'like', '%'. $meterNo .  '%');
+            $query->orWhere('MeterNo', $meterNo );
+            $query->Where('AccountType', $accountType);
+        })->first(); 
+
+        return $customers;
+
+    }
+
 
 
 

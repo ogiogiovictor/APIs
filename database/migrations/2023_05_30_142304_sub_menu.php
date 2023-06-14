@@ -18,6 +18,7 @@ return new class extends Migration
             $table->foreign('menu_id')->references('id')->on('menu');
             $table->json('role_id')->nullable();
             $table->json('permission_id')->nullable();
+            $table->string('menu_status')->default("sub");
             $table->timestamps();
         });
     }

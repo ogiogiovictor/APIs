@@ -21,20 +21,18 @@ use App\Http\Controllers\OPS\Disconnection;
 use App\Http\Controllers\Search\SearchController;
 use App\Http\Controllers\Authenticate\SocialController;
 
-/*
-|--------------------------------------------------------------------------
-| API Routes
-|--------------------------------------------------------------------------
-|
-| Here is where you can register API routes for your application. These
-| routes are loaded by the RouteServiceProvider and all of them will
-| be assigned to the "api" middleware group. Make something great!
-|
-*/
 
-// Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
-//    // return $request->user();
-// });
+///////////////////////////////////////////////////////////////
+# ALTERNATE PAYMENT <CONTROLLERS>
+//////////////////////////////////////////////////////////////
+use App\Http\Controllers\AlternatePayment\AuthenticationController;
+
+///////////////////////////////////////////////////////////////
+# END OF ALTERNATE PAYMENT <CONTROLLERS>
+//////////////////////////////////////////////////////////////
+
+
+
 
 
 Route::post('auth_login', [LoginController::class, 'login']); // normal login
@@ -140,7 +138,14 @@ Route::group(['prefix' => 'v1', 'namespace' => 'Api\v1', 'middleware' => 'OAuth'
             
         });
 
-      //  Route::get('get_roles', [TestController::class, 'getRole']);
+        Route::get('get_acccess', [UserController::class, 'getAccess']);
+        Route::post('add_customer', [CustomerInformation::class, 'addNewCustomerCRMD']); 
+        Route::get('pending_customer_validation', [CustomerInformation::class, 'pendingCustomer']); 
+
+        Route::post('updatenewlycreated', [CustomerInformation::class, 'updateCustomer']);
+        Route::get('access_control_list', [UserController::class, 'AccessControl']); 
+        Route::get('get_permission_role/{role_id}', [UserController::class, 'getRolePermission']);
+
        
          
     });
@@ -234,3 +239,17 @@ Route::group(['prefix' => 'v2', 'namespace' => 'Api\v2', 'middleware' => 'OAuth'
 });
 
 /*********************************** END OF ROUTE FOR TESTING ON LOCAL MACHINE ************************************** */
+
+
+
+
+
+/************************************* IBEDC ALTERNATE PAYMENT SYSTEM **************************************************/
+Route::group(['prefix' => 'v3ibedc_AUTH_token', 'namespace' => 'Api\v3', 'middleware' => 'alternate'], function () {
+
+    Route::prefix('authenticate')->group(function() {
+        Route::post('auth_login', [AuthenticationController::class, 'login']); // normal login
+        
+    });
+
+});

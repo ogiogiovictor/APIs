@@ -52,7 +52,7 @@ class UserResource extends JsonResource
 
         $menuIds = array_column($menuName, 'id');
         //$subMenus = SubMenu::whereIn(["menu_id" => $menuIds, "role_id" => $role])->get();
-        $subMenus = SubMenu::whereIn("menu_id", $menuIds)->where("role_id", $role)->get();
+        $subMenus = SubMenu::whereIn("menu_id", $menuIds)->whereIn("role_id", [$role])->get();
 
          // User Permission
         $permission = array_map('intval', explode(',', trim(MenuRole::where("role_id", $role)->first()->permission_id, '[]')));
