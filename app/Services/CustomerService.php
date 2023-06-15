@@ -153,14 +153,32 @@ class CustomerService
     $user = Auth::user();
     $checkLevel = Auth::user()->level;
 
-    $this->getLevel($roleName, $user, $checkLevel, $role_name);
+    $getSpecialRole =  (new GeneralService)->getSpecialRole();
+    $getUserRoleObject = (new GeneralService)->getUserLevelRole();
+
+    if(in_array($getUserRoleObject['role'], $getSpecialRole) && $user->isHQ()){
+        $getCustomerByRegion = DimensionCustomer::selectRaw('Region, count(*) as total')->groupBy('Region')->get();
+    }else if($user->isRegion()){
+        $getCustomerByRegion = DimensionCustomer::selectRaw('Region, count(*) as total')->where("Region", $getUserRoleObject['region'])->groupBy('Region')->get();
+    }else if($user->isBhub()){
+        $getCustomerByRegion = DimensionCustomer::selectRaw('Region, count(*) as total')
+        ->where("Region", $getUserRoleObject['region'])
+        ->where("BusinessHub", $getUserRoleObject['business_hub'])
+        ->groupBy('Region')->get();
+    }else if($user->isSCenter()){
+        $getCustomerByRegion = DimensionCustomer::selectRaw('Region, count(*) as total')
+        ->where("Region", $getUserRoleObject['region'])
+        ->where("BusinessHub", $getUserRoleObject['business_hub'])
+        ->where("service_center", $getUserRoleObject['sc'])
+        ->groupBy('Region')->get();
+    }
 
     $TotalCustomers =  $this->getLevel($roleName, $user, $checkLevel, $role_name);
     $TotalDSS = DTWarehouse::count();
     $TotalFeederEl = FeederEleven::count();
     $TotalFeederThirty =  FeederThirty::count();
     $TotalTickets = Tickets::count();
-    $CustomerByRegion = DimensionCustomer::selectRaw('Region, count(*) as total')->groupBy('Region')->get();
+    $CustomerByRegion = $getCustomerByRegion;
     $recentCustomers = CustomerResource::collection(DimensionCustomer::whereIn('statusCode', ['0', '1', 'A', 'S'])->orderBy('SetupDate', 'desc')->take(10)->get());
 
 
