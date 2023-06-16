@@ -851,7 +851,6 @@ class TestController extends BaseApiController
 
             $search = DTWarehouse::where(function ($query) use ($request) {
                 $searchQuery = $request->searchQuery;
-
                 $query->where('DSS_11KV_415V_Name', 'LIKE', '%' .  $searchQuery . '%')
                 ->orWhere('Assetid', 'LIKE', '%' .  $searchQuery . '%')
                 ->orWhere('DSS_11KV_415V_Owner', 'LIKE', '%' .  $searchQuery . '%')
@@ -861,7 +860,6 @@ class TestController extends BaseApiController
 
             $elevenDt = DTWarehouse::where(function ($query) use ($request) {
                 $searchQuery = $request->searchQuery;
-
                 $query->where('DSS_11KV_415V_Name', 'LIKE', '%' .  $searchQuery . '%')
                 ->where('assettype', AssetEnum::DT_eleven()->value)
                 ->orWhere('Assetid', 'LIKE', '%' .  $searchQuery . '%')
@@ -880,7 +878,7 @@ class TestController extends BaseApiController
                 ->orWhere('hub_name', 'LIKE', '%' .  $searchQuery . '%');
             })->count();
 
-        $dtTotal = DTWarehouse::count();
+            $dtTotal = DTWarehouse::count();
 
             $data =[
                 'allDt' => $search,

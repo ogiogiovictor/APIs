@@ -173,8 +173,10 @@ class CustomerService
         ->groupBy('Region')->get();
     }
 
+    
+
     $TotalCustomers =  $this->getLevel($roleName, $user, $checkLevel, $role_name);
-    $TotalDSS = DTWarehouse::count();
+    $TotalDSS = $this->getDSS(); //DTWarehouse::count();
     $TotalFeederEl = FeederEleven::count();
     $TotalFeederThirty =  FeederThirty::count();
     $TotalTickets = Tickets::count();
@@ -201,18 +203,31 @@ class CustomerService
 
     }
 
+    private function getDSS(){
+        $user = Auth::user();
+        $specialRole = (new GeneralService)->getSpecialRole();
+        $dss = (new GeneralService)->getUserLevelRole();
+
+        if(in_array($dss['role'], $specialRole) && $user->isHQ()){
+            return DTWarehouse::count();
+        }elseif($user->isBhub()) {
+            return DTWarehouse::where("hub_name", $dss['business_hub'])->count();
+        }
+        //$dss['region'];
+    }
+
     private function getLevel($roleName, $user, $checkLevel, $role_name){
 
-        $values = explode(",", $checkLevel);  // ->where("service_center", $serviceCenter)
-        $region = $values[0];
-        $businessHub = $values[1];
-        $serviceCenter = $values[2];
-       
-
         if(in_array($role_name, $roleName) && $user->isHQ()){
-           return  $result =  DimensionCustomer::whereIn('statusCode', ['0', '1', 'A', 'S'])->count(); 
-          }else {
-  
+            return  $result =  DimensionCustomer::whereIn('statusCode', ['0', '1', 'A', 'S'])->count(); 
+        }
+
+        if (!empty($checkLevel)) {
+            $values = explode(",", $checkLevel);  // ->where("service_center", $serviceCenter)
+            $region = $values[0] ?? null;
+            $businessHub = $values[1] ?? null;
+            $serviceCenter = $values[2] ?? null;
+       
               if($user->isRegion()){
                   $values = explode(",", $checkLevel);
                   $region = $values[0];
@@ -232,7 +247,7 @@ class CustomerService
                   $businessHub = $values[1];
                  return  $result =  DimensionCustomer::where('BusinessHub', $businessHub)->orWhere("BUID", $businessHub)->whereIn('statusCode', ['0', '1', 'A', 'S'])->count(); 
               }
-            }
+        }
         
     }
 
