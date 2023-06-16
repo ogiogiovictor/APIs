@@ -22,10 +22,12 @@ use App\Http\Controllers\Search\SearchController;
 use App\Http\Controllers\Authenticate\SocialController;
 
 
+
 ///////////////////////////////////////////////////////////////
 # ALTERNATE PAYMENT <CONTROLLERS>
 //////////////////////////////////////////////////////////////
 use App\Http\Controllers\AlternatePayment\AuthenticationController;
+use App\Http\Controllers\AlternatePayment\GetCustomerController;
 
 ///////////////////////////////////////////////////////////////
 # END OF ALTERNATE PAYMENT <CONTROLLERS>
@@ -248,7 +250,8 @@ Route::group(['prefix' => 'v2', 'namespace' => 'Api\v2', 'middleware' => 'OAuth'
 Route::group(['prefix' => 'v3ibedc_AUTH_token', 'namespace' => 'Api\v3', 'middleware' => 'alternate'], function () {
 
     Route::prefix('authenticate')->group(function() {
-        Route::post('auth_login', [AuthenticationController::class, 'login']); // normal login
+        Route::post('auth_login', [AuthenticationController::class, 'login']); // normal login    
+        Route::post('get_customer_details', [GetCustomerController::class, 'getCustomerDetails']); // normal login    
         
     });
 
