@@ -23,11 +23,14 @@ use App\Http\Controllers\Authenticate\SocialController;
 
 
 
+
+
 ///////////////////////////////////////////////////////////////
 # ALTERNATE PAYMENT <CONTROLLERS>
 //////////////////////////////////////////////////////////////
 use App\Http\Controllers\AlternatePayment\AuthenticationController;
 use App\Http\Controllers\AlternatePayment\GetCustomerController;
+use App\Http\Controllers\AlternatePayment\PaymentProcessingController;
 
 ///////////////////////////////////////////////////////////////
 # END OF ALTERNATE PAYMENT <CONTROLLERS>
@@ -251,7 +254,16 @@ Route::group(['prefix' => 'v3ibedc_AUTH_token', 'namespace' => 'Api\v3', 'middle
 
     Route::prefix('authenticate')->group(function() {
         Route::post('auth_login', [AuthenticationController::class, 'login']); // normal login    
-        Route::post('get_customer_details', [GetCustomerController::class, 'getCustomerDetails']); // normal login    
+
+
+        Route::group(['middleware' => 'customer_dashboard'], function () {
+           // Route::middleware(['auth:sanctum'])->group(function() {
+          Route::get('get_customer_details', [GetCustomerController::class, 'getCustomerDetails']); // normal login   
+          Route::get('customer360/{account?}/{dss?}/{AccountType?}/{MeterNo?}', [CustomerOveriewController::class, 'customer360']); 
+
+          Route::post("process_payment", [PaymentProcessingController::class, 'makePayment']);
+           // });
+        });
         
     });
 

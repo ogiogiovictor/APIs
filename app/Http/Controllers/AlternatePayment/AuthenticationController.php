@@ -10,6 +10,7 @@ use App\Models\DimensionCustomer;
 use App\Services\CustomerService;
 use App\Http\Resources\NewResource;
 use Illuminate\Support\Str;
+use App\Models\Customer\CustomerAuthModel;
 
 
 class AuthenticationController extends BaseApiController
@@ -26,11 +27,29 @@ class AuthenticationController extends BaseApiController
             }
 
             try{
-
+                
                 $customers = (new CustomerService)->authenticateCustomers($meterNo, $accountType);
-               // $success['Authorization'] = $customers->createToken('API Token')->plainTextToken;
-                $success['Authorization'] = hash('sha256', $plainTextToken = Str::random(80));
+
+
+               // $success['Authorizations'] = hash('sha256', $plainTextToken = Str::random(80));
                 $success['customer'] = new NewResource($customers);
+
+                //Insert Authorization Headers
+               $insertAuthorisation =  CustomerAuthModel::create([
+                       // 'Authorization' => $success['Authorizations'],
+                        'accountno' => $meterNo,
+                        'expires_at' => date('Y-m-d H:m:s'),
+                ]);
+
+                
+                  // Generate a personal access token for the customer
+                  $token = $insertAuthorisation->createToken('customer-token');
+                  // Return the token and customer details in the response
+                  $success['Authorization'] = $token->plainTextToken;
+                  CustomerAuthModel::where("id", $insertAuthorisation->id)->update([
+                    'Authorization' => $success['Authorization'],
+                  ]);
+                
 
 
                 return $this->sendSuccess($success, "Customer Successfully Loaded", Response::HTTP_OK);

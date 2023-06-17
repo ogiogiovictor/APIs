@@ -228,6 +228,33 @@ return [
         ],
 
 
+        'test_environment' => [
+            'driver' => 'sqlsrv',
+            'url' => env('DATABASE_URL'),
+            'host' => env('DB_HOST_TEST', 'localhost'),
+            'port' => env('DB_PORT_TEST', '1433'),
+            'database' => env('DB_DATABASE_TEST', 'forge'),
+            'username' => env('DB_USERNAME_TEST', 'forge'),
+            'password' => env('DB_PASSWORD_TEST', ''),
+            'charset' => 'utf8',
+            'prefix' => '',
+            'prefix_indexes' => true,
+        ],
+
+        'ecmi_prod' => [
+            'driver' => 'sqlsrv',
+            'url' => env('DATABASE_URL'),
+            'host' => env('DB_HOST_ECMI', 'localhost'),
+            'port' => env('DB_PORT_ECMI', '1433'),
+            'database' => env('DB_DATABASE_ECMI', 'forge'),
+            'username' => env('DB_USERNAME_ECMI', 'forge'),
+            'password' => env('DB_PASSWORD_ECMI', ''),
+            'charset' => 'utf8',
+            'prefix' => '',
+            'prefix_indexes' => true,
+        ],
+
+
 
     ],
 

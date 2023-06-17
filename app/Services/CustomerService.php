@@ -1,10 +1,12 @@
 <?php
 
+
 namespace App\Services;
 use App\Models\DimensionCustomer;
 use App\Models\ZoneCustomer;
 use App\Models\ECMIPayment;
 use DB;
+use Closure;
 use App\Models\DTWarehouse;
 use App\Models\FeederEleven;
 use App\Models\FeederThirty;
@@ -19,6 +21,10 @@ use App\Models\MsmsMeters;
 use App\Models\ServiceUnit;
 use Illuminate\Support\Facades\Auth;
 use App\Services\GeneralService;
+use App\Models\Customer\CustomerAuthModel;
+use Symfony\Component\HttpFoundation\Response;
+use Illuminate\Http\Request;
+
 
 
 
@@ -419,6 +425,37 @@ class CustomerService
 
         return $customers;
 
+    }
+
+
+
+    public function customerDetails($meterNo) {
+        $customers =  DimensionCustomer::select('*')->where(function ($query) use ($meterNo) {
+            $query->whereNotIn("StatusCode", ["0, I, C, N"]);
+            $query->where('AccountNo', 'like', '%'. $meterNo .  '%');
+            $query->orWhere('MeterNo', $meterNo );
+        })->first(); 
+
+        return $customers;
+
+    }
+
+
+    public function getHeaderRequest(Request $request)
+
+    {
+        $headerRq = $request->header('Authorization');
+
+        $matches = ['Authorization' => $headerRq];
+        $checkRequest =  CustomerAuthModel::where($matches)->get();
+
+        if($checkRequest){
+
+            return $checkRequest;
+        }else {
+            return response()->json($response, Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
+        
     }
 
 

@@ -11,7 +11,8 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('customer_login', function (Blueprint $table) {
+        Schema::create('customer_login', function (Blueprint $table) {
+            $table->id();
             $table->string('Authorization')->nullable();
             $table->string('accountno')->nullable();
             $table->timestamp('expires_at')->nullable();
