@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Auth;
 
 /*
 |--------------------------------------------------------------------------
@@ -19,7 +20,7 @@ Route::get('/', function () {
 
 
 Auth::routes([  
-    'register' => false, // Register Routes...
+    'register' => true, // Register Routes...
     'reset' => false, // Reset Password Routes...
     'verify' => false, // Email Verification Routes...
    // 'login' => false, 

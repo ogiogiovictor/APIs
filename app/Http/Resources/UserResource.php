@@ -29,7 +29,7 @@ class UserResource extends JsonResource
             'authority' => $this->authority,
             "created_at" => Carbon::parse($this->created_at)->format('M d Y'),
             "role" => $this->roles->first()->name, //$this->roles->pluck('name')->toArray(), //$user->load('roles'), // Auth::user()->load('roles'),
-             "status" => $this->status,
+            "status" => $this->status,
             "time_ago" => Carbon::parse($this->created_at)->subMinutes(2)->diffForHumans(),
             "menus" => $this->menuAccess($this->roles->first()->id),
 
