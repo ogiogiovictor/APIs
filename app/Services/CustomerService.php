@@ -290,9 +290,15 @@ class CustomerService
         }
 
         if ($customer->AccountType == 'Postpaid') {
-            $customer->load('payments');
+            //$customer->load('payments');
+            $customer->load(['payments' => function ($query) {
+                $query->orderBy('PayDate', 'desc');
+            }]);
         } elseif ($customer->AccountType == 'Prepaid') {
-            $customer->load('transactions');
+            //$customer->load('transactions');
+            $customer->load(['transactions' => function ($query) {
+                $query->orderBy('TransactionDateTime', 'desc');  //[TransactionDateTime]
+            }]);
         }
 
       

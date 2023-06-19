@@ -11,7 +11,7 @@ class PaymentRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return false;
+        return true;
     }
 
     /**
@@ -22,10 +22,11 @@ class PaymentRequest extends FormRequest
     public function rules(): array
     {
         return [
-            "email" => "required|email",
-            "phone" =>  ['required', 'regex:/^[0-9]{10}$/'],
+            "email" => "email",
+            "phone" =>  ["required", "regex:/^0\d{10}$/"],
             "amount" => ['required', 'numeric'],
             "account_type" => "required",
+            "account_number" => "required",
         ];
     }
 }
