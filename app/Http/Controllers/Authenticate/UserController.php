@@ -14,6 +14,8 @@ use App\Models\SubMenu;
 use App\Models\User;
 use App\Http\Controllers\BaseApiController;
 use Symfony\Component\HttpFoundation\Response;
+use Illuminate\Support\Facades\Hash;
+
 
 class UserController extends BaseApiController
 {
@@ -54,7 +56,7 @@ class UserController extends BaseApiController
 
     public function addUser(Request $request) {
 
-        
+     
         $validator = Validator::make($request->all(), [
             'name' => 'required',
             'email' => 'required|unique:users|max:255',

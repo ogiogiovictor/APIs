@@ -17,48 +17,48 @@ class SubMenuSeeder extends Seeder
             "name" => "Create Customer",
             "menu_url" => "createcustomer",
             "menu_id" => "1",
-            "role_id" =>  "",
-            "permission_id" =>  ""
+            "role_id" =>  "17",
+            "permission_id" =>  "1"
         ],
 
         [
             "name" => "Postpaid Customer",
             "menu_url" => "customers/postpaid",
             "menu_id" => "1",
-            "role_id" =>  "",
-            "permission_id" =>  ""
+            "role_id" =>  "17",
+            "permission_id" =>  "1"
         ],
 
         [
             "name" => "Prepaid Customer",
             "menu_url" => "customers/prepaid",
             "menu_id" => "1",
-            "role_id" =>  "",
-            "permission_id" =>  ""
+            "role_id" =>  "17",
+            "permission_id" =>  "1"
         ],
 
         [
             "name" => "Prepaid",
             "menu_url" => "payments",
             "menu_id" => "1",
-            "role_id" =>  "",
-            "permission_id" =>  ""
+            "role_id" =>  "17",
+            "permission_id" =>  "1"
         ],
 
         [
             "name" => "Bills",
             "menu_url" => "bills",
             "menu_id" => "1",
-            "role_id" =>  "",
-            "permission_id" =>  ""
+            "role_id" =>  "17",
+            "permission_id" =>  "1"
         ],
 
         [
             "name" => "All Customers",
             "menu_url" => "customers",
             "menu_id" => "1",
-            "role_id" =>  "",
-            "permission_id" =>  ""
+            "role_id" =>  "17",
+            "permission_id" =>  "1"
         ],
 
         
@@ -70,24 +70,24 @@ class SubMenuSeeder extends Seeder
             "name" => "Transformers",
             "menu_url" => "transformers",
             "menu_id" => "2",
-            "role_id" =>  "",
-            "permission_id" =>  ""
+            "role_id" =>  "17",
+            "permission_id" =>  "1"
         ],
 
         [
             "name" => "Feeders",
             "menu_url" => "feeders",
             "menu_id" => "2",
-            "role_id" =>  "",
-            "permission_id" =>  ""
+            "role_id" =>  "17",
+            "permission_id" =>  "1"
         ],
 
         [
             "name" => "Transmission",
             "menu_url" => "transmission",
             "menu_id" => "2",
-            "role_id" =>  "",
-            "permission_id" =>  ""
+            "role_id" =>  "17",
+            "permission_id" =>  "1"
         ],
 
 
@@ -99,8 +99,8 @@ class SubMenuSeeder extends Seeder
             "name" => "Complains",
             "menu_url" => "tickets",
             "menu_id" => "3",
-            "role_id" =>  "",
-            "permission_id" =>  ""
+            "role_id" =>  "17",
+            "permission_id" =>  "1"
         ],
 
 
@@ -109,16 +109,16 @@ class SubMenuSeeder extends Seeder
             "name" => "Events",
             "menu_url" => "mdacustomers",
             "menu_id" => "4",
-            "role_id" =>  "",
-            "permission_id" =>  ""
+            "role_id" =>  "17",
+            "permission_id" =>  "1"
         ],
 
         [
             "name" => "Events",
             "menu_url" => "amievents",
             "menu_id" => "4",
-            "role_id" =>  "",
-            "permission_id" =>  ""
+            "role_id" =>  "17",
+            "permission_id" =>  "1"
         ],
 
 
@@ -130,16 +130,16 @@ class SubMenuSeeder extends Seeder
             "name" => "Approval",
             "menu_url" => "crmdetails",
             "menu_id" => "5",
-            "role_id" =>  "",
-            "permission_id" =>  ""
+            "role_id" =>  "17",
+            "permission_id" =>  "1"
         ],
 
         [
             "name" => "CAAD",
             "menu_url" => "caad",
             "menu_id" => "5",
-            "role_id" =>  "",
-            "permission_id" =>  ""
+            "role_id" =>  "17",
+            "permission_id" =>  "1"
         ],
 
 
@@ -148,16 +148,16 @@ class SubMenuSeeder extends Seeder
             "name" => "Administration",
             "menu_url" => "allusers",
             "menu_id" => "6",
-            "role_id" =>  "",
-            "permission_id" =>  ""
+            "role_id" =>  "17",
+            "permission_id" =>  "1"
         ],
 
         [
             "name" => "Administration",
             "menu_url" => "locations",
             "menu_id" => "6",
-            "role_id" =>  "",
-            "permission_id" =>  ""
+            "role_id" =>  "17",
+            "permission_id" =>  "1"
         ],
         
     ];
