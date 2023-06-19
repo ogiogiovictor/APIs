@@ -77,6 +77,19 @@ class StringHelper
         return $formattedAmount;
     }
 
+
+    public static function generateTransactionReference()
+    {
+        $length = 6;
+        $characters = '984765432100123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
+        $charactersLenth = strlen($characters);
+        $generatedTransactionReference = '';
+        for ($i = 0; $i < $length; $i++) {
+            $generatedTransactionReference .= $characters[rand(0, $charactersLenth - 1)];
+        }
+        return $generatedTransactionReference . time(). "-IBEDC";
+    }
+
     
   
 
