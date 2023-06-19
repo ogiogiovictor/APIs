@@ -235,7 +235,9 @@ Route::group(['prefix' => 'v2', 'namespace' => 'Api\v2', 'middleware' => 'OAuth'
         Route::get('access_control_list', [TestController::class, 'AccessControl']); 
         Route::get('get_permission_role/{role_id}', [TestController::class, 'getRolePermission']);
         
+        Route::post('add_meter', [TestController::class, 'addMeter']);
 
+        
        
 
         
