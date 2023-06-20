@@ -1171,7 +1171,7 @@ class TestController extends BaseApiController
 
             ]);
 
-            return $this->sendSuccess($addMeters, "Successfully", Response::HTTP_OK);
+            return $this->sendSuccess($request, "Successfully", Response::HTTP_OK);
 
         }
             
