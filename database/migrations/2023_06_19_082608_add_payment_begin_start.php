@@ -22,7 +22,11 @@ return new class extends Migration
             $table->string('meter_no')->nullable();
             $table->enum('status', ['pending', 'started', 'success', 'failed'])->default('pending');
             $table->string('customer_name')->nullable();
+            $table->string('payment_source')->nullable();
+            $table->string('provider')->nullable();
+            $table->string('providerRef')->nullable();
             $table->timestamp('date_entered')->nullable();
+            $table->timestamp('receiptno')->nullable();
             $table->timestamps();
         });
     }
