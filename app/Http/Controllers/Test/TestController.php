@@ -1115,6 +1115,12 @@ class TestController extends BaseApiController
     }
 
 
+    public function getMeter(){
+        $getMeter = Meters::orderby('created_at', 'desc')->paginate(30);
+        return $this->sendSuccess($getMeter, "All Meters", Response::HTTP_OK);
+    }
+
+
 
     public function addMeter(Request $request){
         
@@ -1171,7 +1177,7 @@ class TestController extends BaseApiController
 
             ]);
 
-            return $this->sendSuccess($request, "Successfully", Response::HTTP_OK);
+            return $this->sendSuccess($addMeters, "Successfully", Response::HTTP_OK);
 
         }
             
@@ -1180,6 +1186,13 @@ class TestController extends BaseApiController
 
         
 
+    }
+
+    public function getCustomerRegion($region)
+    {
+        $region = DimensionCustomer::where('Region', $region)->paginate(40);
+        $allCustomer = CustomerResource::collection($region)->response()->getData(true);
+        return $this->sendSuccess($allCustomer, "Successfully", Response::HTTP_OK);
     }
 
 

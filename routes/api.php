@@ -236,6 +236,8 @@ Route::group(['prefix' => 'v2', 'namespace' => 'Api\v2', 'middleware' => 'OAuth'
         Route::get('get_permission_role/{role_id}', [TestController::class, 'getRolePermission']);
         
         Route::post('add_meter', [TestController::class, 'addMeter']);
+        Route::get('get_meter', [TestController::class, 'getMeter']);
+        Route::get('customer_all_region/{region}', [TestController::class, 'getCustomerRegion']);
 
         
        
