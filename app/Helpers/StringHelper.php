@@ -80,7 +80,7 @@ class StringHelper
 
     public static function generateTransactionReference()
     {
-        $length = 6;
+        $length = 15;
         $characters = '984765432100123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
         $charactersLenth = strlen($characters);
         $generatedTransactionReference = '';

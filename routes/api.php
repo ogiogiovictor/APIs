@@ -264,6 +264,8 @@ Route::group(['prefix' => 'v3ibedc_AUTH_token', 'namespace' => 'Api\v3', 'middle
           Route::get('customer360/{account?}/{dss?}/{AccountType?}/{MeterNo?}', [CustomerOveriewController::class, 'customer360']); 
 
           Route::post("process_payment", [PaymentProcessingController::class, 'makePayment']);
+          Route::post("complete_payment", [PaymentProcessingController::class, 'processPayment']);
+          Route::get("payment_source", [PaymentProcessingController::class, 'paymentSource']);
            // });
         });
         

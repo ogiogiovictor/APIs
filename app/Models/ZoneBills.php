@@ -17,6 +17,12 @@ class ZoneBills extends Model
 
     public $timestamps = false;
 
+    // protected $fillable = [
+    //     'Payment',
+    //     'BillID',
+    //     'NetArrears'
+    // ];
+
      /**
      * Get the customer that owns this bill.
      */
