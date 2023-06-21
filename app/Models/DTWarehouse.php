@@ -35,4 +35,11 @@ class DTWarehouse extends Model
         return $this->hasMany(DimensionCustomer::class, 'DistributionID', 'Assetid');
     }
 
+    public function customerNew()
+    {
+        return $this->hasOne(DimensionCustomer::class, 'DistributionID', 'Assetid')
+            ->collate('SQL_Latin1_General_CP1_CI_AS');
+    }
+    
+
 }

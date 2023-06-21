@@ -15,6 +15,7 @@ class Meters extends Model
      * @var array<int, string>
      */
     protected $fillable = [
+        'id',
         'type',
         'region',
         'business_hub',

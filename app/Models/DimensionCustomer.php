@@ -58,6 +58,13 @@ class DimensionCustomer extends Model
         return $this->zoneBills->sum('CurrentChgTotal') - $this->payments->sum('Payments');
     }
 
+    public function factBill()
+    {
+        return $this->hasOne(ZoneBills::class, 'AccountNo', 'AccountNo')
+            ->where('BillYear', '2023')
+            ->where('BillMonth', '6');
+    }
+
 
    
     

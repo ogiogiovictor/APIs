@@ -1196,6 +1196,26 @@ class TestController extends BaseApiController
     }
 
 
+    public function getAllDrops(){
+
+        $getDSS = DTWarehouse::all();
+        $serviceUnit = ServiceUnit::all();
+        $serviceBand = ["E4H", "D8H", "C12H", "B16H", "A20H", "A18H"];
+        $feeders = (new AssetService)->allFeeder();
+
+        $data = [
+            'dss' => $getDSS,
+            'service_unit' => $serviceUnit,
+            'service_band' => $serviceBand,
+            'feeder' => $feeders
+        ];
+
+
+        return $this->sendSuccess($data, "loaded Successfully", Response::HTTP_OK);
+
+    }
+
+
 
 
 }

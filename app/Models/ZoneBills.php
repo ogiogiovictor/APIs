@@ -9,7 +9,6 @@ class ZoneBills extends Model
 {
     use HasFactory;
 
-    use HasFactory;
 
     protected $table = "EMS_ZONE.dbo.SpectrumBill";
 

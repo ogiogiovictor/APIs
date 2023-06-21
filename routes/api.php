@@ -20,6 +20,8 @@ use App\Http\Controllers\ACE\InjectionSubStationController;
 use App\Http\Controllers\OPS\Disconnection;
 use App\Http\Controllers\Search\SearchController;
 use App\Http\Controllers\Authenticate\SocialController;
+use App\Http\Controllers\General\GeneralController;
+use App\Http\Controllers\Meters\MeterController;
 
 
 
@@ -151,6 +153,15 @@ Route::group(['prefix' => 'v1', 'namespace' => 'Api\v1', 'middleware' => 'OAuth'
         Route::get('access_control_list', [UserController::class, 'AccessControl']); 
         Route::get('get_permission_role/{role_id}', [UserController::class, 'getRolePermission']);
 
+
+        Route::get('get_dropdown_all', [GeneralController::class, 'getAllDrops']);
+        Route::get('dt_billing_efficency', [AssetController::class, 'dtBillingEffiency']);
+
+        Route::post('add_meter', [MeterController::class, 'addMeter']);
+        Route::get('get_meter', [MeterController::class, 'getMeter']);
+        Route::get('customer_all_region/{region}', [MeterController::class, 'getCustomerRegion']);
+        
+
        
          
     });
@@ -238,6 +249,8 @@ Route::group(['prefix' => 'v2', 'namespace' => 'Api\v2', 'middleware' => 'OAuth'
         Route::post('add_meter', [TestController::class, 'addMeter']);
         Route::get('get_meter', [TestController::class, 'getMeter']);
         Route::get('customer_all_region/{region}', [TestController::class, 'getCustomerRegion']);
+        Route::get('get_dropdown_all', [TestController::class, 'getAllDrops']);
+
 
         
        

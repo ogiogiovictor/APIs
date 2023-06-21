@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\ACE;
 
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
 use App\Repositories\AssetRepositoryInterface;
 use App\Http\Controllers\BaseApiController;
@@ -11,6 +12,8 @@ use App\Http\Requests\AssetRequest;
 use App\Helpers\AssetHelper;
 use App\Models\ZoneCustomer;
 use App\Models\DimensionCustomer;
+use App\Models\DTWarehouse;
+use App\Models\BillingEffiency;
 use App\Services\CustomerService;
 use App\Enums\AssetEnum;
 use Illuminate\Support\Facades\Cache;
@@ -77,6 +80,37 @@ class AssetController extends BaseApiController
 
 
     }
+
+
+
+    public function dtBillingEffiency(){
+     
+
+       //$dtEfficenty = BillingEffiency::orderby("TotalDSS", "desc")->paginate(30);
+      // $dtStatus =  DTWarehouse::select('Status', DB::raw('COUNT(Assetid) as AssetCount'))->groupBy('Status')->get();
+
+       $cacheKey = 'warehouse_billing_efficiency';
+        $minutes = 5;
+
+        $data = Cache::remember($cacheKey, $minutes, function () {
+           return  [
+                'dt_billing' => BillingEffiency::orderby("TotalDSS", "desc")->paginate(30),
+                'dt_by_status' => DTWarehouse::select('Status', DB::raw('COUNT(Assetid) as AssetCount'))->groupBy('Status')->get()
+               ];
+        });
+
+
+    //    $data = [
+    //     'dt_billing' => $dtEfficenty,
+    //     'dt_by_status' => $dtStatus
+    //    ];
+
+        return $this->sendSuccess($data, "Asset Information Saved Successfully", Response::HTTP_OK);
+    }
+
+
+    
+
 
 
    
