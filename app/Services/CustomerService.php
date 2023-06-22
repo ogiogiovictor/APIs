@@ -24,6 +24,8 @@ use App\Services\GeneralService;
 use App\Models\Customer\CustomerAuthModel;
 use Symfony\Component\HttpFoundation\Response;
 use Illuminate\Http\Request;
+use App\Models\HighTension;
+use App\Http\Resources\TransformerResource;
 
 
 
@@ -303,9 +305,9 @@ class CustomerService
 
       
         if($dss){
-            $distribution = DTWarehouse::select('Assetid', 'assettype', 'AssetName', 'DSS_11KV_415V_Make',
+            $distribution = new TransformerResource(DTWarehouse::select('Assetid', 'assettype', 'AssetName', 'DSS_11KV_415V_Make',
             'DSS_11KV_415V_Rating', 'DSS_11KV_415V_Address', 'DSS_11KV_415V_Owner', 'hub_name', 'Status',
-            'DSS_11KV_415V_parent', 'longtitude', 'latitude', 'naccode')->where('Assetid', $dss)->first();
+            'DSS_11KV_415V_parent', 'longtitude', 'latitude', 'naccode')->where('Assetid', $dss)->first());
             $customer->distribution = $distribution;
         }
        
