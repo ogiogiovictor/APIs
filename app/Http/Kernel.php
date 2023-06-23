@@ -45,6 +45,7 @@ class Kernel extends HttpKernel
             \Illuminate\Routing\Middleware\SubstituteBindings::class,
             \App\Http\Middleware\ManageService::class,
             \Illuminate\Session\Middleware\StartSession::class,
+           // 'throttle:5,1',
         ],
     ];
 

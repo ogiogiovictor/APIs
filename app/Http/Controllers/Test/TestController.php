@@ -46,6 +46,7 @@ use App\Models\SubMenu;
 use App\Models\MenuAccess;
 use App\Models\Meters;
 use App\Services\GeneralService;
+use App\Services\AssetService;
 
 
 class TestController extends BaseApiController
@@ -1198,16 +1199,16 @@ class TestController extends BaseApiController
 
     public function getAllDrops(){
 
-        $getDSS = DTWarehouse::all();
+        $getDSS = DTWarehouse::select("DSS_11KV_415V_Name", "Assetid", "DSS_11KV_415V_Owner", "hub_name")->get();
         $serviceUnit = ServiceUnit::all();
         $serviceBand = ["E4H", "D8H", "C12H", "B16H", "A20H", "A18H"];
-        $feeders = (new AssetService)->allFeeder();
+       // $feeders = (new AssetService)->allFeeder();
 
         $data = [
             'dss' => $getDSS,
             'service_unit' => $serviceUnit,
             'service_band' => $serviceBand,
-            'feeder' => $feeders
+           // 'feeder' => $feeders
         ];
 
 
