@@ -17,4 +17,8 @@ class ZoneECMI extends Model
 
     
 
+    public function nonSTSCustomers(){
+        return $this->whereRaw('LEN(MeterNo) >= 15')->paginate(100);
+       
+    }
 }

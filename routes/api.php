@@ -160,6 +160,8 @@ Route::group(['prefix' => 'v1', 'namespace' => 'Api\v1', 'middleware' => 'OAuth'
         Route::post('add_meter', [MeterController::class, 'addMeter']);
         Route::get('get_meter', [MeterController::class, 'getMeter']);
         Route::get('customer_all_region/{region}', [MeterController::class, 'getCustomerRegion']);
+
+        Route::get('get_nsts_customers', [CustomerInformation::class, 'nonStsCusomters']);
         
 
        

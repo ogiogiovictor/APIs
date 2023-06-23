@@ -18,6 +18,7 @@ use Illuminate\Support\Facades\Http;
 use App\Models\KCTGenerator;
 use Illuminate\Support\Facades\Auth;
 use App\Services\GeneralService;
+use App\Models\ZoneECMI;
 
 class CustomerInformation extends BaseApiController
 {
@@ -416,6 +417,16 @@ class CustomerInformation extends BaseApiController
             return $this->sendError($e->getmessage(), "No Result Found", Response::HTTP_BAD_REQUEST);
         }
 
+    }
+
+
+
+    public function nonStsCusomters(){
+
+        $zoneECMI = new ZoneECMI();
+        $customers = $zoneECMI->nonSTSCustomers();
+
+        return $this->sendSuccess($customers, "Non STS Customers Successfully Loaded", Response::HTTP_OK);
     }
 
      

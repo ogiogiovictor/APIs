@@ -18,15 +18,16 @@ class LoginController extends BaseApiController
 
         if($request->expectsJson()) {
 
-            $validatedData = $request->validated();
+             $validatedData = $request->validated();
 
-            $userStatus = User::where('email', $validatedData->email)->value('status');
+
+            $userStatus = User::where('email', $validatedData['email'])->value('status');
 
             if($userStatus == 0 || $userStatus == '0'){
                 return $this->sendError('Invalid Status', "No Activation Included in the account", Response::HTTP_UNAUTHORIZED);
             }
 
-            if(Auth::attempt(['email' => $validatedData->email, 'password' => $validatedData->password])){
+            if(Auth::attempt(['email' => $validatedData['email'], 'password' => $validatedData['password'] ])){
                 $authUser = Auth::user();
                 $success['Authorization'] = $authUser->createToken('Sanctom+Socialite')->plainTextToken;
                 $success['user'] = $authUser;

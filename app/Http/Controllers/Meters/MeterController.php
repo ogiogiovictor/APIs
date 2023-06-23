@@ -7,6 +7,8 @@ use Illuminate\Http\Request;
 use App\Models\Meters;
 use App\Http\Controllers\BaseApiController;
 use Symfony\Component\HttpFoundation\Response;
+use App\Models\DimensionCustomer;
+use App\Http\Resources\CustomerResource;
 
 class MeterController extends BaseApiController
 {
