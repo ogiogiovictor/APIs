@@ -304,11 +304,17 @@ class CustomerService
         }
 
       
-        if($dss){
-            $distribution = new TransformerResource(DTWarehouse::select('Assetid', 'assettype', 'AssetName', 'DSS_11KV_415V_Make',
-            'DSS_11KV_415V_Rating', 'DSS_11KV_415V_Address', 'DSS_11KV_415V_Owner', 'hub_name', 'Status',
-            'DSS_11KV_415V_parent', 'longtitude', 'latitude', 'naccode')->where('Assetid', $dss)->first());
-            $customer->distribution = $distribution;
+        if($dss && $dss != 'null'){
+            $checkdss = DTWarehouse::where("Assetid", $dss)->value('Assetid');
+            if($checkdss){
+                $distribution = new TransformerResource(DTWarehouse::select('Assetid', 'assettype', 'AssetName', 'DSS_11KV_415V_Make',
+                'DSS_11KV_415V_Rating', 'DSS_11KV_415V_Address', 'DSS_11KV_415V_Owner', 'hub_name', 'Status',
+                'DSS_11KV_415V_parent', 'longtitude', 'latitude', 'naccode')->where('Assetid', $dss)->first());
+                // $distribution = DTWarehouse::select('Assetid', 'assettype', 'AssetName', 'DSS_11KV_415V_Make',
+                // 'DSS_11KV_415V_Rating', 'DSS_11KV_415V_Address', 'DSS_11KV_415V_Owner', 'hub_name', 'Status',
+                // 'DSS_11KV_415V_parent', 'longtitude', 'latitude', 'naccode')->where('Assetid', $dss)->first();
+                $customer->distribution = $distribution;
+            }
         }
        
 
