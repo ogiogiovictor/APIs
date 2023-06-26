@@ -27,6 +27,7 @@ class UserResource extends JsonResource
             'name' => $this->name,
             'email' => $this->email,
             'authority' => $this->authority,
+            'level' => $this->level,
             "created_at" => Carbon::parse($this->created_at)->format('M d Y'),
             "role" => $this->roles->first()->name, //$this->roles->pluck('name')->toArray(), //$user->load('roles'), // Auth::user()->load('roles'),
             "status" => $this->status,
