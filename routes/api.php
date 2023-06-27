@@ -22,6 +22,7 @@ use App\Http\Controllers\Search\SearchController;
 use App\Http\Controllers\Authenticate\SocialController;
 use App\Http\Controllers\General\GeneralController;
 use App\Http\Controllers\Meters\MeterController;
+use App\Http\Controllers\Export\ExportController;
 
 
 
@@ -162,9 +163,9 @@ Route::group(['prefix' => 'v1', 'namespace' => 'Api\v1', 'middleware' => 'OAuth'
         Route::get('customer_all_region/{region}', [MeterController::class, 'getCustomerRegion']);
 
         Route::get('get_nsts_customers', [CustomerInformation::class, 'nonStsCusomters']);
-        
 
-       
+        Route::post('export_dt', [ExportController::class, 'exportExcel']);
+        
          
     });
 });

@@ -31,7 +31,7 @@ class NewResource extends JsonResource
                 'FirstName' => $this->FirstName,
                 'OtherNames' => $this->OtherNames,
                 'OldTariffCode' => $this->OldTariffCode,
-                'Address' => $this->Address1 . ' ' . $this->Address2 ,
+                'Address' => $this->Address1 ?? $this->Address,
                 'TarriffCode' => $this->TarriffCode,
                 'State' => $this->State,
                 'Mobile' => $this->Mobile,
@@ -45,7 +45,7 @@ class NewResource extends JsonResource
                 //'CustomerSK' => $this->CustomerID,
                 "AcctTypeDesc" => $this->AcctTypeDesc,
                 "City" => $this->City,
-               // "DistributionID" => $this->DistributionID,
+                "DistributionID" => $this->DistributionID,
                 //"ADC"=> $this->ADC,
                 "ConnectionType" => $this->ConnectionType,
                 "lasttransactiondate" => $this->AccountType == 'Prepaid' ? 

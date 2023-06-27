@@ -29,7 +29,7 @@ class CustomerResource extends JsonResource
             'FirstName' => $this->FirstName,
             'OtherNames' => $this->OtherNames,
             'OldTariffCode' => $this->OldTariffCode,
-            'Address' => $this->Address1 . ' ' . $this->Address2 ,
+            'Address' => $this->Address,
             'TarriffCode' => $this->TarriffCode,
             'State' => $this->State,
             'Mobile' => $this->Mobile,

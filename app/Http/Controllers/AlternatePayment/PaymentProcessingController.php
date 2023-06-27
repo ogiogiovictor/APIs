@@ -17,6 +17,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
+use App\Models\TestModelPayments;
 
 
 class PaymentProcessingController extends BaseApiController
@@ -71,8 +72,8 @@ class PaymentProcessingController extends BaseApiController
 
             if($checkRef == 'Postpaid'){
                 $update = PaymentModel::where("transaction_id", $request->txnref)->update([
-                    'status' => 'success',
-                    'provider' => 'interswitch',
+                    'status' => 'success',  //"resp": "00",
+                    'provider' => $request->provider ?? '',
                     'providerRef' => $request['payRef'],
                     'receiptno' =>  Carbon::now()->format('YmdHis').time()
                 ]);
@@ -83,7 +84,7 @@ class PaymentProcessingController extends BaseApiController
                     "BillID" => $mainBills->BillID,
                     "PaymentTransactionId" =>  $checkRef->providerRef,
                     "receiptnumber" => $checkRef->receiptnumber,
-                    "PaymentSource" => $checkRef->payment_source,
+                    "PaymentSource" => 101, //I need to add this source to the database later //$checkRef->payment_source, 101
                     "MeterNo" => $custInfo->MeterNo,
                     "AccountNo" => $custInfo->AccountNo,
                     "PayDate" => Carbon::now()->format('Y-m-d H:i:s'),
@@ -98,6 +99,20 @@ class PaymentProcessingController extends BaseApiController
                     "BusinessUnit" => $custInfo->BUID,
                     "DateEngtered" => Carbon::now()->format('m'),
                     "CustomerID" => $custInfo->CustomerID,
+                ]);
+
+                //Update Billing Status
+                $addPaymentStatus = TestModelPayments::create([
+                    'transid' =>  $checkRef->providerRef,
+                    'transref' => $checkRef->transaction_id,
+                    'enteredby' => $checkRef->payment_source,
+                    'transdate' => Carbon::now()->format('Y-m-d H:i:s'),
+                    'transamount' => $request->apprAmt,
+                    'transstatus' => 'success',
+                    'accountno' => $checkRef->account_number,
+                    'transactionresponsemessage' => $request['desc'],
+                    'paymenttype' => $checkRef->payment_source,
+                    'TransactionBusinessUnit' => $checkRef->BUID
                 ]);
 
                 //I still have one table to add here

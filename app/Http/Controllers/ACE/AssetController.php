@@ -95,7 +95,9 @@ class AssetController extends BaseApiController
         $data = Cache::remember($cacheKey, $minutes, function () {
            return  [
                 'dt_billing' => BillingEffiency::orderby("TotalDSS", "desc")->paginate(30),
-                'dt_by_status' => DTWarehouse::select('Status', DB::raw('COUNT(Assetid) as AssetCount'))->groupBy('Status')->get()
+                'dt_by_status' => DTWarehouse::select('Status', DB::raw('COUNT(Assetid) as AssetCount'))->groupBy('Status')->get(),
+                'dt_total_billed_with_value' => BillingEffiency::where('TotalCustomers', '<>', 0)->count(),
+                'dt_billed_dss' => BillingEffiency::where('TotalDSS', '<>', 0)->count(),
                ];
         });
 
