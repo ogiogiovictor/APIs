@@ -255,6 +255,8 @@ Route::group(['prefix' => 'v2', 'namespace' => 'Api\v2', 'middleware' => 'OAuth'
         Route::get('get_dropdown_all', [TestController::class, 'getAllDrops']);
 
         Route::post('export_dt', [TestController::class, 'exportExcel']);
+        Route::post('export_customers', [ExportController::class, 'exportExcel']);
+        
 
 
         

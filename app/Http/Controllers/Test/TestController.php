@@ -1232,6 +1232,13 @@ class TestController extends BaseApiController
     }
 
 
+    // public function exportCustomers(Request $request){
+
+    //     $region = DimensionCustomer::where('Region', $request->mregion)->get();
+    //     $allCustomer = CustomerResource::collection($region)->response()->getData(true);
+    //     return $this->sendSuccess($allCustomer, "Successfully", Response::HTTP_OK);
+    // }
+
     public function getAllDrops(){
 
         $getDSS = DTWarehouse::select("DSS_11KV_415V_Name", "Assetid", "DSS_11KV_415V_Owner", "hub_name")->get();
