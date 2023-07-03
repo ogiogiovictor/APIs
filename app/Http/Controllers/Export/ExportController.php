@@ -5,7 +5,9 @@ namespace App\Http\Controllers\Export;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Test\DimensionCustomer; //please comment this on live
+use App\Models\Test\DTWarehouse;
 #use App\Models\DimensionCustomer; 
+#use App\Models\DTWarehouse;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class ExportController extends Controller
@@ -29,8 +31,42 @@ class ExportController extends Controller
 
             return $this->downloadCustomer($data);
 
+        }else if($request->has('download') && $request->download == "download_transformer"){
+
+
+             $data = DTWarehouse::withCount('getCustomerCount')->with('byregion')->get();
+
+            return $this->downloadDT($data);
+
         }
        
+    }
+
+
+    private function downloadDT($data){
+
+        $callback = function () use ($data) {
+            $file = fopen('php://output', 'w');
+
+            // Write CSV headers
+            fputcsv($file, ['Assetid', 'assettype']);
+
+            // Write data rows
+            foreach ($data as $row) {
+                fputcsv($file, [$row->Assetid, $row->assettype]);
+            }
+
+            fclose($file);
+        };
+
+         // Set the response headers
+         $headers = [
+            'Content-Type' => 'text/csv',
+            'Content-Disposition' => 'attachment; filename="export.csv"',
+        ];
+
+        return new StreamedResponse($callback, 200, $headers);
+
     }
 
 

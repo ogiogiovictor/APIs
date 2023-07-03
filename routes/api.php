@@ -165,6 +165,8 @@ Route::group(['prefix' => 'v1', 'namespace' => 'Api\v1', 'middleware' => 'OAuth'
         Route::get('get_nsts_customers', [CustomerInformation::class, 'nonStsCusomters']);
 
         Route::post('export_dt', [ExportController::class, 'exportExcel']);
+
+        Route::apiResource('assets', AssetController::class);
         
          
     });
@@ -256,6 +258,13 @@ Route::group(['prefix' => 'v2', 'namespace' => 'Api\v2', 'middleware' => 'OAuth'
 
         Route::post('export_dt', [TestController::class, 'exportExcel']);
         Route::post('export_customers', [ExportController::class, 'exportExcel']);
+
+
+        Route::get('dt_by_business_hub', [TestController::class, 'DTBusinessHub']);
+
+        Route::get('my_approval', [TestController::class, 'ApprovedCustomers']);
+
+       
         
 
 

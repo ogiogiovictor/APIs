@@ -28,8 +28,10 @@ class AssetRepository implements AssetRepositoryInterface
    public function storeDTs($data, $assetType){
     
         if($assetType == AssetEnum::DT_eleven()->value){
+             $gisData = DTWarehouse::create($data);
             return DTEleven::create($data);
         }else if($assetType == AssetEnum::DT_thirty_three()->value){
+            $gisData = DTWarehouse::create($data);
             return DTThirty::create($data);
         }else{
             return "Bad Asset Type";

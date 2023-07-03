@@ -5,6 +5,9 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use App\Helpers\AssetHelper;
+
 
 class DTWarehouse extends Model
 {
@@ -31,6 +34,24 @@ class DTWarehouse extends Model
         'DSS_11KV_415V_Trenches_with_granite', 'DSS_11KV_415V_fence_type', 'Edited by', 'Edited DateTime', 'AssetName', 'msrepl_tran_version'
     ];
 
+    protected static function boot(){
+        //$static = "TMP109070";
+         parent::boot();
+         //static::saving(fn($data) => $data->Assetid = AssetHelper::stripAll($static));
+         static::saving(function ($data){
+             $static = "TMP109070";
+             $data->Assetid = AssetHelper::stripAll($static);
+             $data->DSS_11KV_415V_Oil_Level = 0;
+             $data->DSS_11KV_415V_Silica_Condition = 0;
+         });
+       
+     }
+ 
+ 
+     public function serviceUnitEl(): BelongsTo {
+         return $this->belongsTo(ServiceUnit::class, "Name");
+     }
+
     public function getCustomerCount(){
         return $this->hasMany(DimensionCustomer::class, 'DistributionID', 'Assetid');
     }
@@ -40,6 +61,8 @@ class DTWarehouse extends Model
         return $this->hasOne(DimensionCustomer::class, 'DistributionID', 'Assetid')
             ->collate('SQL_Latin1_General_CP1_CI_AS');
     }
+
+
     
 
 }

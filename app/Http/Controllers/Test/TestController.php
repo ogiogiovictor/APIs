@@ -48,6 +48,8 @@ use App\Models\Meters;
 use App\Services\GeneralService;
 use App\Services\AssetService;
 use Symfony\Component\HttpFoundation\StreamedResponse;
+use App\Http\Resources\DTBusinessHubResource;
+
 
 
 class TestController extends BaseApiController
@@ -994,7 +996,7 @@ class TestController extends BaseApiController
         $user = User::create([
             'name' => $request->name,
             'email' => $request->email,
-            'status' => 1,
+            'status' => "1",
             'authority' => $request->authority,
             'password' => Hash::make($request->password),
             'level' => $request->level ?? []
@@ -1038,11 +1040,8 @@ class TestController extends BaseApiController
             $baseUrl = env('CUSTOMER_API_URL');
             $addCustomerUrl = $baseUrl . 'add_customer';
 
-            $response = Http::post($addCustomerUrl, $request->all());
+           return $response = Http::post($addCustomerUrl, $request->all());
 
-            if ($response) {
-                return $this->sendSuccess($response, "Customer Successfully Created", Response::HTTP_OK);
-            }
 
         }catch(\Exception $e){
             return $e->getmessage();
@@ -1256,6 +1255,27 @@ class TestController extends BaseApiController
 
         return $this->sendSuccess($data, "loaded Successfully", Response::HTTP_OK);
 
+    }
+
+
+
+    public function DTBusinessHub() {
+
+        //count(Assetid), hub_name,
+        $getDSS = DTBusinessHubResource::collection(DTWarehouse::select("hub_name", DB::raw("COUNT(Assetid) as asset_count"))->groupBy('hub_name')->get());
+
+        return $this->sendSuccess($getDSS, "loaded Successfully", Response::HTTP_OK);
+
+    }
+
+
+    public function ApprovedCustomers(){
+
+        $baseUrl = env('CUSTOMER_API_URL');
+        $getCustomerApproval = $baseUrl . 'my_approvals/'. Auth::user()->id;
+
+        return $response = Http::get($getCustomerApproval);        
+       
     }
 
 

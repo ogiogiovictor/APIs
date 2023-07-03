@@ -16,4 +16,13 @@ class DTWarehouse extends Model
     public function getCustomerCount(){
         return $this->hasMany(DimensionCustomer::class, 'DistributionID', 'Assetid');
     }
+
+
+    public function byregion()
+    {
+         return $this->hasOne(ServiceUnit::class,  'Biz_Hub', 'DSS_11KV_415V_Owner');
+    }
+
+  
+
 }

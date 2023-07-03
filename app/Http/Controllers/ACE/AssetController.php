@@ -17,6 +17,7 @@ use App\Models\BillingEffiency;
 use App\Services\CustomerService;
 use App\Enums\AssetEnum;
 use Illuminate\Support\Facades\Cache;
+use App\Http\Resources\BillingEfficencyResource;
 
 
 
@@ -94,7 +95,7 @@ class AssetController extends BaseApiController
 
         $data = Cache::remember($cacheKey, $minutes, function () {
            return  [
-                'dt_billing' => BillingEffiency::orderby("TotalDSS", "desc")->paginate(30),
+                'dt_billing' => new BillingEfficencyResource(BillingEffiency::orderby("TotalDSS", "desc")->paginate(30)),
                 'dt_by_status' => DTWarehouse::select('Status', DB::raw('COUNT(Assetid) as AssetCount'))->groupBy('Status')->get(),
                 'dt_total_billed_with_value' => BillingEffiency::where('TotalCustomers', '<>', 0)->count(),
                 'dt_billed_dss' => BillingEffiency::where('TotalDSS', '<>', 0)->count(),

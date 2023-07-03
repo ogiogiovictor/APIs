@@ -51,8 +51,15 @@ class DimensionCustomer extends Model
 
     public function getTotalOwingAttribute()
     {
-        return $this->zoneBills->sum('CurrentChgTotal') - $this->payments->sum('Payments');
+        return $this->zoneBills->sum('CurrentChgTotal')->$this->payments->sum('Payments');
     }
+
+    
+
+
+
+
+   
 
    
 }
