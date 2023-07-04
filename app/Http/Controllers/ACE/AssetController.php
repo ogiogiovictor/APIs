@@ -18,7 +18,7 @@ use App\Services\CustomerService;
 use App\Enums\AssetEnum;
 use Illuminate\Support\Facades\Cache;
 use App\Http\Resources\BillingEfficencyResource;
-
+use App\Http\Resources\DTBusinessHubResource;
 
 
 class AssetController extends BaseApiController
@@ -91,11 +91,12 @@ class AssetController extends BaseApiController
       // $dtStatus =  DTWarehouse::select('Status', DB::raw('COUNT(Assetid) as AssetCount'))->groupBy('Status')->get();
 
        $cacheKey = 'warehouse_billing_efficiency';
-        $minutes = 5;
+        $minutes = 30;
 
         $data = Cache::remember($cacheKey, $minutes, function () {
            return  [
-                'dt_billing' => new BillingEfficencyResource(BillingEffiency::orderby("TotalDSS", "desc")->paginate(30)),
+               'dt_billing' => BillingEfficencyResource::collection(BillingEffiency::orderby("TotalDSS", "desc")->paginate(30)),
+               // 'dt_billing' => BillingEffiency::orderby("TotalDSS", "desc")->paginate(30),
                 'dt_by_status' => DTWarehouse::select('Status', DB::raw('COUNT(Assetid) as AssetCount'))->groupBy('Status')->get(),
                 'dt_total_billed_with_value' => BillingEffiency::where('TotalCustomers', '<>', 0)->count(),
                 'dt_billed_dss' => BillingEffiency::where('TotalDSS', '<>', 0)->count(),
@@ -110,6 +111,19 @@ class AssetController extends BaseApiController
 
         return $this->sendSuccess($data, "Asset Information Saved Successfully", Response::HTTP_OK);
     }
+
+
+
+
+    public function DTBusinessHub() {
+
+        //count(Assetid), hub_name,
+        $getDSS = DTBusinessHubResource::collection(DTWarehouse::select("hub_name", DB::raw("COUNT(Assetid) as asset_count"))->groupBy('hub_name')->get());
+
+        return $this->sendSuccess($getDSS, "loaded Successfully", Response::HTTP_OK);
+
+    }
+
 
 
     

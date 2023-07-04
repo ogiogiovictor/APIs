@@ -167,6 +167,13 @@ Route::group(['prefix' => 'v1', 'namespace' => 'Api\v1', 'middleware' => 'OAuth'
         Route::post('export_dt', [ExportController::class, 'exportExcel']);
 
         Route::apiResource('assets', AssetController::class);
+
+        Route::post('export_customers', [ExportController::class, 'exportExcel']);
+
+        Route::get('dt_by_business_hub', [AssetController::class, 'DTBusinessHub']);
+
+        Route::get('my_approval', [CustomerInformation::class, 'ApprovedCustomers']);
+
         
          
     });

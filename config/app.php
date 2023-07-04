@@ -199,7 +199,7 @@ return [
 
        // Maatwebsite\Excel\ExcelServiceProvider::class,
       //  \SocialiteProviders\Manager\ServiceProvider::class, // add
-        Adldap\Laravel\AdldapServiceProvider::class,
+      
 
 
 

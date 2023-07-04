@@ -22,6 +22,12 @@ class PaymentModel extends Model
         'status',
         'customer_name',
         'date_entered',
+        'BUID',
+        'provider',
+        'providerRef',
+        'receiptno',
+        'payment_source',
+        'Descript'
     ];
 
 }

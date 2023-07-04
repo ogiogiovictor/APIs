@@ -41,9 +41,9 @@ return [
             'provider' => 'users',
         ],
 
-        'ldap' => [
-            'driver' => 'ldap',
-        ],
+        // 'ldap' => [
+        //     'driver' => 'ldap',
+        // ],
         
 
     ],

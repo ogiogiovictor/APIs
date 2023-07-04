@@ -428,6 +428,16 @@ class CustomerInformation extends BaseApiController
 
         return $this->sendSuccess($customers, "Non STS Customers Successfully Loaded", Response::HTTP_OK);
     }
+    
+
+    public function ApprovedCustomers(){
+
+        $baseUrl = env('CUSTOMER_API_URL');
+        $getCustomerApproval = $baseUrl . 'my_approvals/'. Auth::user()->id;
+
+        return $response = Http::get($getCustomerApproval);        
+       
+    }
 
      
  

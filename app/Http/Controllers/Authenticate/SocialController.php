@@ -23,6 +23,8 @@ class SocialController extends BaseApiController
 
     public function redirectoToProvider(String $provider){
 
+        
+
         try {
            $social_user = \Socialite::driver($provider)->user();
          //$social_user = \Socialite::driver($provider)->stateless()->user();
@@ -36,12 +38,13 @@ class SocialController extends BaseApiController
 
     public function authenticate(Request $request){
 
-         
-        return $user = Adldap::search()->users()->find('ogiogio victor');
+         // Finding a user:
+      //  return $user = Adldap::search()->users()->find('victor.ogiogio@ibedc.com');
+        
 
         $credentials = $request->only('email', 'password');
 
-        if(Auth::guard('ldap')->attempt($credentials)){
+        if(Auth::guard('adldap')->attempt($credentials)){
             $authUser = Auth::guard('ldap')->user();
 
             $success['Authorization'] = $authUser->createToken('Sanctom+Socialite')->plainTextToken;
