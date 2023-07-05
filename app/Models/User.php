@@ -28,6 +28,9 @@ class User extends Authenticatable
         'authority',
         'level',
         'status',
+        'login_type',
+        'guid',
+        'domain',
     ];
 
     /**

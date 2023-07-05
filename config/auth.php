@@ -41,10 +41,12 @@ return [
             'provider' => 'users',
         ],
 
-        // 'ldap' => [
-        //     'driver' => 'ldap',
-        // ],
-        
+        'alpha' => [
+            'driver' => 'session',
+            'provider' => 'alpha',
+        ],
+
+      
 
     ],
 
@@ -71,10 +73,11 @@ return [
             'model' => App\Models\User::class,
         ],
 
-        // 'adldap' => [
-        //     'driver' => 'ldap',
-        //     'model' => App\Models\User::class,
-        // ],
+        'alpha' => [
+            'driver' => 'ldap',
+            #'model' => LdapRecord\Models\ActiveDirectory\User::class,
+            'model' => App\Ldap\AlphaUser::class,
+        ],
 
         // 'users' => [
         //     'driver' => 'database',
