@@ -1279,6 +1279,29 @@ class TestController extends BaseApiController
     }
 
 
+    public function AssignUserMenu(Request $request){
+
+        $getRowID = Role::where('name', $request->role)->first();
+
+        $menuIds = implode(',', $request->menu_id);
+
+        $updateMenuRole = MenuRole::updateOrCreate(
+            ['role_id' => $getRowID->id],    
+            [
+                'menu_id' =>  "[$menuIds]",
+
+            ]);
+
+        if($updateMenuRole){
+            return $this->sendSuccess($updateMenuRole, "Record Successfully Updated", Response::HTTP_OK);
+        }else {
+            return $this->sendError("Error", "No Result Found", Response::HTTP_BAD_REQUEST);
+        }
+       
+
+    }
+
+
 
 
 }

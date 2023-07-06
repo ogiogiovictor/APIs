@@ -271,6 +271,8 @@ Route::group(['prefix' => 'v2', 'namespace' => 'Api\v2', 'middleware' => 'OAuth'
 
         Route::get('my_approval', [TestController::class, 'ApprovedCustomers']);
 
+        Route::post('assign_user_menu', [TestController::class, 'AssignUserMenu']);
+
        
         
 
