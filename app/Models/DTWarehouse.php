@@ -17,7 +17,8 @@ class DTWarehouse extends Model
 
     protected $primaryKey = 'AssetId';
 
-    protected $table = "MAIN_WAREHOUSE.dbo.gis_dss";
+   // protected $table = "MAIN_WAREHOUSE.dbo.gis_dss";
+    protected $table = "MAIN_WAREHOUSE.dbo.all_gis_dss";
 
     public $timestamps = false;
 
@@ -61,6 +62,12 @@ class DTWarehouse extends Model
         return $this->hasOne(DimensionCustomer::class, 'DistributionID', 'Assetid')
             ->collate('SQL_Latin1_General_CP1_CI_AS');
     }
+
+    public function byregion()
+    {
+         return $this->hasOne(ServiceUnit::class,  'Biz_Hub', 'DSS_11KV_415V_Owner');
+    }
+
 
 
     

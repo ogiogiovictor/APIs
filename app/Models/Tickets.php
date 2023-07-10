@@ -11,7 +11,9 @@ class Tickets extends Model
 
 
     protected $connection = 'crm';
-    protected $table = "tickets";
+    //protected $table = "tickets";
+    protected $table = "crm_tickets";
+
 
    // public $timestamps = false;
 

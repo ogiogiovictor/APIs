@@ -19,11 +19,11 @@ class Oauthenticate
     {
         $get_allowed_ip = ApplicationAccess::pluck("ip_address")->toArray();
      
-        $myIP = isset($_SERVER['REMOTE_ADDR']) ? $_SERVER['REMOTE_ADDR'] : request()->ip(); 
+        $myIP = isset($_SERVER['SERVER_ADDR']) ? $_SERVER['SERVER_ADDR'] : request()->ip(); 
 
         if(!in_array($myIP, $get_allowed_ip)){
             return response()->json([
-                'status' => 401, 'message' => 'Host IP Not Allowed YES' . $_SERVER['HTTP_HOST']. " -request- ".request()->ip(). " serverip- ". $_SERVER['REMOTE_ADDR'],
+                'status' => 401, 'message' => 'Host IP Not Allowed ' . $_SERVER['HTTP_HOST']. " -request- ".request()->ip(). " serverip- ". $_SERVER['SERVER_ADDR'],
             ], Response::HTTP_BAD_REQUEST);
         }
 

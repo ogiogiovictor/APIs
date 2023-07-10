@@ -12,6 +12,7 @@ use App\Services\AmiService;
 use App\Http\Resources\AmiResource;
 use App\Http\Resources\AmiminiResource;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Redis;
 
 class AmiController extends BaseApiController
 {
@@ -70,11 +71,12 @@ class AmiController extends BaseApiController
     }
 
     public function getAll(){
+        Redis::flushall();
 
         $cacheKey = 'ami_event_getAll';
         $minutes = 5;
 
-        $data = Cache::remember($cacheKey, $minutes, function () {
+       /* $data = Cache::remember($cacheKey, $minutes, function () {
             $group = (new AmiService)->allConnectionsgroups();
             $getRequest = (new AmiService)->allConnections();
 
@@ -84,15 +86,15 @@ class AmiController extends BaseApiController
             ];
 
         });
+        */
 
-        //$group = (new AmiService)->allConnectionsgroups();
+        $group = (new AmiService)->allConnectionsgroups();
+        $getRequest = (new AmiService)->allConnections();
 
-      //  $getRequest = (new AmiService)->allConnections();
-
-        // $data = [
-        //     'group' => $group,
-        //     'ami_data' => $getRequest,
-        // ];
+         $data = [
+             'group' => $group,
+             'ami_data' => $getRequest,
+         ];
         return $this->sendSuccess($data, "Data Loaded - ". count($data), Response::HTTP_OK);
         
     }

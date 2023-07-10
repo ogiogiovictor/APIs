@@ -32,9 +32,25 @@ class TicketService
     }
 
 
-    public function ticketStats(){
+    public function ticketStats($request){
+    
+        $reqStatus = '';
 
-        $tickets = Tickets::orderby('created_at', 'desc')->paginate(20);
+        if ($request === 'closed') {
+            $reqStatus = 'closed';
+        } elseif ($request === 'open') {
+            $reqStatus = 'open';
+        } elseif ($request === 'unassigned') {
+            $reqStatus = 'unassigned';
+        }
+
+        //$tickets = Tickets::where("status", $reqStatus)->orderby('created_at', 'desc')->paginate(20);
+        $tickets =  $tickets = Tickets::when($reqStatus, function ($query) use ($reqStatus) {
+            return $query->where('status', $reqStatus);
+        })
+        ->orderBy('created_at', 'desc')
+        ->paginate(20);
+
         $closedTicket = Tickets::where('status', 'closed')->count();
         $openTickets = Tickets::where('status', 'open')->count();
         $unassignedTickets = Tickets::where('unassigned', 1)->count();

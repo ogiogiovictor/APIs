@@ -4,11 +4,12 @@ namespace App\Http\Controllers\Export;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-use App\Models\Test\DimensionCustomer; //please comment this on live
-use App\Models\Test\DTWarehouse;
-#use App\Models\DimensionCustomer; 
-#use App\Models\DTWarehouse;
+#use App\Models\Test\DimensionCustomer; //please comment this on live
+#use App\Models\Test\DTWarehouse;
+use App\Models\DimensionCustomer; 
+use App\Models\DTWarehouse;
 use Symfony\Component\HttpFoundation\StreamedResponse;
+use App\Http\Resources\DTResource;
 
 class ExportController extends Controller
 {
@@ -19,8 +20,17 @@ class ExportController extends Controller
         if($request->has('download') && $request->download == "download_customer"){
 
           
-            $data = DimensionCustomer::whereBetween("SetupDate", [$request->start_date, $request->end_date])->where("AccountType", $request->account_type)
-            ->where("BusinessHub", $request->business_hub)->where("Region", $request->Region)->where("StatusCode", $request->status)->get();
+            if ($request->account_type == 'Prepaid') {
+                $status = ($request->status == 'A') ? 1 : 0;
+            } else {
+                $status = $request->status;
+            }
+
+            
+                $data = DimensionCustomer::whereBetween("SetupDate", [$request->start_date, $request->end_date])->where("AccountType", $request->account_type)
+            ->where("BusinessHub", $request->business_hub)->where("Region", $request->region)->where("StatusCode", $status)->get();
+            
+            
 
              return $mdata = $this->downloadCustomer($data);
 
@@ -33,8 +43,8 @@ class ExportController extends Controller
 
         }else if($request->has('download') && $request->download == "download_transformer"){
 
-
-             $data = DTWarehouse::withCount('getCustomerCount')->with('byregion')->get();
+             //$data = DTWarehouse::withCount('getCustomerCount')->with('byregion')->get();
+             $data =  DTResource::collection(DTWarehouse::where('Region', $request->region)->withCount('getCustomerCount')->get());
 
             return $this->downloadDT($data);
 
@@ -49,11 +59,13 @@ class ExportController extends Controller
             $file = fopen('php://output', 'w');
 
             // Write CSV headers
-            fputcsv($file, ['Assetid', 'assettype']);
+            fputcsv($file, ['Assetid', 'assettype', 'Capture_Datetime', 'latitude', 'longitude', 'DSS_11KV_415V_Owner', 'DSS_11KV_415V_Name',
+            'DSS_11KV_415V_Address', 'DSS_11KV_415V_Rating', 'hub_name', 'Status']);
 
             // Write data rows
             foreach ($data as $row) {
-                fputcsv($file, [$row->Assetid, $row->assettype]);
+                fputcsv($file, [$row->Assetid, $row->assettype, $row->Capture_Datetime, $row->latitude, $row->longitude, $row->DSS_11KV_415V_Owner, $row->DSS_11KV_415V_Name
+                , $row->DSS_11KV_415V_Address, $row->DSS_11KV_415V_Rating, $row->hub_name, $row->Status]);
             }
 
             fclose($file);

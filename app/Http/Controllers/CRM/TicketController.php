@@ -12,8 +12,8 @@ use Symfony\Component\HttpFoundation\Response;
 
 class TicketController extends BaseApiController
 {
-    public function index(){
-        $ticketData = (new TicketService)->ticketStats();
+    public function index(Request $request){
+        $ticketData = (new TicketService)->ticketStats($request->type);
 
         if($ticketData){
             return $this->sendSuccess($ticketData, "Ticket Successfully  Loaded", Response::HTTP_OK);

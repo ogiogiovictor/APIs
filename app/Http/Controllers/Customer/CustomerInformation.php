@@ -331,11 +331,7 @@ class CustomerInformation extends BaseApiController
             $baseUrl = env('CUSTOMER_API_URL');
             $addCustomerUrl = $baseUrl . 'add_customer';
 
-            $response = Http::post($addCustomerUrl, $request->all());
-
-            if ($response) {
-                return $this->sendSuccess($response, "Customer Successfully Created", Response::HTTP_OK);
-            }
+            return $response = Http::post($addCustomerUrl, $request->all());
 
         }catch(\Exception $e){
             return $e->getmessage();

@@ -121,6 +121,8 @@ Route::group(['prefix' => 'v1', 'namespace' => 'Api\v1', 'middleware' => 'OAuth'
         Route::get('grap_asset/{type?}', [AssetController::class, 'getAssetWH']);  // Get Asset Warehouse
         Route::get('grap_feeder/{type?}', [FeederController::class, 'index']); //Get Feeder Warehouse
         Route::get('transmission_stations', [InjectionSubStationController::class, 'getTransmissionStations']);
+        Route::post('grap_feeder', [FeederController::class, 'addFeeder']); 
+        Route::post('add_assets', [AssetController::class, 'store']);
 
         //AMI
         Route::get('get_events', [AmiController::class, 'getSummary'])->name('getEvents');  

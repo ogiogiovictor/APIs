@@ -179,7 +179,7 @@ class PaymentProcessingController extends BaseApiController
                 'payment_source' => $request->payment_source,
                // 'meter_no' => $request->meter_no,
                 'status' => "pending",
-                'customer_name' => $zoneECMI->Surname.' '. $zoneECMI->OtherNames,
+                'customer_name' => $custInfo->Surname.' '. $custInfo->FirstName,
                 'date_entered' => Carbon::now(),
                 'BUID' => $custInfo->BUID
     

@@ -20,7 +20,7 @@ class AssetService
     public function getFeederEleven() {
 
      
-        $eleven =  FeederEleven::paginate(20);
+        $eleven =  FeederEleven::orderby("Capture DateTime", "desc")->paginate(20);
 
         return $eleven;
     
@@ -29,7 +29,7 @@ class AssetService
        public function getFeederThirty() {
     
        
-        $thirty =  FeederThirty::paginate(20);
+        $thirty =  FeederThirty::orderby("Capture DateTime", "desc")->paginate(20);
         
 
        
@@ -40,8 +40,8 @@ class AssetService
 
        public function allFeeder() {
 
-        $eleven = FeederEleven::get(); 
-        $thirty = Feederthirty::get();
+        $eleven = FeederEleven::orderby("Capture DateTime", "desc")->get(); 
+        $thirty = Feederthirty::orderby("Capture DateTime", "desc")->get();
         $merged = $eleven->merge($thirty)->rowpageme(10);
 
         return $merged;
