@@ -15,6 +15,7 @@ use App\Models\User;
 use App\Http\Controllers\BaseApiController;
 use Symfony\Component\HttpFoundation\Response;
 use Illuminate\Support\Facades\Hash;
+use Spatie\Permission\Models\Role;
 
 
 class UserController extends BaseApiController
@@ -128,10 +129,36 @@ class UserController extends BaseApiController
 
      public function getRolePermission($role_id) {
 
-        $hasAccess = SubMenu::where("role_id", $role_id)->get();
+        //$hasAccess = SubMenu::where("role_id", $role_id)->get();
+       // $hasAccess = SubMenu::whereIn("role_id", [$role_id])->get();
+        $hasAccess = SubMenu::whereIn("role_id", [strval($role)])->get();
 
         return $this->sendSuccess($hasAccess, "Successfully", Response::HTTP_OK);
     }
+
+
+    public function AssignUserMenu(Request $request){
+
+        $getRowID = Role::where('name', $request->role)->first();
+
+        $menuIds = implode(',', $request->menu_id);
+
+        $updateMenuRole = MenuRole::updateOrCreate(
+            ['role_id' => $getRowID->id],    
+            [
+                'menu_id' =>  "[$menuIds]",
+
+            ]);
+
+        if($updateMenuRole){
+            return $this->sendSuccess($updateMenuRole, "Record Successfully Updated", Response::HTTP_OK);
+        }else {
+            return $this->sendError("Error", "No Result Found", Response::HTTP_BAD_REQUEST);
+        }
+       
+
+    }
+
 
 
 

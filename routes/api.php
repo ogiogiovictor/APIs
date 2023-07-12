@@ -139,6 +139,7 @@ Route::group(['prefix' => 'v1', 'namespace' => 'Api\v1', 'middleware' => 'OAuth'
             Route::post('assign_roles', [RoleController::class, 'assignMenuRole']);
             Route::post('permissions', [PermissionController::class, 'store']);
             Route::get('permissions', [PermissionController::class, 'index']);
+            Route::post('assign_permission', [PermissionController::class, 'giveMePermission']);
             
         });
 
@@ -168,13 +169,15 @@ Route::group(['prefix' => 'v1', 'namespace' => 'Api\v1', 'middleware' => 'OAuth'
 
         Route::post('export_dt', [ExportController::class, 'exportExcel']);
 
-        Route::apiResource('assets', AssetController::class);
+        //Route::apiResource('assets', AssetController::class); //Need to fix this maybe change the assets to massets
 
         Route::post('export_customers', [ExportController::class, 'exportExcel']);
 
         Route::get('dt_by_business_hub', [AssetController::class, 'DTBusinessHub']);
 
         Route::get('my_approval', [CustomerInformation::class, 'ApprovedCustomers']);
+
+        Route::post('assign_user_menu', [UserController::class, 'AssignUserMenu']);
 
         
          

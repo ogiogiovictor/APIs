@@ -6,10 +6,18 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Support\Facades\DB;
+use Spatie\Permission\Traits\HasRoles;
+
+
 
 class Role extends Model
 {
-    use HasFactory;
+    use HasRoles, HasFactory;
+
+    public $fillable = [
+        'name',
+    ];
+    
 
     public function users(): BelongsToMany
     {

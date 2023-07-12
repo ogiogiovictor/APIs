@@ -8,6 +8,10 @@ use App\Http\Controllers\BaseApiController;
 use Symfony\Component\HttpFoundation\Response;
 use Illuminate\Support\Facades\Auth;
 use Spatie\Permission\Models\Permission;
+#use App\Models\Role;
+use Spatie\Permission\Models\Role;
+#use Spatie\Permission\Models\Permission;
+use App\Models\User;
 
 class PermissionController extends BaseApiController
 {
@@ -48,6 +52,18 @@ class PermissionController extends BaseApiController
         }catch(\Exception $e){
             return $this->sendError("Error", "Error Loading Data, Something went wrong", Response::HTTP_INTERNAL_SERVER_ERROR);
         }
+
+    }
+
+    public function giveMePermission(Request $request){
+
+        $authUser = User::find($request->user_id);
+        $permissionName = $request->permission; 
+      
+        
+        $authUser->givePermissionTo($permissionName);
+        return $this->sendSuccess($authUser, "Roles Information", Response::HTTP_OK);
+
 
     }
 

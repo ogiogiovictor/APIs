@@ -36,7 +36,11 @@ class SocialController extends BaseApiController
 
                 $checkType = $this->checkExistEmail($user->mail, $validatedData['password']);
 
-                return $checkType;
+                $data = [
+                    'user' => $checkType,
+                    'ad_user' => $user
+                ];
+                return $data;
 
             }else if(Auth::guard('web')->attempt(['email' => $validatedData['mail'], 'password' => $validatedData['password'] ])) {
                 $authUser = Auth::guard('web')->user();

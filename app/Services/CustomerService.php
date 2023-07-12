@@ -26,6 +26,8 @@ use Symfony\Component\HttpFoundation\Response;
 use Illuminate\Http\Request;
 use App\Models\HighTension;
 use App\Http\Resources\TransformerResource;
+use App\Http\Resources\NewResource;
+use App\Models\SubAccount;
 
 
 
@@ -281,10 +283,13 @@ class CustomerService
 
        
         //$customer = DimensionCustomer::with('bills')->where('AccountNo', $changeAccountNumber)->first();
+        
+        $newFormatedNumber = StringHelper::formatAccountNumber($changeAccountNumber);
+       
         if($accountType == 'Postpaid'){
             $customer = DimensionCustomer::with(['bills' => function ($query) {
                 $query->orderByDesc('Billdate');
-            }])->where('AccountNo', $changeAccountNumber)->first();
+            }])->where('AccountNo', $newFormatedNumber)->first();
         }else {
             $customer = DimensionCustomer::with(['bills' => function ($query) {
                 $query->orderByDesc('Billdate');
@@ -318,7 +323,7 @@ class CustomerService
         }
        
 
-       $newFormatedNumber = StringHelper::formatAccountNumber($changeAccountNumber);
+     
        $crm_user = CRMUser::where('accountno', $newFormatedNumber)->first();
 
        if($crm_user){
@@ -374,9 +379,21 @@ class CustomerService
             ->first();
             $customer->disconnections = $disconnections;
        }
-      
 
-      
+       if($accountType == 'Prepaid'){
+        $subAccountBal = SubAccount::select("SubAccountNo", "AccountNo", "AmountAttached", "Balance", "SubAccountAbbre", "ModeOfPayment", "PaymentAmount", "lastmodified")
+        ->where(["AccountNo" => $newFormatedNumber, "SubAccountAbbre" => 'OUTBAL'])->first();
+
+            $addBalance = 0;
+            if($subAccountBal){
+                $subAccountBalFpUnit = SubAccount::where(["AccountNo" => $newFormatedNumber, "SubAccountAbbre" => 'FPUNIT'])->first()->Balance;
+                $addBalance = $subAccountBal->Balance + $subAccountBalFpUnit;
+                $subAccountBal->Balance = number_format($addBalance, 2, ".", "");
+            }
+        $customer->outbalance = $subAccountBal;
+       }
+
+
 
        return $customer;
 

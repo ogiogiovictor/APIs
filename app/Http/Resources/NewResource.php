@@ -8,6 +8,7 @@ use Illuminate\Support\Carbon;
 use App\Models\ECMIPayment;
 use App\Models\EMSPayment;
 use App\Helpers\StringHelper;
+use App\Models\SubAccount;
 
 
 class NewResource extends JsonResource
@@ -58,8 +59,33 @@ class NewResource extends JsonResource
                 "vat" => $this->AccountType == 'Prepaid' ?  ECMIPayment::select('VAT')->latest('TransactionDateTime')->where("AccountNo", $this->AccountNo)->value('VAT') : null,
                // "lastPayment" => $this->AccountType == 'Postpaid' ?  EMSPayment::select('Payments')->latest('PayDate')->where("AccountNo", $this->AccountNo)->value('Payments') : null,
                // "lastPayDate" => $this->AccountType == 'Postpaid' ?  EMSPayment::select('PayDate')->latest('PayDate')->where("AccountNo", $this->AccountNo)->value('PayDate') : null,
-
+               "outbalance" => $this->outBalance($this->AccountType, $this->AccountNo),
         ];
         //return parent::toArray($request);
     }
+
+
+    public function outBalance($accType, $actNo){
+        if($accType == 'Prepaid'){
+            //$accountNo = Customer::where("MeterNo", $actNo)->value("AccountNo");
+            $subAccountBal = SubAccount::select("SubAccountNo", "AccountNo", "AmountAttached", "Balance", "SubAccountAbbre", "ModeOfPayment", "PaymentAmount", "lastmodified")
+            ->where(["AccountNo" => $actNo, "SubAccountAbbre" => 'OUTBAL'])->first();
+
+            //return  $subAccountBal->Balance;
+          
+
+            $addBalance = 0;
+            if($subAccountBal){
+                $subAccountBalFpUnit = SubAccount::where(["AccountNo" => $actNo, "SubAccountAbbre" => 'FPUNIT'])->first()->Balance;
+                $addBalance = $subAccountBal->Balance + $subAccountBalFpUnit;
+                $subAccountBal->Balance = number_format($addBalance, 2, ".", "");
+            }
+
+            return $subAccountBal;
+           
+        }
+    }
+
+
+
 }

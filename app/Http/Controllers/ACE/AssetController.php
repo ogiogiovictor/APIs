@@ -121,13 +121,13 @@ class AssetController extends BaseApiController
         $minutes = 30;
 
         $data = Cache::remember($cacheKey, $minutes, function () {
-            
-            $getDSS =  DTBusinessHubResource::collection(DTWarehouse::select("hub_name", DB::raw("COUNT(Assetid) as asset_count"))->groupBy('hub_name')->get());
-            return $this->sendSuccess($getDSS, "loaded Successfully", Response::HTTP_OK);
+         
+         return DTBusinessHubResource::collection(DTWarehouse::select("hub_name", DB::raw("COUNT(Assetid) as asset_count"))->groupBy('hub_name')->get());
+          
         });
         //$getDSS = DTBusinessHubResource::collection(DTWarehouse::select("hub_name", DB::raw("COUNT(Assetid) as asset_count"))->groupBy('hub_name')->get());
 
-       // return $this->sendSuccess($getDSS, "loaded Successfully", Response::HTTP_OK);
+       return $this->sendSuccess($data, "loaded Successfully", Response::HTTP_OK);
 
     }
    

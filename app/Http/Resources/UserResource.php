@@ -33,12 +33,15 @@ class UserResource extends JsonResource
             "status" => $this->status,
             "time_ago" => Carbon::parse($this->created_at)->subMinutes(2)->diffForHumans(),
             "menus" => $this->menuAccess($this->roles->first()->id),
+            "permission" =>  $this->permissions->pluck('name'),
 
         ];
         //return parent::toArray($request);
     }
 
     public function menuAccess($role) {
+
+    
         //User Role
         $menu = MenuRole::where("role_id", $role)->first()->menu_id;
         
@@ -52,8 +55,16 @@ class UserResource extends JsonResource
         $menuName = MenuAccess::whereIn("id", $menuArray)->where("menu_status", "on")->get()->toArray();
 
         $menuIds = array_column($menuName, 'id');
-        //$subMenus = SubMenu::whereIn(["menu_id" => $menuIds, "role_id" => $role])->get();
-        $subMenus = SubMenu::whereIn("menu_id", $menuIds)->whereIn("role_id", [$role])->get();
+
+        $subMenus = SubMenu::whereIn("menu_id", $menuIds)->whereIn("role_id", [strval($role)])->get();
+       // $subMenus = SubMenu::whereIn("menu_id", $menuIds)->whereRaw("CONCAT(',', role_id, ',') LIKE CONCAT('%,', ?, ',%')", [$role])->get();
+       //$roleId = "%[" . $role . "]%";
+       //$subMenus = SubMenu::whereIn("menu_id", $menuIds)->whereRaw("role_id LIKE ?", [$roleId])->get();
+
+    
+
+
+
 
          // User Permission
         $permission = array_map('intval', explode(',', trim(MenuRole::where("role_id", $role)->first()->permission_id, '[]')));
@@ -67,7 +78,7 @@ class UserResource extends JsonResource
                 'id' => $navbar['id'],
                 'menu_name' => $navbar['menu_name'],
                 'menu_url' => $navbar['menu_url'],
-                'submenu' => $submenu,
+                'submenu' => $subMenus,
                'permission' => $permissions->get($navbar['id'])
             ];
 
