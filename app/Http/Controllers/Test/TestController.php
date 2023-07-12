@@ -54,6 +54,8 @@ use App\Http\Resources\DTBusinessHubResource;
 
 class TestController extends BaseApiController
 {
+
+  
     public function login(LoginRequest $request) //: Object
     {
 
@@ -80,6 +82,9 @@ class TestController extends BaseApiController
         }
 
     }
+
+
+
 
 
     public function stats() {
@@ -1278,6 +1283,8 @@ class TestController extends BaseApiController
        
     }
 
+    
+
 
     public function AssignUserMenu(Request $request){
 
@@ -1301,6 +1308,27 @@ class TestController extends BaseApiController
 
     }
 
+
+    public function userLogout(Request $request){
+
+        $userId = $request->userId;
+       // $user = auth()->user()->tokens()->delete();
+       
+       // $user->tokens()->delete();
+       if(!Auth::check()) {
+        return $this->sendError("No Data", "Error Loading User Data", Response::HTTP_UNAUTHORIZED);
+        }
+
+        $user =  auth()->user()->tokens()->delete();
+    
+        
+        return response()->json(['message' => 'Logged out successfully', 'user' => $user]);
+    }
+
+    
+
+
+   
 
 
 

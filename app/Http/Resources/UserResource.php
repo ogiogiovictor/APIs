@@ -11,6 +11,8 @@ use Illuminate\Support\Facades\Auth;
 use App\Models\MenuRole;
 use App\Models\MenuAccess;
 use App\Models\SubMenu;
+use App\Models\AssignSubMenu;
+use App\Http\Resources\SubMenuResource;
 
 class UserResource extends JsonResource
 {
@@ -41,7 +43,8 @@ class UserResource extends JsonResource
 
     public function menuAccess($role) {
 
-    
+         // Fetch role IDs
+        $roleIds = array_map('intval', explode(',', $role));
         //User Role
         $menu = MenuRole::where("role_id", $role)->first()->menu_id;
         
@@ -56,14 +59,7 @@ class UserResource extends JsonResource
 
         $menuIds = array_column($menuName, 'id');
 
-        $subMenus = SubMenu::whereIn("menu_id", $menuIds)->whereIn("role_id", [strval($role)])->get();
-       // $subMenus = SubMenu::whereIn("menu_id", $menuIds)->whereRaw("CONCAT(',', role_id, ',') LIKE CONCAT('%,', ?, ',%')", [$role])->get();
-       //$roleId = "%[" . $role . "]%";
-       //$subMenus = SubMenu::whereIn("menu_id", $menuIds)->whereRaw("role_id LIKE ?", [$roleId])->get();
-
-    
-
-
+        $subMenus =  SubMenuResource::collection(AssignSubMenu::whereIn("menu_id", $menuIds)->where("role_id", $role)->get());
 
 
          // User Permission
@@ -78,7 +74,7 @@ class UserResource extends JsonResource
                 'id' => $navbar['id'],
                 'menu_name' => $navbar['menu_name'],
                 'menu_url' => $navbar['menu_url'],
-                'submenu' => $subMenus,
+                'submenu' => $submenu,
                'permission' => $permissions->get($navbar['id'])
             ];
 
