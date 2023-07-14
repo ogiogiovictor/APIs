@@ -49,6 +49,7 @@ use App\Services\GeneralService;
 use App\Services\AssetService;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 use App\Http\Resources\DTBusinessHubResource;
+use App\Models\AssignSubMenu;
 
 
 
@@ -1131,7 +1132,8 @@ class TestController extends BaseApiController
     
      public function AccessControl() {
         $getMenu = MenuAccess::where("menu_status", "on")->get();
-        $getSubMenu = SubMenu::all();
+       // $getSubMenu = SubMenu::all();
+        $getSubMenu = AssignSubMenu::all();
 
         $array = [];
         foreach($getMenu as $get){
@@ -1139,7 +1141,8 @@ class TestController extends BaseApiController
                 'menu_id' => $get->id,
                 'menu_name' => $get->menu_name,
                 'menu_status' => $get->menu_status,
-                'submenu' => SubMenu::where('menu_id', $get->id)->get()
+                'submenu' => SubMenu::where('menu_id', $get->id)->get(),
+               // 'submenu' => $this->refactorOutput(AssignSubMenu::where('menu_id', $get->id)->get())
             ];
         }
 
@@ -1147,12 +1150,38 @@ class TestController extends BaseApiController
      }
 
 
+
      public function getRolePermission($role_id) {
 
-        $hasAccess = SubMenu::where("role_id", $role_id)->get();
+       // $hasAccess = SubMenu::where("role_id", $role_id)->get();
+        $hasAccess =  $this->refactorOutput(AssignSubMenu::where("role_id", $role_id)->get()); //AssignSubMenu::where("role_id", $role_id)->get();
 
         return $this->sendSuccess($hasAccess, "Successfully", Response::HTTP_OK);
     }
+
+
+    private function refactorOutput($data){
+        if($data){
+            $array = [];
+            foreach($data as $get){
+                $array[] = [
+                    'created_at' => $get->created_at,
+                    'id' => intval($get->sub_menu_id),
+                    'menu_id' => intval($get->menu_id),
+                    'sub_menu_id' => intval($get->sub_menu_id),
+                    'name' => SubMenu::where("id", $get->sub_menu_id)->value("name"),
+
+                    'menu_status' => SubMenu::where("id", $get->sub_menu_id)->value("menu_status"),
+                    'menu_url' =>SubMenu::where("id", $get->sub_menu_id)->value("menu_url"),
+                   
+                    'role_id' =>   $get->role_id
+                ];
+            }
+            return $array;
+        }
+
+     }
+
 
 
     public function getMeter(){
@@ -1285,10 +1314,27 @@ class TestController extends BaseApiController
 
     
 
-
     public function AssignUserMenu(Request $request){
 
         $getRowID = Role::where('name', $request->role)->first();
+        $subMenu = $request->submenu_id;
+
+        $new_array = [];
+        $getAccess = SubMenu::select("menu_id")->whereIn("id", $request->submenu_id)->get();
+        if($getAccess){
+          foreach($getAccess as $get){
+            array_push($new_array, $get->menu_id);
+          }
+        }
+
+        return  $new_array;
+
+        return 
+        [
+          'data' =>  $getAccess,
+           'sub_id' => $request->submenu_id
+
+        ];
 
         $menuIds = implode(',', $request->menu_id);
 
@@ -1297,7 +1343,8 @@ class TestController extends BaseApiController
             [
                 'menu_id' =>  "[$menuIds]",
 
-            ]);
+            ]
+        );
 
         if($updateMenuRole){
             return $this->sendSuccess($updateMenuRole, "Record Successfully Updated", Response::HTTP_OK);
