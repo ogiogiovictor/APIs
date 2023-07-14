@@ -179,6 +179,8 @@ Route::group(['prefix' => 'v1', 'namespace' => 'Api\v1', 'middleware' => 'OAuth'
 
         Route::post('assign_user_menu', [UserController::class, 'AssignUserMenu']);
 
+        Route::post('mlogout', [TestController::class, 'userLogout']);
+
         
          
     });

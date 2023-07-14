@@ -11,6 +11,9 @@ use App\Models\SubMenu;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 use App\Http\Controllers\BaseApiController;
 use Illuminate\Support\Facades\Route;
+use App\Models\AssignSubMenu;
+
+
 
 class BeforeMiddleware  extends BaseApiController
 {
@@ -25,16 +28,30 @@ class BeforeMiddleware  extends BaseApiController
        $requestUrl = $request->getRequestUri();
        $requestMethod = $request->getMethod();
        $replacedUrl = str_replace('/api/v1/', '', $requestUrl);
+
+       
              
         $userRole = Auth::user()->roles->pluck('id')->first();
-        $menuRole = MenuRole::where('role_id', $userRole)->first();
+       // $menuRole = MenuRole::where('role_id', $userRole)->first();
 
        // return $this->rejectError($request, "You do not have access to this resource", Response::HTTP_UNAUTHORIZED);
 
-        if (!$menuRole) {
-            return $this->rejectError('no_access', "You do not have access to this resource", Response::HTTP_UNAUTHORIZED);
+        if (!$userRole) {
+            return $this->rejectError('no_access', "You are not assigned a role", Response::HTTP_UNAUTHORIZED);
             //throw new HttpException(403, 'You do not have access to this resource.');
         }
+
+       $getURL = SubMenu::where("menu_url", $replacedUrl)->where("menu_status", "sub")->first();
+
+       $checkforAccess = AssignSubMenu::where(["role_id", $userRole->id, "sub_menu_id", $getURL->id])->first()->menu_id;
+
+       if($checkforAccess){
+           return $next($request);
+       }else {
+        return $this->sendError('no_access', "You do not have access to this resource", Response::HTTP_UNAUTHORIZED);
+       }
+
+
 
       
         $menuId = $menuRole->menu_id;
@@ -68,8 +85,6 @@ class BeforeMiddleware  extends BaseApiController
             }
 
 
-        }else if($requestMethod == 'POST'){
-            return $next($request);
         }
         //$hasAccess = SubMenu::whereIn('menu_id', $menuString)->exists();
 

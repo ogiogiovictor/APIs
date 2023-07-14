@@ -16,6 +16,7 @@ use App\Http\Controllers\BaseApiController;
 use Symfony\Component\HttpFoundation\Response;
 use Illuminate\Support\Facades\Hash;
 use Spatie\Permission\Models\Role;
+use App\Models\AssignSubMenu;
 
 
 class UserController extends BaseApiController
@@ -129,19 +130,46 @@ class UserController extends BaseApiController
 
      public function getRolePermission($role_id) {
 
-        //$hasAccess = SubMenu::where("role_id", $role_id)->get();
-       // $hasAccess = SubMenu::whereIn("role_id", [$role_id])->get();
-        $hasAccess = SubMenu::whereIn("role_id", [strval($role)])->get();
+        //$hasAccess = SubMenu::whereIn("role_id", [strval($role)])->get();
+        $hasAccess =  $this->refactorOutput(AssignSubMenu::where("role_id", $role_id)->get()); 
 
         return $this->sendSuccess($hasAccess, "Successfully", Response::HTTP_OK);
     }
 
 
+
+    private function refactorOutput($data){
+        if($data){
+            $array = [];
+            foreach($data as $get){
+                $array[] = [
+                    'created_at' => $get->created_at,
+                    'id' => intval($get->sub_menu_id),
+                    'menu_id' => intval($get->menu_id),
+                    'sub_menu_id' => intval($get->sub_menu_id),
+                    'name' => SubMenu::where("id", $get->sub_menu_id)->value("name"),
+
+                    'menu_status' => SubMenu::where("id", $get->sub_menu_id)->value("menu_status"),
+                    'menu_url' =>SubMenu::where("id", $get->sub_menu_id)->value("menu_url"),
+                   
+                    'role_id' =>   $get->role_id
+                ];
+            }
+            return $array;
+        }
+
+     }
+
+
+
     public function AssignUserMenu(Request $request){
 
         $getRowID = Role::where('name', $request->role)->first();
+        $subMenu = $request->submenu_id;
+        $new_array = SubMenu::whereIn("id", $subMenu)->pluck('menu_id')->toArray();
 
-        $menuIds = implode(',', $request->menu_id);
+       // $menuIds = implode(',', $request->menu_id);
+        $menuIds = implode(',', array_unique(array_map('intval', $new_array)));
 
         $updateMenuRole = MenuRole::updateOrCreate(
             ['role_id' => $getRowID->id],    
@@ -149,6 +177,22 @@ class UserController extends BaseApiController
                 'menu_id' =>  "[$menuIds]",
 
             ]);
+        
+       //You need to insert based on the role and submenu
+      if ($subMenu) {
+            foreach ($subMenu as $newGet) {
+               
+                AssignSubMenu::updateOrCreate(
+                    ['role_id' => $getRowID->id, 'sub_menu_id' => $newGet],
+                    [
+                        'menu_id' => SubMenu::where("id", $newGet)->value("menu_id"),
+                        'role_id' => $getRowID->id
+                    ]
+                );
+            }
+     }
+    
+      
 
         if($updateMenuRole){
             return $this->sendSuccess($updateMenuRole, "Record Successfully Updated", Response::HTTP_OK);
@@ -158,6 +202,22 @@ class UserController extends BaseApiController
        
 
     }
+
+
+    public function userLogout(Request $request){
+
+        $userId = $request->userId;
+       if(!Auth::check()) {
+        return $this->sendError("No Data", "Error Loading User Data", Response::HTTP_UNAUTHORIZED);
+        }
+
+        $user =  auth()->user()->tokens()->delete();
+    
+        
+        return response()->json(['message' => 'Logged out successfully', 'user' => $user]);
+    }
+
+    
 
 
 
