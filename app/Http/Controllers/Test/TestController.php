@@ -1321,6 +1321,7 @@ class TestController extends BaseApiController
 
         $new_array = [];
         $getAccess = SubMenu::select("menu_id")->whereIn("id", $request->submenu_id)->get();
+        return $new_array = SubMenu::whereIn("id", $subMenu)->pluck('menu_id')->toArray();
         if($getAccess){
           foreach($getAccess as $get){
             array_push($new_array, $get->menu_id);
