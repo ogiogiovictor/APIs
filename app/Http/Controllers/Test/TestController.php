@@ -1319,23 +1319,27 @@ class TestController extends BaseApiController
         $getRowID = Role::where('name', $request->role)->first();
         $subMenu = $request->submenu_id;
 
-        $new_array = [];
-        $getAccess = SubMenu::select("menu_id")->whereIn("id", $request->submenu_id)->get();
-        return $new_array = SubMenu::whereIn("id", $subMenu)->pluck('menu_id')->toArray();
-        if($getAccess){
+        //$new_array = [];
+       // $getAccess = SubMenu::select("menu_id")->whereIn("id", $request->submenu_id)->get();
+         $new_array = SubMenu::whereIn("id", $subMenu)->pluck('menu_id')->toArray();
+        return  $new_array = array_unique($new_array);
+       /* if($getAccess){
           foreach($getAccess as $get){
             array_push($new_array, $get->menu_id);
           }
         }
 
         return  $new_array;
+        */
 
-        return 
+        // To be deleted later
+      /*   return  
         [
-          'data' =>  $getAccess,
+          'menu_id' =>  $new_array,
            'sub_id' => $request->submenu_id
 
         ];
+        */
 
         $menuIds = implode(',', $request->menu_id);
 
