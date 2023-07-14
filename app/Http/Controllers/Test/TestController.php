@@ -1322,7 +1322,7 @@ class TestController extends BaseApiController
         //$new_array = [];
        // $getAccess = SubMenu::select("menu_id")->whereIn("id", $request->submenu_id)->get();
          $new_array = SubMenu::whereIn("id", $subMenu)->pluck('menu_id')->toArray();
-        return  $new_array = array_unique($new_array);
+         $new_array = array_values(array_unique($new_array));
        /* if($getAccess){
           foreach($getAccess as $get){
             array_push($new_array, $get->menu_id);
@@ -1376,6 +1376,35 @@ class TestController extends BaseApiController
         
         return response()->json(['message' => 'Logged out successfully', 'user' => $user]);
     }
+
+
+//     public function allme(){
+//       $secret_key = "KD3VQoYrbdNjbinY";
+//       $shopping =  $this->EncryptV2($secret_key, $data);
+//       return response()->json(['message' => 'Logged out successfully', 'user' => $shopping]);
+       
+//     }
+
+
+//    private function EncryptV2($encryption_key, $data)
+//     {
+//     $source = mb_convert_encoding($encryption_key, 'UTF-16LE', 'UTF-8');
+//     $key = md5($source, true);
+//     $key .= substr($key, 0, 8);
+    
+//     // Pad for PKCS7
+//     $block = openssl_cipher_iv_length('des-ede3-cbc');
+//     $padding = $block - (strlen($data) % $block);
+//     $data .= str_repeat(chr($padding), $padding);
+    
+//     $iv = "\0\0\0\0\0\0\0\0";
+//     $encData = openssl_encrypt($data, 'des-ede3-cbc', $key, OPENSSL_RAW_DATA | OPENSSL_NO_PADDING, $iv);
+    
+//     return base64_encode($encData);
+//     }
+
+
+
 
     
 
