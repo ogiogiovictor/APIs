@@ -31,34 +31,50 @@ class BeforeMiddleware  extends BaseApiController
 
        
              
-        $userRole = Auth::user()->roles->pluck('id')->first();
-       // $menuRole = MenuRole::where('role_id', $userRole)->first();
+       $userRole = Auth::user()->roles->pluck('id')->first();
+     //  return $this->rejectError('no_access',  $replacedUrl, Response::HTTP_UNAUTHORIZED);
+       
+     // Remove everything after the '?' in the menu_url
+       $removeQuesionMarkURL = strtok($replacedUrl, '?');
 
-       // return $this->rejectError($request, "You do not have access to this resource", Response::HTTP_UNAUTHORIZED);
+       //return $this->rejectError('no_access', $removeQuesionMarkURL, Response::HTTP_UNAUTHORIZED);
 
         if (!$userRole) {
             return $this->rejectError('no_access', "You are not assigned a role", Response::HTTP_UNAUTHORIZED);
             //throw new HttpException(403, 'You do not have access to this resource.');
         }
 
-       $getURL = SubMenu::where("menu_url", $replacedUrl)->where("menu_status", "sub")->first();
+       $getURL = SubMenu::where("menu_url", $removeQuesionMarkURL)->where("menu_status", "sub")->first();
 
-       $checkforAccess = AssignSubMenu::where(["role_id", $userRole->id, "sub_menu_id", $getURL->id])->first()->menu_id;
+       if($getURL){
+        $checkforAccess = AssignSubMenu::where("role_id", $userRole)->where("sub_menu_id", $getURL->id)->first();
 
-       if($checkforAccess){
+            if ($checkforAccess) {
+                return $next($request);
+            } else {
+                return $this->sendError('no_access', "You do not have access to this resource", Response::HTTP_UNAUTHORIZED);
+            }
+            
+       }else {
+        return $this->sendError('no_access', "You do not have access to this resource", Response::HTTP_UNAUTHORIZED);
+       }
+      
+
+      /* if($checkforAccess){
            return $next($request);
        }else {
         return $this->sendError('no_access', "You do not have access to this resource", Response::HTTP_UNAUTHORIZED);
        }
+       */
 
 
 
       
-        $menuId = $menuRole->menu_id;
-        $menuString = array_map('intval', explode(',', trim($menuId, '[]')));
+        //$menuId = $menuRole->menu_id;
+       // $menuString = array_map('intval', explode(',', trim($menuId, '[]')));
 
         //Get the ID of the route 
-        if($requestMethod == 'GET'){
+      /*  if($requestMethod == 'GET'){
 
             //For Roles
             //$getRouteID = intval(SubMenu::where("menu_url", $replacedUrl)->where("menu_status", "sub")->first()->menu_id);
@@ -86,13 +102,8 @@ class BeforeMiddleware  extends BaseApiController
 
 
         }
-        //$hasAccess = SubMenu::whereIn('menu_id', $menuString)->exists();
-
-       // return $this->rejectError($getRouteID , $menuString, Response::HTTP_UNAUTHORIZED);
-            
-        // if($hasAccess){
-            
-        // }
+        */
+     
         
         return $this->sendError('no_access', "You do not have access to this resource", Response::HTTP_UNAUTHORIZED);
         //throw new HttpException(403, 'You do not have access to this submenu.');

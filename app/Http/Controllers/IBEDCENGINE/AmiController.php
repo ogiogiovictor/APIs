@@ -70,7 +70,7 @@ class AmiController extends BaseApiController
       
     }
 
-    public function getAll(){
+    public function getAll(Request $request){
         Redis::flushall();
 
         $cacheKey = 'ami_event_getAll';
@@ -88,8 +88,10 @@ class AmiController extends BaseApiController
         });
         */
 
+        $eventType = $request->query('type'); 
+
         $group = (new AmiService)->allConnectionsgroups();
-        $getRequest = (new AmiService)->allConnections();
+        $getRequest = (new AmiService)->allConnections($eventType);
 
          $data = [
              'group' => $group,
@@ -102,6 +104,26 @@ class AmiController extends BaseApiController
     public function eventUpDown(){
         $requestPower = (new AmiService)->powerUppowerDown();
         return $this->sendSuccess($requestPower, "Data Loaded - ". count($requestPower), Response::HTTP_OK);
+    }
+
+
+
+
+      /**
+     * Display the loadSummary resource.
+     */
+    public function monthlySummary(): JsonResponse
+    {
+
+
+            
+            try {
+                $getRequest = (new AmiService)->getMonthlySummary();
+                return $this->sendSuccess($getRequest, "Data Successfully Loaded - ". count($getRequest), Response::HTTP_OK);
+            }catch(\Exception $e){
+                return $this->sendError("Error", "Error Loading Data, Something went wrong", Response::HTTP_INTERNAL_SERVER_ERROR);
+            }
+
     }
 
     

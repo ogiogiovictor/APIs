@@ -23,6 +23,7 @@ use App\Http\Controllers\Authenticate\SocialController;
 use App\Http\Controllers\General\GeneralController;
 use App\Http\Controllers\Meters\MeterController;
 use App\Http\Controllers\Export\ExportController;
+use App\Http\Controllers\CAAD\CaadController;
 
 
 
@@ -125,8 +126,12 @@ Route::group(['prefix' => 'v1', 'namespace' => 'Api\v1', 'middleware' => 'OAuth'
         Route::post('add_assets', [AssetController::class, 'store']);
 
         //AMI
-        Route::get('get_events', [AmiController::class, 'getSummary'])->name('getEvents');  
-        Route::get('get_all_connection', [AmiController::class, 'getAll'])->name('getAll');  
+        Route::middleware(['before'])->group(function () {
+           
+            Route::get('events', [AmiController::class, 'getAll'])->name('getAll');  
+        });
+        Route::get('get_summary', [AmiController::class, 'getSummary'])->name('getSummary');
+        Route::get('ami_monthly_summary', [AmiController::class, 'monthlySummary'])->name('monthlySummary');
 
         //General
         Route::post('search_any', [SearchController::class, 'searching']);
@@ -142,6 +147,12 @@ Route::group(['prefix' => 'v1', 'namespace' => 'Api\v1', 'middleware' => 'OAuth'
             Route::post('assign_permission', [PermissionController::class, 'giveMePermission']);
             
         });
+
+        Route::get('caad_process_flow', [CaadController::class, 'getApproval']);
+
+        //END OF  Administrative Users
+
+
 
         Route::prefix('stsix')->group(function() {
          
@@ -180,6 +191,9 @@ Route::group(['prefix' => 'v1', 'namespace' => 'Api\v1', 'middleware' => 'OAuth'
         Route::post('assign_user_menu', [UserController::class, 'AssignUserMenu']);
 
         Route::post('mlogout', [TestController::class, 'userLogout']);
+
+
+        
 
         
          
