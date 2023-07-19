@@ -160,7 +160,7 @@ class AmiService
         ->select("AC.MSNO", DB::raw('CONVERT(Varchar(50), SUM(Cast(FDAY.KWH_ABS as money)),1) as consumption'))
         ->where("SYS.Tag", '=', 'CustomerType')
         ->whereYear("FDAY.BEGINTIME", $currentYear)->whereMonth("FDAY.BEGINTIME", $currentMonth)
-        ->groupBy('AC.MSNO')->paginate(100);
+        ->groupBy('AC.MSNO')->paginate(500);
 
         $mainResult = AmiminiResource::collection($getConnection);
 

@@ -148,9 +148,13 @@ Route::group(['prefix' => 'v1', 'namespace' => 'Api\v1', 'middleware' => 'OAuth'
             
         });
 
-        Route::get('caad_process_flow', [CaadController::class, 'getApproval']);
 
-        //END OF  Administrative Users
+        //CAAD PROCESS FLOW
+
+        Route::get('caad_process_flow', [CaadController::class, 'getApproval']);
+        Route::post('process_caad_request', [CaadController::class, 'addCAAD']);
+
+        
 
 
 
