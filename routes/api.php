@@ -301,6 +301,9 @@ Route::group(['prefix' => 'v2', 'namespace' => 'Api\v2', 'middleware' => 'OAuth'
         Route::post('mlogout', [TestController::class, 'userLogout']);
 
         Route::post('upload_bulk_caad', [TestController::class, 'BulkCAADUpload']);
+
+        Route::get('allcaad', [TestController::class, 'getAllCAAD']);
+        Route::get('allcaadbatch', [TestController::class, 'getAllCAADBatch']);
        
         
 

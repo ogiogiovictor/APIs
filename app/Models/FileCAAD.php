@@ -15,4 +15,8 @@ class FileCAAD extends Model
         'process_caad_id', 'file_name', 'file_size', 'file_type', 'file_link'
 
      ];
+
+     public function myFile(){
+      return $this->belongsTo(ProcessCAAD::class, 'id');
+     }
 }

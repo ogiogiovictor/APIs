@@ -14,4 +14,13 @@ class CAADCommentApproval extends Model
     protected $fillable = [
         'process_caad_id', 'approval_type', 'batch_id', 'approval_by', 'rejected_by', 'comments'
     ];
+
+    public function myCaadcomments(){
+        return $this->belongsTo(ProcessCAAD::class, 'id');
+    }
+
+
+    public function mybatchcaad(){
+        return $this->hasOne(BulkCAAD::class, 'id');
+    }
 }

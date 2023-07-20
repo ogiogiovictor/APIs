@@ -14,4 +14,13 @@ class BulkCAAD extends Model
     protected $fillable = [
         'bulk_unique_id', 'batch_name', 'business_hub', 'batch_file_name'
     ];
+
+
+    public function withmanycaads(){
+        return $this->hasMany(ProcessCAAD::class, 'batch_id');
+    }
+
+    public function withmayncomments(){
+        return $this->hasMany(CAADCommentApproval::class, 'batch_id');
+    }
 }

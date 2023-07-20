@@ -53,6 +53,7 @@ use App\Models\AssignSubMenu;
 use App\Imports\CAADImport;
 use App\Models\BulkCAAD;
 use App\Models\FileCAAD;
+use App\Models\ProcessCAAD;
 
 
 
@@ -1381,32 +1382,6 @@ class TestController extends BaseApiController
     }
 
 
-//     public function allme(){
-//       $secret_key = "KD3VQoYrbdNjbinY";
-//       $shopping =  $this->EncryptV2($secret_key, $data);
-//       return response()->json(['message' => 'Logged out successfully', 'user' => $shopping]);
-       
-//     }
-
-
-//    private function EncryptV2($encryption_key, $data)
-//     {
-//     $source = mb_convert_encoding($encryption_key, 'UTF-16LE', 'UTF-8');
-//     $key = md5($source, true);
-//     $key .= substr($key, 0, 8);
-    
-//     // Pad for PKCS7
-//     $block = openssl_cipher_iv_length('des-ede3-cbc');
-//     $padding = $block - (strlen($data) % $block);
-//     $data .= str_repeat(chr($padding), $padding);
-    
-//     $iv = "\0\0\0\0\0\0\0\0";
-//     $encData = openssl_encrypt($data, 'des-ede3-cbc', $key, OPENSSL_RAW_DATA | OPENSSL_NO_PADDING, $iv);
-    
-//     return base64_encode($encData);
-//     }
-
-
 
     public function BulkCAADUpload(Request $request){
        
@@ -1444,11 +1419,32 @@ class TestController extends BaseApiController
       
 
         $result =  Excel::import(new CAADImport($batch_id), $request->file('file'));
-       
+
+        return $this->sendSuccess(200, "Record Successfully Updated", Response::HTTP_OK);
          
-        return response()->json(['message' => 'Logged out successfully', 'data' =>  $result]);
         
     }
+
+
+        public function getAllCAAD(){
+
+            $getSingleCAAD = ProcessCAAD::with('fileUpload')->with('CaadComment')->where('batch_type', 'single')->orderBy('id', 'desc')->paginate(20);
+            $getBatchCAAD = BulkCAAD::with('withmanycaads')->with('withmayncomments')->orderBy('id', 'desc')->paginate(20);
+
+            $data = [
+                'single' => $getSingleCAAD,
+                'batch' => $getBatchCAAD
+            ];
+
+            return $this->sendSuccess($data, "Record Successfully Updated", Response::HTTP_OK);
+
+        }
+
+
+    
+
+
+    
 
 
 
