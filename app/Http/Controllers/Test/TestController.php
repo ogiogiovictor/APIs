@@ -1408,11 +1408,34 @@ class TestController extends BaseApiController
 
     public function BulkCAADUpload(Request $request){
 
+       
         $request->validate([
             'file' => 'required|mimes:xlsx,csv',
         ]);
 
+       // $destinationPath = public_path('customercaad/');
+          //Handle file upload
+         if ($request->has('file')) {
+
+            $file = $request->file('file');
+
+                $timestamp = now()->timestamp; // Generate the current Unix timestamp
+                $date = now()->format('Ymd'); // Format the current date as YYYYMMDD  
+                // Combine the timestamp, date, and extension to form the unique filename
+                $uniqueFileName = $date . '_' . $timestamp;
+ 
+                $fileName = $uniqueFileName.''. uniqid() . '_' . $file->getClientOriginalName();
+                $extension = $file->getClientOriginalExtension();
+
+                $file->storeAs('customercaad', $fileName, 'public');
+            
+
+        }
+
         Excel::import(new CAADImport, $request->file('file'));
+       
+         
+           
 
         return response()->json(['message' => 'File imported successfully']);
         
