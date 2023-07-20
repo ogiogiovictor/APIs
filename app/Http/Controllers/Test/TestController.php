@@ -1429,7 +1429,7 @@ class TestController extends BaseApiController
         public function getAllCAAD(){
 
             $getSingleCAAD = ProcessCAAD::with('fileUpload')->with('CaadComment')->where('batch_type', 'single')->orderBy('id', 'desc')->paginate(20);
-            $getBatchCAAD = BulkCAAD::with('withmanycaads')->with('withmayncomments')->orderBy('id', 'desc')->paginate(20);
+            $getBatchCAAD = BulkCAAD::with('withmanycaads')->withCount('withmanycaads')->with('withmayncomments')->orderBy('id', 'desc')->paginate(20);
 
             $data = [
                 'single' => $getSingleCAAD,
