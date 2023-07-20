@@ -1,0 +1,33 @@
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    /**
+     * Run the migrations.
+     */
+    public function up(): void
+    {
+        Schema::create('caad_comment_approval', function (Blueprint $table) {
+            $table->id();
+            $table->string('process_caad_id')->nullable();
+            $table->string('approval_type')->default('single');
+            $table->string('batch_id')->default('0');
+            $table->string('approval_by')->default('null');
+            $table->string('rejected_by')->default('null');
+            $table->string('comments')->default('null');
+            $table->timestamps();
+        });
+    }
+
+    /**
+     * Reverse the migrations.
+     */
+    public function down(): void
+    {
+        Schema::dropIfExists('caad_comment_approval');
+    }
+};

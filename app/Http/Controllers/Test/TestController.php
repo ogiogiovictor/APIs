@@ -51,6 +51,8 @@ use Symfony\Component\HttpFoundation\StreamedResponse;
 use App\Http\Resources\DTBusinessHubResource;
 use App\Models\AssignSubMenu;
 use App\Imports\CAADImport;
+use App\Models\BulkCAAD;
+use App\Models\FileCAAD;
 
 
 
@@ -1407,13 +1409,12 @@ class TestController extends BaseApiController
 
 
     public function BulkCAADUpload(Request $request){
-
        
         $request->validate([
             'file' => 'required|mimes:xlsx,csv',
         ]);
 
-       // $destinationPath = public_path('customercaad/');
+       
           //Handle file upload
          if ($request->has('file')) {
 
@@ -1428,16 +1429,24 @@ class TestController extends BaseApiController
                 $extension = $file->getClientOriginalExtension();
 
                 $file->storeAs('customercaad', $fileName, 'public');
-            
 
+                $bulkCAAD = BulkCAAD::create([
+                    'batch_name' => $request->batch_name,
+                    'business_hub' => $request->business_hub,
+                    'bulk_unique_id' => uniqid() . '_'. $date.''.$timestamp,
+                    'batch_file_name' => $fileName,
+                ]);
+        
+                $batch_id = $bulkCAAD->id; // Get the batch_id from the newly created BulkCAAD model
+                
         }
 
-        Excel::import(new CAADImport, $request->file('file'));
+      
+
+        $result =  Excel::import(new CAADImport($batch_id), $request->file('file'));
        
          
-           
-
-        return response()->json(['message' => 'File imported successfully']);
+        return response()->json(['message' => 'Logged out successfully', 'data' =>  $result]);
         
     }
 
