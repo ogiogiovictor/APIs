@@ -50,6 +50,7 @@ use App\Services\AssetService;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 use App\Http\Resources\DTBusinessHubResource;
 use App\Models\AssignSubMenu;
+use App\Imports\CAADImport;
 
 
 
@@ -1402,6 +1403,20 @@ class TestController extends BaseApiController
     
 //     return base64_encode($encData);
 //     }
+
+
+
+    public function BulkCAADUpload(Request $request){
+
+        $request->validate([
+            'file' => 'required|mimes:xlsx,csv',
+        ]);
+
+        Excel::import(new CAADImport, $request->file('file'));
+
+        return response()->json(['message' => 'File imported successfully']);
+        
+    }
 
 
 
