@@ -15,7 +15,7 @@ class CAADImport implements ToModel, WithHeadingRow
     */
     public function model(array $row)
     {
-      return $row['accountno'];
+        
         return new ProcessCAAD([
         // 'accountNo'       => $row[0],
         // 'phoneNo'         => $row[1], 
@@ -33,14 +33,14 @@ class CAADImport implements ToModel, WithHeadingRow
         // 'remarks'         => $row[13], 
         // 'file_upload_id'  => $row[14], 
 
-            'accountNo'  => $row['accountNo'],
-            'phoneNo'    => $row['phoneNo'], 
+            'accountNo'  => $row['accountno'],
+            'phoneNo'    => $row['phoneno'], 
             'surname'    => $row['surname'], 
             'lastname'    => $row['lastname'], 
             'othername'    => $row['othername'], 
             'service_center'  => $row['service_center'], 
             'meterno'    => $row['meterno'], 
-            'accountType'    => $row['accountType'], 
+            'accountType'    => $row['accounttype'], 
             'transtype'    => $row['transtype'], 
             'meter_reading'    => $row['meter_reading'], 
             'transaction_type'    => $row['transaction_type'], 
