@@ -164,7 +164,25 @@ class AmiService
 
 
     //Get all feeders that are Myto/Icommer/11kv 33
-    public function getAmiFeeders(){
+    public function getAmiFeeders($request){
+
+        $reqStatus = '';
+
+        if ($request === '33kV Panel') {
+            $reqStatus = '33kV Panel';
+        } elseif ($request === 'Bus Coupler') {
+            $reqStatus = 'Bus Coupler';
+        } elseif ($request === 'Incomer') {
+            $reqStatus = 'Incomer';
+        }elseif ($request === 'Line Breaker') {
+            $reqStatus = 'Line Breaker';
+        }elseif ($request === 'MYTO') {
+            $reqStatus = 'MYTO';
+        }elseif ($request === 'Spare') {
+            $reqStatus = 'Spare';
+        }
+
+        $reqStatus = trim(stripslashes($request), '"');
     
         $getConnection = DB::connection("ami")->table("PowerSys.dbo.DATA_F_DPS_DAY AS FDAY")
          ->leftJoin("PowerSys.dbo.ACHV_METER AS MT", "MT.MSNO", "FDAY.MSNO")
@@ -174,7 +192,7 @@ class AmiService
          ->leftJoin("PowerSys.dbo.ACHV_CUSTOMER AS CUS", "CUS.ID", "POC.Customer_ID")
          ->leftJoin("PowerSys.dbo.SYS_BASE AS SYS", "SYS.Key", "CUS.CustomerType")
          ->select("FDAY.MSNO", "PG.Descr", "FDAY.DATE", "FDAY.SAVEDB_TIME", "FDAY.BEGINTIME", "FDAY.ENDTIME", "FDAY.KWH_ABS", "FDAY.KWH_ABS_START", "FDAY.KWH_ABS_END", "PNG.Region", "PNG.BusinessHub", "PNG.Transformer", "SYS.Value AS AssetType")
-         ->where("SYS.Tag", '=', 'CustomerType')->where("SYS.Value", '=',  'Feeder')->orderBy("FDAY.SAVEDB_TIME", 'desc')->paginate(30);
+         ->where("SYS.Tag", '=', 'CustomerType')->where("SYS.Value", '=',  'Feeder')->where("PG.Descr", $reqStatus)->orderBy("FDAY.SAVEDB_TIME", 'desc')->paginate(30);
       
           return $getConnection;
      }

@@ -129,10 +129,13 @@ class AmiController extends BaseApiController
      /**
      * Display the loadSummary resource.
      */
-    public function FeederDetails(): JsonResponse
+    public function FeederDetails(Request $request): JsonResponse
     {
             try {
-                $getRequest = (new AmiService)->getAmiFeeders();
+
+                $eventType = $request->query('type'); 
+
+                $getRequest = (new AmiService)->getAmiFeeders($eventType);
                 $group = (new AmiService)->getAMIFeederGroup();
 
                 $data = [
