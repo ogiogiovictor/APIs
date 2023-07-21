@@ -132,6 +132,7 @@ Route::group(['prefix' => 'v1', 'namespace' => 'Api\v1', 'middleware' => 'OAuth'
         });
         Route::get('get_summary', [AmiController::class, 'getSummary'])->name('getSummary');
         Route::get('ami_monthly_summary', [AmiController::class, 'monthlySummary'])->name('monthlySummary');
+        Route::get('all_feeders_with_myto', [AmiController::class, 'FeederDetails'])->name('FeederDetails');
 
         //General
         Route::post('search_any', [SearchController::class, 'searching']);

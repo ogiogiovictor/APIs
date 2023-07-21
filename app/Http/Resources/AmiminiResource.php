@@ -19,6 +19,7 @@ class AmiminiResource extends JsonResource
         return [
             "MSNO" => $this->MSNO,
             "consumption" => $this->consumption,
+            "Descr" => $this->Descr,
            /* "region" => DB::connection("ami")->table("PowerSys.dbo.DATA_F_DPS_DAY AS FDAY")->join("PowerSys.dbo.ACHV_METER AS MT", "MT.MSNO", "FDAY.MSNO")
             ->join("PowerSys.dbo.ACHV_POC AS POC", "MT.ID", "POC.Meter_ID")->join("PowerSys.dbo.ACHV_POWERGRID_NAME AS PNG", "PNG.ID", "POC.PowerGrid_ID")
             ->select("PNG.Region")

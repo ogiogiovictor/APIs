@@ -114,12 +114,33 @@ class AmiController extends BaseApiController
      */
     public function monthlySummary(): JsonResponse
     {
-
-
-            
             try {
                 $getRequest = (new AmiService)->getMonthlySummary();
+               // $getRequest = (new AmiService)->amiMonthlySummary();
                 return $this->sendSuccess($getRequest, "Data Successfully Loaded - ". count($getRequest), Response::HTTP_OK);
+            }catch(\Exception $e){
+                return $this->sendError("Error", "Error Loading Data, Something went wrong", Response::HTTP_INTERNAL_SERVER_ERROR);
+            }
+
+    }
+
+
+
+     /**
+     * Display the loadSummary resource.
+     */
+    public function FeederDetails(): JsonResponse
+    {
+            try {
+                $getRequest = (new AmiService)->getAmiFeeders();
+                $group = (new AmiService)->getAMIFeederGroup();
+
+                $data = [
+                    'group' => $group,
+                    'data' => $getRequest
+                ];
+
+                return $this->sendSuccess($data, "Data Successfully Loaded - ". count($getRequest), Response::HTTP_OK);
             }catch(\Exception $e){
                 return $this->sendError("Error", "Error Loading Data, Something went wrong", Response::HTTP_INTERNAL_SERVER_ERROR);
             }
