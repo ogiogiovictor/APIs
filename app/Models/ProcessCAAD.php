@@ -14,7 +14,7 @@ class ProcessCAAD extends Model
     protected $fillable = [
         'accountNo', 'phoneNo', 'surname', 'lastname', 'othername', 'service_center', 'meterno',
         'accountType', 'transtype', 'meter_reading', 'transaction_type', 'effective_date', 'amount',
-        'remarks', 'file_upload_id', 'batch_type', 'batch_id', 'status'
+        'remarks', 'file_upload_id', 'batch_type', 'batch_id', 'status', 'region', 'business_hub'
     ];
 
 

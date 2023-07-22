@@ -35,6 +35,7 @@ use App\Http\Controllers\CAAD\CaadController;
 use App\Http\Controllers\AlternatePayment\AuthenticationController;
 use App\Http\Controllers\AlternatePayment\GetCustomerController;
 use App\Http\Controllers\AlternatePayment\PaymentProcessingController;
+use App\Http\Controllers\FileDownloadController;
 
 ///////////////////////////////////////////////////////////////
 # END OF ALTERNATE PAYMENT <CONTROLLERS>
@@ -305,6 +306,9 @@ Route::group(['prefix' => 'v2', 'namespace' => 'Api\v2', 'middleware' => 'OAuth'
 
         Route::get('allcaad', [TestController::class, 'getAllCAAD']);
         Route::get('allcaadbatch', [TestController::class, 'getAllCAADBatch']);
+        Route::post('process_caad_request', [TestController::class, 'addCAAD']);
+        Route::get('storage/{folder}/{filename}', [FileDownloadController::class, 'show']);
+
        
         
 
