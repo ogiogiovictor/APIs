@@ -55,6 +55,9 @@ use App\Models\BulkCAAD;
 use App\Models\FileCAAD;
 use App\Models\ProcessCAAD;
 use App\Http\Requests\CaadRequest; 
+use App\Enums\CaadEnum;
+use App\Models\Caad;
+use App\Models\CAADCommentApproval;
 
 
 
@@ -1389,7 +1392,6 @@ class TestController extends BaseApiController
         $request->validate([
             'file' => 'required|mimes:xlsx,csv',
         ]);
-
        
           //Handle file upload
          if ($request->has('file')) {
@@ -1411,6 +1413,7 @@ class TestController extends BaseApiController
                     'business_hub' => $request->business_hub,
                     'bulk_unique_id' => uniqid() . '_'. $date.''.$timestamp,
                     'batch_file_name' => $fileName,
+                    'region' => $request->region
                 ]);
         
                 $batch_id = $bulkCAAD->id; // Get the batch_id from the newly created BulkCAAD model
@@ -1529,6 +1532,134 @@ class TestController extends BaseApiController
             }
             
     
+        }
+
+
+
+
+        public function CaadApprovalRequest(Request $request){
+          //  return CaadEnum::ADMIN->value;
+          // return CaadEnum::APPROVED_BY_MD->label();
+
+            try{
+                // Get the user role
+                $userRole = Auth::user()->roles->pluck('name')->first();
+                DB::beginTransaction();
+                // Check if the batch type is single
+                    if ($request->batch_type == 'single') {
+                        // Update the process CAAD status
+                        $processCAAD = ProcessCAAD::find($request->id);
+                        $processCAAD->status = $this->getApprovalStatus($userRole);
+                        $processCAAD->save();
+                    }
+
+                    // Add a comment
+                    $this->addComment($request, $userRole);
+                    DB::commit();
+                    return $this->sendSuccess($processCAAD, "CAAD Successfully Approved", Response::HTTP_CREATED);
+
+            } catch(\Exception $e){
+                DB::rollBack();
+                return $this->sendError("Error", $e->getMessage(), Response::HTTP_INTERNAL_SERVER_ERROR);
+            }
+           
+
+        }
+
+
+        public function CaadRejectRequest(Request $request){
+  
+              try{
+                  // Get the user role
+                  $userRole = Auth::user()->roles->pluck('name')->first();
+                  DB::beginTransaction();
+                  // Check if the batch type is single
+                      if ($request->batch_type == 'single') {
+                          // Update the process CAAD status
+                          $processCAAD = ProcessCAAD::find($request->id);
+                          $processCAAD->status = 10;
+                          $processCAAD->save();
+                      }
+  
+                      // Add a comment
+                      $this->addRejectComment($request, $userRole);
+                      DB::commit();
+                      return $this->sendSuccess($processCAAD, "CAAD Successfully Approved", Response::HTTP_CREATED);
+  
+              } catch(\Exception $e){
+                  DB::rollBack();
+                  return $this->sendError("Error", $e->getMessage(), Response::HTTP_INTERNAL_SERVER_ERROR);
+              }
+             
+  
+          }
+
+
+
+        
+
+
+
+        private function getApprovalStatus(string $userRole)
+        {
+            switch ($userRole) {
+                case 'district_accountant':
+                    return CaadEnum::APPROVED_BY_DISTRICT_ACCOUNTANT->value;
+                case 'businesshub_manager':
+                    return CaadEnum::APPROVED_BY_BUSINESS_HUB_MANAGER->value;
+                case 'audit':
+                    return CaadEnum::APPROVED_BY_AUDIT->value;
+                case 'regional_manager':
+                    return CaadEnum::APPROVED_BY_REGIONAL_MANAGER->value;
+                case 'hcs':
+                    return CaadEnum::APPROVED_BY_HCS->value;
+                case 'cco':
+                    return CaadEnum::APPROVED_BY_CCO->value;
+                case 'md':
+                    return CaadEnum::APPROVED_BY_MD->value;
+                case 'admin':
+                    return CaadEnum::ADMIN->value;
+                default:
+                    throw new \Exception('Invalid user role');
+            }
+        }
+
+        private function addComment(Request $request, string $userRole)
+        {
+
+            // Get the label for the given userRole from the CaadEnum
+            $userRoleLabel = match ($userRole) {
+                'district_accountant' => CaadEnum::APPROVED_BY_DISTRICT_ACCOUNTANT->label(),
+                'businesshub_manager' => CaadEnum::APPROVED_BY_BUSINESS_HUB_MANAGER->label(),
+                'audit' => CaadEnum::APPROVED_BY_AUDIT->label(),
+                'regional_manager' => CaadEnum::APPROVED_BY_REGIONAL_MANAGER->label(),
+                'hcs' => CaadEnum::APPROVED_BY_HCS->label(),
+                'cco' => CaadEnum::APPROVED_BY_CCO->label(),
+                'md' => CaadEnum::APPROVED_BY_MD->label(),
+                'admin' => CaadEnum::ADMIN->label(),
+                default => '',
+            };
+
+            $caadComment = CAADCommentApproval::create([
+                'process_caad_id' => $request->id,
+                'approval_type' => $request->batch_type,
+                'batch_id' => isset($request->batch_id) ? $request->batch_id : 0,
+                'approval_by' => Auth::user()->name,
+                'comments' =>  $userRoleLabel . ' @ ' . ' ' . Date('Y-m-d H:i:s'),
+            ]);
+        }
+
+
+        private function addRejectComment(Request $request, string $userRole)
+        {
+
+            $caadComment = CAADCommentApproval::create([
+                'process_caad_id' => $request->id,
+                'approval_type' => $request->batch_type,
+                'batch_id' => isset($request->batch_id) ? $request->batch_id : 0,
+                'approval_by' => Auth::user()->name,
+                'comments' =>  'Rejected By ' . $userRole. ' @ ' . ' ' . Date('Y-m-d H:i:s'),
+            ]);
         }
 
 

@@ -12,7 +12,7 @@ class BulkCAAD extends Model
     protected $table = "bulkcaad";
 
     protected $fillable = [
-        'bulk_unique_id', 'batch_name', 'business_hub', 'batch_file_name'
+        'bulk_unique_id', 'batch_name', 'business_hub', 'batch_file_name', 'region'
     ];
 
 

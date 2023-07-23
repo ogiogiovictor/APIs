@@ -309,6 +309,11 @@ Route::group(['prefix' => 'v2', 'namespace' => 'Api\v2', 'middleware' => 'OAuth'
         Route::post('process_caad_request', [TestController::class, 'addCAAD']);
         Route::get('storage/{folder}/{filename}', [FileDownloadController::class, 'show']);
 
+        Route::post('caad_approval_request', [TestController::class, 'CaadApprovalRequest']);
+        Route::post('caad_reject_request', [TestController::class, 'CaadRejectRequest']);
+        
+
+        
        
         
 
