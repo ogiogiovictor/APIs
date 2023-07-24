@@ -131,7 +131,7 @@ Route::group(['prefix' => 'v1', 'namespace' => 'Api\v1', 'middleware' => 'OAuth'
            
             Route::get('events', [AmiController::class, 'getAll'])->name('getAll');  
         });
-        Route::get('get_summary', [AmiController::class, 'getSummary'])->name('getSummary');
+        Route::get('get_ami_summary', [AmiController::class, 'getSummary'])->name('getSummary');
         Route::get('ami_monthly_summary', [AmiController::class, 'monthlySummary'])->name('monthlySummary');
         Route::get('all_feeders_with_myto/{type?}', [AmiController::class, 'FeederDetails'])->name('FeederDetails');
 
@@ -151,10 +151,21 @@ Route::group(['prefix' => 'v1', 'namespace' => 'Api\v1', 'middleware' => 'OAuth'
         });
 
 
-        //CAAD PROCESS FLOW
+        //CAAD PROCESS FLOW --
 
-        Route::get('caad_process_flow', [CaadController::class, 'getApproval']);
+        Route::get('caad_process_flow', [CaadController::class, 'getApproval'])->middleware('before');; //Admin Router
         Route::post('process_caad_request', [CaadController::class, 'addCAAD']);
+
+        Route::get('allcaad', [CaadController::class, 'getAllCAAD'])->middleware('before');
+        Route::get('caads', [CaadController::class, 'allCAAD'])->middleware('before');
+
+        
+
+        Route::post('upload_bulk_caad', [CaadController::class, 'BulkCAADUpload']);
+        Route::get('storage/{folder}/{filename}', [FileDownloadController::class, 'show']);
+
+        Route::post('caad_approval_request', [CaadController::class, 'CaadApprovalRequest']);
+        Route::post('caad_reject_request', [CaadController::class, 'CaadRejectRequest']);
 
         
 
@@ -196,7 +207,7 @@ Route::group(['prefix' => 'v1', 'namespace' => 'Api\v1', 'middleware' => 'OAuth'
 
         Route::post('assign_user_menu', [UserController::class, 'AssignUserMenu']);
 
-        Route::post('mlogout', [TestController::class, 'userLogout']);
+        Route::post('mlogout', [UserController::class, 'userLogout']);
 
 
         
