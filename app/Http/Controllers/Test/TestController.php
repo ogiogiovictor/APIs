@@ -1431,9 +1431,66 @@ class TestController extends BaseApiController
 
 
         public function getAllCAAD(){
+            // Assuming you have already retrieved the user role
+            $userRole = Auth::user()->roles->pluck('name')->first();
+            $getUserRoleObject = (new GeneralService)->getUserLevelRole();
 
-            $getSingleCAAD = ProcessCAAD::with('fileUpload')->with('CaadComment')->where('batch_type', 'single')->orderBy('id', 'desc')->paginate(20);
-            $getBatchCAAD = BulkCAAD::with('withmanycaads')->withCount('withmanycaads')->with('withmayncomments')->withCount('withmayncomments')->orderBy('id', 'desc')->paginate(20);
+            $getSingleCAAD = ProcessCAAD::with('fileUpload')->with('CaadComment')
+                ->where('batch_type', 'single')
+                ->when($userRole === 'district_accountant', function ($query, $getUserRoleObject) {
+                    return $query->where('status', CaadEnum::PENDING->value)->where("business_hub", $getUserRoleObject['business_hub']);
+                })
+                ->when($userRole === 'businesshub_manager', function ($query, $getUserRoleObject) {
+                    return $query->where('status', CaadEnum::APPROVED_BY_DISTRICT_ACCOUNTANT->value)->where("business_hub", $getUserRoleObject['business_hub']);
+                })
+                ->when($userRole === 'audit', function ($query, $getUserRoleObject) {
+                    return $query->where('status', CaadEnum::APPROVED_BY_BUSINESS_HUB_MANAGER->value)->where("business_hub", $getUserRoleObject['business_hub']);
+                })
+                ->when($userRole === 'regional_head', function ($query, $getUserRoleObject) {
+                    return $query->where('status', CaadEnum::APPROVED_BY_AUDIT->value)->where("region", $getUserRoleObject['region']);
+                })
+                ->when($userRole === 'hcs', function ($query) {
+                    return $query->where('status', CaadEnum::APPROVED_BY_REGIONAL_MANAGER->value);
+                })
+                ->when($userRole === 'cco', function ($query) {
+                    return $query->where('status', CaadEnum::APPROVED_BY_HCS->value);
+                })
+                ->when($userRole === 'md', function ($query) {
+                    return $query->where('status',  CaadEnum::APPROVED_BY_CCO->value);
+                }) 
+                ->when($userRole === 'admin', function ($query) {
+                    return $query->whereIn('status', [0, 1, 2, 3, 4, 5, 6, 7, 10]);
+                })
+                ->orderBy('id', 'desc')
+            ->paginate(20);
+
+
+            $getBatchCAAD = BulkCAAD::with('withmanycaads')->withCount('withmanycaads')->with('withmayncomments')->withCount('withmayncomments')
+                ->when($userRole === 'district_accountant', function ($query, $getUserRoleObject) {
+                    return $query->where('batch_status', CaadEnum::PENDING->value)->where("business_hub", $getUserRoleObject['business_hub']);
+                })
+                ->when($userRole === 'businesshub_manager', function ($query, $getUserRoleObject) {
+                    return $query->where('batch_status', CaadEnum::APPROVED_BY_DISTRICT_ACCOUNTANT->value)->where("business_hub", $getUserRoleObject['business_hub']);
+                })
+                ->when($userRole === 'audit', function ($query, $getUserRoleObject) {
+                    return $query->where('batch_status', CaadEnum::APPROVED_BY_BUSINESS_HUB_MANAGER->value)->where("business_hub", $getUserRoleObject['business_hub']);
+                })
+                ->when($userRole === 'regional_head', function ($query, $getUserRoleObject) {
+                    return $query->where('batch_status', CaadEnum::APPROVED_BY_AUDIT->value)->where("region", $getUserRoleObject['region']);
+                })
+                ->when($userRole === 'hcs', function ($query) {
+                    return $query->where('batch_status', CaadEnum::APPROVED_BY_REGIONAL_MANAGER->value);
+                })
+                ->when($userRole === 'cco', function ($query) {
+                    return $query->where('batch_status', CaadEnum::APPROVED_BY_HCS->value);
+                })
+                ->when($userRole === 'md', function ($query) {
+                    return $query->where('batch_status',  CaadEnum::APPROVED_BY_CCO->value);
+                }) 
+                ->when($userRole === 'admin', function ($query) {
+                    return $query->whereIn('batch_status', [0, 1, 2, 3, 4, 5, 6, 7, 10]);
+                })
+            ->orderBy('id', 'desc')->paginate(20);
 
             $data = [
                 'single' => $getSingleCAAD,
@@ -1551,12 +1608,22 @@ class TestController extends BaseApiController
                         $processCAAD = ProcessCAAD::find($request->id);
                         $processCAAD->status = $this->getApprovalStatus($userRole);
                         $processCAAD->save();
+                    }else {
+                        
+                        $processBatch = BulkCAAD::find($request->id);
+                        $processBatch->batch_status = $this->getApprovalStatus($userRole);
+                        $processBatch->save();
+
+                        //Now Update the processCADD where batch id is = batch
+                        $processCARD = ProcessCAAD::where('batch_id', $request->id)->update([
+                            'status' => $this->getApprovalStatus($userRole)
+                        ]);
                     }
 
                     // Add a comment
-                    $this->addComment($request, $userRole);
+                   $secret =  $this->addComment($request, $userRole);
                     DB::commit();
-                    return $this->sendSuccess($processCAAD, "CAAD Successfully Approved", Response::HTTP_CREATED);
+                    return $this->sendSuccess($secret, "CAAD Successfully Approved", Response::HTTP_CREATED);
 
             } catch(\Exception $e){
                 DB::rollBack();
@@ -1579,6 +1646,17 @@ class TestController extends BaseApiController
                           $processCAAD = ProcessCAAD::find($request->id);
                           $processCAAD->status = 10;
                           $processCAAD->save();
+                      }else {
+
+                        $processBatch = BulkCAAD::find($request->id);
+                        $processBatch->batch_status = 10;
+                        $processBatch->save();
+
+                        //Now Update the processCADD where batch id is = batch
+                        $processCARD = ProcessCAAD::where('batch_id', $request->id)->update([
+                            'status' => 10
+                        ]);
+
                       }
   
                       // Add a comment
@@ -1593,10 +1671,6 @@ class TestController extends BaseApiController
              
   
           }
-
-
-
-        
 
 
 
@@ -1640,7 +1714,7 @@ class TestController extends BaseApiController
                 default => '',
             };
 
-            $caadComment = CAADCommentApproval::create([
+          return  $caadComment = CAADCommentApproval::create([
                 'process_caad_id' => $request->id,
                 'approval_type' => $request->batch_type,
                 'batch_id' => isset($request->batch_id) ? $request->batch_id : 0,
