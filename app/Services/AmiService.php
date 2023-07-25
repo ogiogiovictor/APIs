@@ -44,17 +44,12 @@ class AmiService
 
 
     public function allConnectionsgroups(){
-       
-         $getConnection = DB::connection("ami")->table("PowerSys.dbo.DATA_F_DPS_DAY AS FDAY")
-         ->join("PowerSys.dbo.ACHV_METER AS MT", "MT.MSNO", "FDAY.MSNO")
+
+         $getConnection = DB::connection("ami")->table("PowerSys.dbo.ACHV_METER AS MT")
          ->join("PowerSys.dbo.ACHV_POC AS POC", "MT.ID", "POC.Meter_ID")
-         ->join("PowerSys.dbo.ACHV_POWERGRID_NAME AS PNG", "PNG.ID", "POC.PowerGrid_ID")
-         ->join("PowerSys.dbo.ACHV_POWERGRID AS PG", "PG.ID", "PNG.ID")
          ->join("PowerSys.dbo.ACHV_CUSTOMER AS CUS", "CUS.ID", "POC.Customer_ID")
          ->join("PowerSys.dbo.SYS_BASE AS SYS", "SYS.Key", "CUS.CustomerType")
-         ->selectRaw("SYS.Value AS AssetType, COUNT(PG.Descr) as total")
-         //->selectRaw("SYS.Value AS AssetType, COUNT(DISTINCT FDAY.MSNO) as total")
-         //->whereNotNull("FDAY.KWH_ABS")
+         ->selectRaw("SYS.Value AS AssetType, COUNT(MT.MSNO) as total")
          ->where("SYS.Tag", "=", "CustomerType")
          ->groupBy("SYS.Value")
          ->get();
@@ -110,7 +105,24 @@ class AmiService
     }
 
 
-    public function getMeterReading($year, $month){
+    public function getMeterReading($year, $month, $eventType){
+
+         // return $request;
+         $reqStatus = '';
+
+         if ($eventType === 'DT') {
+             $reqStatus = 'DT';
+         } elseif ($eventType === 'Feeder') {
+             $reqStatus = 'Feeder';
+         } elseif ($eventType === 'Non-MD') {
+             $reqStatus = 'Non-MD';
+         }elseif ($eventType === 'MD') {
+             $reqStatus = 'MD';
+         }elseif ($eventType === 'Governments/Organizations') {
+             $reqStatus = 'Governments/Organizations';
+         }
+ 
+         $reqStatus = trim(stripslashes($eventType), '"');
        
         $getConnection = DB::connection("ami")->table("PowerSys.dbo.ACHV_METER AS AC")
         ->leftJoin("PowerSys.dbo.ACHV_POC AS POC", "AC.ID", "POC.Meter_ID")
@@ -120,7 +132,7 @@ class AmiService
         ->leftJoin("PowerSys.dbo.DATA_F_DPS_DAY AS FDAY", "FDAY.MSNO", "AC.MSNO")
         ->leftJoin("PowerSys.dbo.SYS_BASE AS SYS", "SYS.Key", "CUS.CustomerType")
         ->select("AC.MSNO", "PG.Descr", DB::raw('CONVERT(Varchar(50), SUM(Cast(FDAY.KWH_ABS as money)),1) as consumption'))
-        ->where("SYS.Tag", '=', 'CustomerType')
+        ->where("SYS.Tag", '=', 'CustomerType')->where("SYS.Value", $reqStatus)
         ->whereYear("FDAY.BEGINTIME", $year)->whereMonth("FDAY.BEGINTIME", $month)
         //->groupBy('AC.MSNO', 'PNG.Region', 'FDAY.BEGINTIME', "PNG.BusinessHub", "PNG.Transformer", "FDAY.ENDTIME")
         ->groupBy('AC.MSNO', 'PG.Descr')
@@ -199,20 +211,32 @@ class AmiService
 
 
      public function getAMIFeederGroup(){
-       
-        $getConnection = DB::connection("ami")->table("PowerSys.dbo.DATA_F_DPS_DAY AS FDAY")
-        ->join("PowerSys.dbo.ACHV_METER AS MT", "MT.MSNO", "FDAY.MSNO")
+
+        $getConnection = DB::connection("ami")->table("PowerSys.dbo.ACHV_METER AS MT")
         ->join("PowerSys.dbo.ACHV_POC AS POC", "MT.ID", "POC.Meter_ID")
         ->join("PowerSys.dbo.ACHV_POWERGRID_NAME AS PNG", "PNG.ID", "POC.PowerGrid_ID")
         ->join("PowerSys.dbo.ACHV_POWERGRID AS PG", "PG.ID", "PNG.ID")
         ->join("PowerSys.dbo.ACHV_CUSTOMER AS CUS", "CUS.ID", "POC.Customer_ID")
         ->join("PowerSys.dbo.SYS_BASE AS SYS", "SYS.Key", "CUS.CustomerType")
         ->selectRaw("PG.Descr, COUNT(PG.Descr) as total")
-        //->whereNotNull("FDAY.KWH_ABS")
-        ->where("SYS.Tag", "=", "CustomerType")
-        ->where("SYS.Value", "=", "Feeder")
+        ->where("SYS.Tag", "=", "CustomerType")->where("SYS.Value", "=", "Feeder")
         ->groupBy("PG.Descr")
         ->get();
+     
+       
+        // $getConnection = DB::connection("ami")->table("PowerSys.dbo.DATA_F_DPS_DAY AS FDAY")
+        // ->join("PowerSys.dbo.ACHV_METER AS MT", "MT.MSNO", "FDAY.MSNO")
+        // ->join("PowerSys.dbo.ACHV_POC AS POC", "MT.ID", "POC.Meter_ID")
+        // ->join("PowerSys.dbo.ACHV_POWERGRID_NAME AS PNG", "PNG.ID", "POC.PowerGrid_ID")
+        // ->join("PowerSys.dbo.ACHV_POWERGRID AS PG", "PG.ID", "PNG.ID")
+        // ->join("PowerSys.dbo.ACHV_CUSTOMER AS CUS", "CUS.ID", "POC.Customer_ID")
+        // ->join("PowerSys.dbo.SYS_BASE AS SYS", "SYS.Key", "CUS.CustomerType")
+        // ->selectRaw("PG.Descr, COUNT(PG.Descr) as total")
+        // //->whereNotNull("FDAY.KWH_ABS")
+        // ->where("SYS.Tag", "=", "CustomerType")
+        // ->where("SYS.Value", "=", "Feeder")
+        // ->groupBy("PG.Descr")
+        // ->get();
      
     return $getConnection;
    }

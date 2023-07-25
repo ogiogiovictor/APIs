@@ -6,6 +6,6 @@ Interface AmiRepositoryInterface
 {
     
    
-
+    public function search();
 
 }

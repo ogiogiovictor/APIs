@@ -388,7 +388,7 @@ class CaadController extends BaseApiController
 
                   //Now Update the processCADD where batch id is = batch
                   $processCARD = ProcessCAAD::where('batch_id', $request->id)->update([
-                      'status' => 10
+                      'status' => 10  // Status 10 is for rejection
                   ]);
 
                 }
@@ -465,7 +465,7 @@ class CaadController extends BaseApiController
                     return $query->orderBy('created_at', 'desc');
                 })
                 ->orderBy('id', 'desc')
-            ->paginate(20);
+            ->paginate(10);
 
 
 

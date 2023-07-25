@@ -9,6 +9,7 @@ use App\Repositories\SearchPaymentRepository;
 use App\Repositories\SearchBillingRepository;
 use App\Repositories\SearchFeederRepository;
 use App\Repositories\SearchTicketRepository;
+use App\Repositories\AmiRepository;
 
 class SearchFactory extends Controller
 {
@@ -28,6 +29,8 @@ class SearchFactory extends Controller
                 return new SearchFeederRepository($request);
             case 'tickets':
                 return new SearchTicketRepository($request);
+            case 'search_events_summary':
+                return new AmiRepository($request);
             default:
                 throw new \InvalidArgumentException('Invalid payment type');  
         }
