@@ -49,54 +49,62 @@ class AmiController extends BaseApiController
 
     public function getSummary(Request $request){
         
+        
         $cacheKey = 'ami_event_summary_mdacustomers';
         $minutes = 5;
+
+        $eventType = $request->query('type'); 
         
 
-        $cachedSummary = Cache::remember($cacheKey, $minutes, function () use ($request) {
+        $cachedSummary = Cache::remember($cacheKey, $minutes, function () use ($request, $eventType) {
             $year = $request->year ?? Date('Y');
             $month = $request->month ?? Date('m');
 
-            $getRequest = (new AmiService)->getMeterReading($year, $month); // $request->year, $request->month; and
+            $group = (new AmiService)->allConnectionsgroups();
+            $getRequest = (new AmiService)->getMeterReading($year, $month, $eventType); // $request->year, $request->month; and
             $newResource = AmiminiResource::collection($getRequest); // $request->year, $request->month; and
-            return $newResource;
+
+            return [
+                'group' => $group,
+                'summary_data' => $newResource,
+            ];
         });
 
-          //  $getRequest = (new AmiService)->getMeterReading(2023, 5); // $request->year, $request->month; and
-
-        //    $newResource = AmiminiResource::collection($getRequest); // $request->year, $request->month; and
+    
 
         return $this->sendSuccess($cachedSummary, "Data Successfully Loaded - ", Response::HTTP_OK);
       
     }
 
     public function getAll(Request $request){
-        Redis::flushall();
+        //Redis::flushall();
 
         $cacheKey = 'ami_event_getAll';
         $minutes = 5;
 
-       /* $data = Cache::remember($cacheKey, $minutes, function () {
-            $group = (new AmiService)->allConnectionsgroups();
-            $getRequest = (new AmiService)->allConnections();
+        $eventType = $request->query('type'); 
 
-        return [
+        $data = Cache::remember($cacheKey, $minutes, function () use ($eventType) {
+            $group = (new AmiService)->allConnectionsgroups();
+            $getRequest = (new AmiService)->allConnections($eventType);
+    
+            return [
                 'group' => $group,
                 'ami_data' => $getRequest,
             ];
-
         });
-        */
+        
 
-        $eventType = $request->query('type'); 
+        
 
-        $group = (new AmiService)->allConnectionsgroups();
+      /*  $group = (new AmiService)->allConnectionsgroups();
         $getRequest = (new AmiService)->allConnections($eventType);
 
          $data = [
              'group' => $group,
              'ami_data' => $getRequest,
          ];
+         */
         return $this->sendSuccess($data, "Data Loaded - ". count($data), Response::HTTP_OK);
         
     }

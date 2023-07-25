@@ -17,6 +17,8 @@ class AmiminiResource extends JsonResource
     public function toArray(Request $request): array
     {
         return [
+            'year' => Date('Y'),
+            'month' => Date('m'),
             "MSNO" => $this->MSNO,
             "consumption" => $this->consumption,
             "Descr" => $this->Descr,
