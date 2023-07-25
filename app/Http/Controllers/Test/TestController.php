@@ -58,6 +58,7 @@ use App\Http\Requests\CaadRequest;
 use App\Enums\CaadEnum;
 use App\Models\Caad;
 use App\Models\CAADCommentApproval;
+use Illuminate\Support\Facades\Password;
 
 
 
@@ -1740,6 +1741,74 @@ class TestController extends BaseApiController
     
 
 
+        public function changePassword(Request $request){
+
+            $request->validate([
+                'old_password' => 'required',
+                'new_password' => 'required|string|min:6',
+            ]);
+    
+            $user = Auth::user();
+    
+            if (!Hash::check($request->old_password, $user->password)) {
+                return $this->sendError("Error", "Your current password does not matches with the password you provided. Please try again.", Response::HTTP_BAD_REQUEST);
+            }
+    
+            if (strcmp($request->old_password, $request->new_password) == 0) {
+                return $this->sendError("Error", "New Password cannot be same as your current password. Please choose a different password.", Response::HTTP_BAD_REQUEST);
+            }
+    
+            //Hash::make($request->new_password)
+            $user->password = bcrypt($request->new_password);
+            $user->save();
+    
+            return $this->sendSuccess($user, "Password changed successfully !", Response::HTTP_OK);
+        }
+
+
+      /*  public function sendPasswordReset(Request $request){
+
+            $request->validate([
+                'email' => 'required',
+            ]);
+
+            $user = User::where('email', $request->email)->first();
+            if (!$user) {
+                return $this->sendError("Error", "We can't find a user with that e-mail address.", Response::HTTP_BAD_REQUEST);
+            }
+
+            $token = Str::random(60);
+            $user->password_reset_token = $token;
+            $user->save();
+
+            //Send Email as an event
+           // event(new PasswordResetEvent($user));
+
+
+        }
+        */
+
+        public function forgotPassword(Request $request){
+
+            $request->validate(['email' => 'required|email']);
+
+            $user = User::where('email', $request->email)->first();
+            if (!$user) {
+                return $this->sendError("Error", "We can't find a user with that e-mail address.", Response::HTTP_BAD_REQUEST);
+            }
+
+            $status = Password::sendResetLink($request->only('email') );
+
+           /* return $status === Password::RESET_LINK_SENT
+            ? back()->with(['status' => __($status)])
+            : back()->withErrors(['email' => __($status)]);
+            */
+
+            $neStatus = Password::RESET_LINK_SENT;
+
+            return $this->sendSuccess($neStatus, "Password changed Sent !", Response::HTTP_OK);
+
+        }
     
 
 

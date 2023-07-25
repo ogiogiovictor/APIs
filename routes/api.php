@@ -131,7 +131,7 @@ Route::group(['prefix' => 'v1', 'namespace' => 'Api\v1', 'middleware' => 'OAuth'
            
             Route::get('events', [AmiController::class, 'getAll'])->name('getAll');  
         });
-        Route::get('get_ami_summary', [AmiController::class, 'getSummary'])->name('getSummary');
+        Route::get('get_ami_summary', [AmiController::class, 'getSummary'])->name('getAmiSummary');
         Route::get('ami_monthly_summary', [AmiController::class, 'monthlySummary'])->name('monthlySummary');
         Route::get('all_feeders_with_myto/{type?}', [AmiController::class, 'FeederDetails'])->name('FeederDetails');
 
@@ -223,10 +223,12 @@ Route::group(['prefix' => 'v1', 'namespace' => 'Api\v1', 'middleware' => 'OAuth'
 /*********************************** ROUTE FOR TESTING ON LOCAL MACHINE ************************************** */
 
 Route::post('auth_login_test', [TestController::class, 'login']);
+Route::post('forgot-password', [TestController::class, 'forgotPassword']);
 
 /////////////////////////////////////// API FOR CUSTOMER MANAGEMEMENT SYSTEM ///////////////////////////////////  'middleware' => 'oAuth'
 Route::group(['prefix' => 'v2', 'namespace' => 'Api\v2', 'middleware' => 'OAuth'], function () {
 //Route::group(['prefix' => 'v2', 'namespace' => 'Api\v2', 'middleware' => ['OAuth', 'before'] ], function () {
+    
 
     Route::middleware(['auth:sanctum'])->group(function() {
 
@@ -322,6 +324,9 @@ Route::group(['prefix' => 'v2', 'namespace' => 'Api\v2', 'middleware' => 'OAuth'
 
         Route::post('caad_approval_request', [TestController::class, 'CaadApprovalRequest']);
         Route::post('caad_reject_request', [TestController::class, 'CaadRejectRequest']);
+
+
+        Route::post('change_password', [TestController::class, 'changePassword']); // When i am logged in 
         
 
         
