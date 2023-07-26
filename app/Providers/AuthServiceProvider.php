@@ -6,6 +6,8 @@ namespace App\Providers;
 use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvider;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Auth\Notifications\ResetPassword;
+use App\Notifications\ResetPasswordNotification;
 
 class AuthServiceProvider extends ServiceProvider
 {
@@ -33,6 +35,11 @@ class AuthServiceProvider extends ServiceProvider
         Auth::viaRequest('adldap', function ($request) {
             return Auth::guard('ad')->user() ?: null;
         });
+
+        //password reset link
+        // ResetPassword::createUrlUsing(function ($user, string $token) {
+        //     return 'https://example.com/reset-password?token='.$token;
+        // });
 
     }
 }

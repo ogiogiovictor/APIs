@@ -225,6 +225,10 @@ Route::group(['prefix' => 'v1', 'namespace' => 'Api\v1', 'middleware' => 'OAuth'
 Route::post('auth_login_test', [TestController::class, 'login']);
 Route::post('forgot-password', [TestController::class, 'forgotPassword']);
 
+Route::get('reset-password/{token}',  [TestController::class, 'changePassword'])->middleware('guest')->name('password.reset');
+Route::post('reset-password', [TestController::class, 'resetPassword']); 
+Route::get('check-password/{token}',  [TestController::class, 'checkPassword'])->middleware('guest');
+
 /////////////////////////////////////// API FOR CUSTOMER MANAGEMEMENT SYSTEM ///////////////////////////////////  'middleware' => 'oAuth'
 Route::group(['prefix' => 'v2', 'namespace' => 'Api\v2', 'middleware' => 'OAuth'], function () {
 //Route::group(['prefix' => 'v2', 'namespace' => 'Api\v2', 'middleware' => ['OAuth', 'before'] ], function () {
@@ -327,6 +331,8 @@ Route::group(['prefix' => 'v2', 'namespace' => 'Api\v2', 'middleware' => 'OAuth'
 
 
         Route::post('change_password', [TestController::class, 'changePassword']); // When i am logged in 
+
+       
         
 
         

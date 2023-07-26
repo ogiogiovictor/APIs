@@ -60,6 +60,9 @@ use App\Models\Caad;
 use App\Models\CAADCommentApproval;
 use Illuminate\Support\Facades\Password;
 
+use Illuminate\Auth\Events\PasswordReset;
+use Illuminate\Support\Str;
+
 
 
 class TestController extends BaseApiController
@@ -1806,10 +1809,49 @@ class TestController extends BaseApiController
 
             $neStatus = Password::RESET_LINK_SENT;
 
-            return $this->sendSuccess($neStatus, "Password changed Sent !", Response::HTTP_OK);
+            $getToken = DB::table('password_reset_tokens')->where('email', $request->email)->first();
+
+            return $this->sendSuccess($getToken, "Password changed Sent !", Response::HTTP_OK);
 
         }
     
+    
+        public function resetPassword(Request $request) {
+
+            $request->validate([
+                'token' => 'required',
+                'email' => 'required|email',
+                'password' => 'required|min:8|confirmed',
+            ]);
+
+            $status = Password::reset(
+                $request->only('email', 'password', 'password_confirmation', 'token'),
+                function ($user, $password) {
+                    $user->forceFill([ 'password' => Hash::make($password) ])->setRememberToken(Str::random(60));
+         
+                    $user->save();
+         
+                    event(new PasswordReset($user));
+            });
+
+            $status === Password::PASSWORD_RESET;
+            
+        }
+
+
+        public function checkPassword($checkpassword){
+            if(!$checkpassword){
+                return $this->sendError("Error", "We can't find a user with that e-mail address.", Response::HTTP_BAD_REQUEST);
+            } 
+
+            $getToken = DB::table('password_reset_tokens')->where('token', $checkpassword)->first();
+
+            if($getToken) {
+                return $this->sendSuccess($getToken, "Token Exists", Response::HTTP_OK);
+            }else {
+                return $this->sendError("Error", "We can't find a user with that e-mail address.", Response::HTTP_BAD_REQUEST);
+            }
+        }
 
 
 

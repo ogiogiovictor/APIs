@@ -11,6 +11,7 @@ use Spatie\Permission\Traits\HasRoles;
 use App\Enums\AuthorityEnum;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use App\Notifications\ResetPasswordNotification;
 
 class User extends Authenticatable
 {
@@ -83,4 +84,18 @@ class User extends Authenticatable
         return $this->belongsToMany(Role::class, 'model_has_roles', 'model_id', 'role_id')
             ->where('model_type', User::class);
     }
+
+    /**
+     * Send a password reset notification to the user.
+     *
+     * @param  string  $token
+     * @return void
+     */
+    public function sendPasswordResetNotification($token)
+    {
+        $url = 'https://localohost:3000/reset-password?token='.$token;
+    
+        $this->notify(new ResetPasswordNotification($url));
+    }
+
 }
