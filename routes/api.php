@@ -155,6 +155,7 @@ Route::group(['prefix' => 'v1', 'namespace' => 'Api\v1', 'middleware' => 'OAuth'
 
         Route::get('caad_process_flow', [CaadController::class, 'getApproval'])->middleware('before');; //Admin Router
         Route::post('process_caad_request', [CaadController::class, 'addCAAD']);
+    
 
         Route::get('allcaad', [CaadController::class, 'getAllCAAD'])->middleware('before');
         Route::get('caads', [CaadController::class, 'allCAAD'])->middleware('before');
@@ -166,7 +167,7 @@ Route::group(['prefix' => 'v1', 'namespace' => 'Api\v1', 'middleware' => 'OAuth'
 
         Route::post('caad_approval_request', [CaadController::class, 'CaadApprovalRequest']);
         Route::post('caad_reject_request', [CaadController::class, 'CaadRejectRequest']);
-
+      
         
 
 

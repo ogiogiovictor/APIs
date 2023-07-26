@@ -35,9 +35,8 @@ class CaadController extends BaseApiController
 
     public function addCAAD(CaadRequest $request){
 
-        $validator = Validator::make($request->all(), [
-            'file_upload' => 'required|array',
-            'file_upload.*' => 'file|mimes:jpeg,jpg,png,pdf|max:2048', // Add allowed file types here
+        $validator = Validator::make($request->file_upload, [
+            'file_upload' => 'file|mimes:jpeg,jpg,png,pdf,csv|max:2048', // Add allowed file types here
             // other validation rules for other form fields if required
         ]);
 
@@ -48,25 +47,60 @@ class CaadController extends BaseApiController
 
         try {
 
-            $processCAAD = ProcessCAAD::create([
-                'accountNo' => $request->accountNo,
-                'phoneNo' => $request->phoneNo,
-                'surname' => $request->surname,
-                'lastname' => $request->lastname,
-                'othername' => $request->othername,
-                'service_center' => $request->service_center,
-                'meterno' => $request->meterno,
-                'accountType' => $request->accountType,
-                'transtype' => $request->transtype,
-                'meter_reading' => $request->meter_reading,
-                'transaction_type' => $request->transaction_type,
-                'effective_date' => $request->effective_date,
-                'amount' => $request->amount,
-                'remarks' => $request->remarks,
-                'file_upload_id' => 0,
-                'created_by' => Auth::user()->id,
 
-            ]);
+            if(isset($request->update_id)){
+                $getwhocreated = ProcessCAAD::find($request->update_id);
+                // if($getwhocreated->created_by  != $request->update_id){
+                //     return $this->sendError("Error", "You are not authorized to update this request", Response::HTTP_BAD_REQUEST);
+                // }
+                
+                //update CAAD information 
+                $processCAAD = ProcessCAAD::where("id", $request->update_id)->update([
+                    'accountNo' => $request->accountNo,
+                    'phoneNo' => $request->phoneNo,
+                    'surname' => $request->surname,
+                    'lastname' => $request->lastname,
+                    'othername' => $request->othername,
+                    'service_center' => $request->service_center,
+                    'meterno' => $request->meterno,
+                    'accountType' => $request->accountType,
+                    'transtype' => $request->transtype,
+                    'meter_reading' => $request->meter_reading,
+                    'transaction_type' => $request->transaction_type,
+                    'effective_date' => $request->effective_date,
+                    'amount' => isset($request->amount) ? $request->amount : $getwhocreated->amount,
+                    'remarks' => $request->remarks,
+                    'file_upload_id' => 0,
+                    'business_hub' => $request->business_hub,
+                    'region' => $request->region,
+                    'created_by' => Auth::user()->id,
+                ]);
+
+            }else {
+
+                $processCAAD = ProcessCAAD::create([
+                    'accountNo' => $request->accountNo,
+                    'phoneNo' => $request->phoneNo,
+                    'surname' => $request->surname,
+                    'lastname' => $request->lastname,
+                    'othername' => $request->othername,
+                    'service_center' => $request->service_center,
+                    'meterno' => $request->meterno,
+                    'accountType' => $request->accountType,
+                    'transtype' => $request->transtype,
+                    'meter_reading' => $request->meter_reading,
+                    'transaction_type' => $request->transaction_type,
+                    'effective_date' => $request->effective_date,
+                    'amount' => $request->amount,
+                    'remarks' => $request->remarks,
+                    'file_upload_id' => 0,
+                    'business_hub' => $request->business_hub,
+                    'region' => $request->region,
+                    'created_by' => Auth::user()->id,
+    
+                ]);
+
+            } 
 
            
               // Check if the destination folder exists and has write permissions is_writable
@@ -96,7 +130,7 @@ class CaadController extends BaseApiController
                     $file->storeAs('customercaad', $fileName, 'public');
 
                     $uploadfile = FileCAAD::create([
-                        'process_caad_id' => $processCAAD->id,
+                        'process_caad_id' => isset($request->update_id) ? $request->update_id : $processCAAD->id,
                         'file_name' => $fileName,
                         'file_size' => $file->getSize(),
                         'file_type' => $file->getClientMimeType(),
@@ -106,9 +140,10 @@ class CaadController extends BaseApiController
     
             }
 
+            $getUpdate = isset($request->update_id) ? $getwhocreated->where("id", $request->update_id)->first() : $processCAAD;
          
 
-          return $this->sendSuccess($processCAAD, "File Successfully Uploaded", Response::HTTP_CREATED);
+          return $this->sendSuccess($getUpdate, "File Successfully Uploaded", Response::HTTP_CREATED);
 
         }catch(\Exception $e){
 
