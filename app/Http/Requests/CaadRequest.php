@@ -3,6 +3,9 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Contracts\Validation\Validator;
+use Illuminate\Http\Exceptions\HttpResponseException;
+use Illuminate\Validation\ValidationException;
 
 class CaadRequest extends FormRequest
 {
@@ -34,4 +37,23 @@ class CaadRequest extends FormRequest
             "remarks" => 'required',
         ];
     }
+
+
+
+    /**
+     * Handle a failed validation attempt.
+     *
+     * @param  Validator  $validator
+     * @return void
+     *
+     * @throws HttpResponseException
+     */
+    protected function failedValidation(Validator $validator)
+    {
+        $errors = (new ValidationException($validator))->errors();
+
+        throw new HttpResponseException(response()->json(['errors' => $errors], 422));
+    }
+
+    
 }

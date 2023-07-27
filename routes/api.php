@@ -333,7 +333,7 @@ Route::group(['prefix' => 'v2', 'namespace' => 'Api\v2', 'middleware' => 'OAuth'
 
         Route::post('change_password', [TestController::class, 'changePassword']); // When i am logged in 
 
-       
+        Route::get('caads', [TestController::class, 'allCAAD']);
         
 
         
