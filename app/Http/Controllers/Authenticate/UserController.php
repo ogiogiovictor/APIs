@@ -17,6 +17,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Illuminate\Support\Facades\Hash;
 use Spatie\Permission\Models\Role;
 use App\Models\AssignSubMenu;
+use App\Jobs\RegistrationJob;
 
 
 class UserController extends BaseApiController
@@ -84,6 +85,8 @@ class UserController extends BaseApiController
           //Atach User to a Role
           //$user->assignRole('admin');
           $user->assignRole($request->role);
+
+          dispatch(new RegistrationJob($user, $request->password));
 
         return $this->sendSuccess($user, "User Created Successfully", Response::HTTP_OK);
     }

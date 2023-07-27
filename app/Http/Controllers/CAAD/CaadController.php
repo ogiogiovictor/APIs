@@ -35,15 +35,28 @@ class CaadController extends BaseApiController
 
     public function addCAAD(CaadRequest $request){
 
-        $validator = Validator::make($request->file_upload, [
-            'file_upload' => 'file|mimes:jpeg,jpg,png,pdf,csv|max:2048', // Add allowed file types here
+       /* $validator = Validator::make($request->all(), [
+            'file_upload' => 'sometimes|nullable|mimes:jpeg,jpg,png,pdf,csv,xlsx|max:2048', // Add allowed file types here
             // other validation rules for other form fields if required
         ]);
 
+        $validator->after(function ($validator) use ($request) {
+            $files = $request->file('file_upload');
+    
+            if (is_array($files)) {
+                foreach ($files as $file) {
+                    if ($file !== null && !$file->isValid()) {
+                        $validator->errors()->add('file_upload', 'Invalid file upload.');
+                        break; // Stop processing if any file is invalid
+                    }
+                }
+            }
+        });
+    
         if ($validator->fails()) {
             return $this->sendError("Validation Error", $validator->errors(), Response::HTTP_BAD_REQUEST);
         }
-    
+        */
 
         try {
 
@@ -73,7 +86,8 @@ class CaadController extends BaseApiController
                     'file_upload_id' => 0,
                     'business_hub' => $request->business_hub,
                     'region' => $request->region,
-                    'created_by' => Auth::user()->id,
+                    'created_by' => Auth::user()->id
+                  //  'status' => 0
                 ]);
 
             }else {
