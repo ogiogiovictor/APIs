@@ -142,10 +142,10 @@ Route::group(['prefix' => 'v1', 'namespace' => 'Api\v1', 'middleware' => 'OAuth'
         Route::prefix('roles')->group(function() {
          
            // Route::apiResource('roles', RoleController::class);
-            Route::get('get_roles', [RoleController::class, 'getRole']);
+            Route::get('get_roles', [RoleController::class, 'getRole'])->middleware('before');;
             Route::post('assign_roles', [RoleController::class, 'assignMenuRole']);
             Route::post('permissions', [PermissionController::class, 'store']);
-            Route::get('permissions', [PermissionController::class, 'index']);
+            Route::get('permissions', [PermissionController::class, 'index'])->middleware('before');;
             Route::post('assign_permission', [PermissionController::class, 'giveMePermission']);
             
         });

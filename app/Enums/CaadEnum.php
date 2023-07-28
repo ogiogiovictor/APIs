@@ -14,6 +14,7 @@ enum CaadEnum: string
     case APPROVED_BY_CCO = '6';
     case APPROVED_BY_MD = '7';
     case ADMIN = '8'; // If ADMIN needs to have the same value as APPROVED_BY_DISTRICT_ACCOUNTANT, make sure to change it to '1' as well.
+    case BILLING = '9';
 
 
     public function label(): string
@@ -28,6 +29,7 @@ enum CaadEnum: string
             self::APPROVED_BY_CCO => 'Approved by CCO',
             self::APPROVED_BY_MD => 'Approved by MD',
             self::ADMIN => 'Approved by Admin',
+            self::BILLING => 'Completed and Customer Account Updated by Billing',
         };
     }
 }

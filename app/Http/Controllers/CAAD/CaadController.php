@@ -185,7 +185,7 @@ class CaadController extends BaseApiController
                 return $query->where('status', CaadEnum::APPROVED_BY_DISTRICT_ACCOUNTANT->value)->where("business_hub", $getUserRoleObject['business_hub']);
             })
             ->when($userRole === 'audit', function ($query, $getUserRoleObject) {
-                return $query->where('status', CaadEnum::APPROVED_BY_BUSINESS_HUB_MANAGER->value)->where("business_hub", $getUserRoleObject['business_hub']);
+                return $query->where('status', CaadEnum::APPROVED_BY_BUSINESS_HUB_MANAGER->value)->where("region", $getUserRoleObject['region']);
             })
             ->when($userRole === 'regional_manager', function ($query, $getUserRoleObject) {
                 return $query->where('status', CaadEnum::APPROVED_BY_AUDIT->value)->where("region", $getUserRoleObject['region']);
@@ -201,6 +201,8 @@ class CaadController extends BaseApiController
             }) 
             ->when($userRole === 'admin', function ($query) {
                 return $query->whereIn('status', [0, 1, 2, 3, 4, 5, 6, 7, 10]);
+            })->when($userRole === 'billing', function ($query) {
+                return $query->whereIn('status', CaadEnum::APPROVED_BY_MD->value);
             })
             ->orderBy('id', 'desc')
         ->paginate(20);
@@ -214,7 +216,7 @@ class CaadController extends BaseApiController
                 return $query->where('batch_status', CaadEnum::APPROVED_BY_DISTRICT_ACCOUNTANT->value)->where("business_hub", $getUserRoleObject['business_hub']);
             })
             ->when($userRole === 'audit', function ($query, $getUserRoleObject) {
-                return $query->where('batch_status', CaadEnum::APPROVED_BY_BUSINESS_HUB_MANAGER->value)->where("business_hub", $getUserRoleObject['business_hub']);
+                return $query->where('batch_status', CaadEnum::APPROVED_BY_BUSINESS_HUB_MANAGER->value)->where("region", $getUserRoleObject['region']);
             })
             ->when($userRole === 'regional_manager', function ($query, $getUserRoleObject) {
                 return $query->where('batch_status', CaadEnum::APPROVED_BY_AUDIT->value)->where("region", $getUserRoleObject['region']);
@@ -230,6 +232,8 @@ class CaadController extends BaseApiController
             }) 
             ->when($userRole === 'admin', function ($query) {
                 return $query->whereIn('batch_status', [0, 1, 2, 3, 4, 5, 6, 7, 10]);
+            })->when($userRole === 'billing', function ($query) {
+                return $query->whereIn('status', CaadEnum::APPROVED_BY_MD->value);
             })
         ->orderBy('id', 'desc')->paginate(20);
 
@@ -287,11 +291,85 @@ class CaadController extends BaseApiController
     }
 
 
+     /*   private function getApprovalStatus(string $userRole, int $amount)
+      {
+
+        $getLimit = Caad::where("role", $userRole)->value("end_limit");
+
+
+          switch ($userRole) {
+              case 'district_accountant':
+                return CaadEnum::APPROVED_BY_DISTRICT_ACCOUNTANT->value;
+              case 'businesshub_manager':
+                  return CaadEnum::APPROVED_BY_BUSINESS_HUB_MANAGER->value;
+              case 'audit':
+                  return CaadEnum::APPROVED_BY_AUDIT->value;
+              case 'regional_manager':
+                if($amount <= $getLimit){
+                    return CaadEnum::BILLING->value;
+                }else {
+                    return CaadEnum::APPROVED_BY_REGIONAL_MANAGER->value;
+                }
+                 
+              case 'hcs':
+                if($amount <= $getLimit){
+                    return CaadEnum::BILLING->value;
+                }else {
+                    return CaadEnum::APPROVED_BY_HCS->value;
+                }
+              case 'cco':
+                if($amount <= $getLimit){
+                    return CaadEnum::BILLING->value;
+                }else {
+                    return CaadEnum::APPROVED_BY_CCO->value;
+                }
+              case 'md':
+                  return CaadEnum::APPROVED_BY_MD->value;
+              case 'admin':
+                  return CaadEnum::ADMIN->value;
+              default:
+                  throw new \Exception('Invalid user role');
+          }
+      }
+      */
+
+
+
+        private function getApprovalStatus(string $userRole, int $amount)
+        {
+            // Define the role-based approval mapping
+            $roleApprovalMapping = [
+                'district_accountant' => CaadEnum::APPROVED_BY_DISTRICT_ACCOUNTANT->value,
+                'businesshub_manager' => CaadEnum::APPROVED_BY_BUSINESS_HUB_MANAGER->value,
+                'audit' => CaadEnum::APPROVED_BY_AUDIT->value,
+                'regional_manager' => ($amount <= $getLimit) ? CaadEnum::BILLING->value : CaadEnum::APPROVED_BY_REGIONAL_MANAGER->value,
+                'hcs' => ($amount <= $getLimit) ? CaadEnum::BILLING->value : CaadEnum::APPROVED_BY_HCS->value,
+                'cco' => ($amount <= $getLimit) ? CaadEnum::BILLING->value : CaadEnum::APPROVED_BY_CCO->value,
+                'md' => CaadEnum::APPROVED_BY_MD->value,
+                'billing' => CaadEnum::BILLING->value,
+                'admin' => CaadEnum::ADMIN->value,
+            ];
+
+            // Check if the user role exists in the mapping, otherwise, throw an exception
+            if (!array_key_exists($userRole, $roleApprovalMapping)) {
+                throw new \Exception('Invalid user role');
+            }
+
+            return $roleApprovalMapping[$userRole];
+        }
+
+
+      
+     
+     
+  
 
 
     public function CaadApprovalRequest(Request $request){
 
           try{
+
+            $amount = (int)$request->amount;
               // Get the user role
               $userRole = Auth::user()->roles->pluck('name')->first();
               DB::beginTransaction();
@@ -299,19 +377,19 @@ class CaadController extends BaseApiController
                   if ($request->batch_type == 'single') {
                       // Update the process CAAD status
                       $processCAAD = ProcessCAAD::find($request->id);
-                      $processCAAD->status = $this->getApprovalStatus($userRole);
+                      $processCAAD->status = $this->getApprovalStatus($userRole,  $amount);
                       $processCAAD->save();
 
                       $this->passPosition($userRole, $request->id, $request->batch_type);
                   }else {
                       
                       $processBatch = BulkCAAD::find($request->id);
-                      $processBatch->batch_status = $this->getApprovalStatus($userRole);
+                      $processBatch->batch_status = $this->getApprovalStatus($userRole,  $amount);
                       $processBatch->save();
 
                       //Now Update the processCADD where batch id is = batch
                       $processCARD = ProcessCAAD::where('batch_id', $request->id)->update([
-                          'status' => $this->getApprovalStatus($userRole)
+                          'status' => $this->getApprovalStatus($userRole,  $amount)
                       ]);
 
                       $this->passPosition($userRole, $request->id, $request->batch_type);
@@ -329,6 +407,9 @@ class CaadController extends BaseApiController
          
 
       }
+
+
+  
 
 
       private function passPosition($userRole, $id, $batchType){
@@ -358,6 +439,48 @@ class CaadController extends BaseApiController
     
         return 0; // Return 0 if the user role is not found in the positions array
     }
+
+
+
+   
+    private function addComment(Request $request, string $userRole)
+    {
+
+        // Get the label for the given userRole from the CaadEnum
+        $userRoleLabel = match ($userRole) {
+            'district_accountant' => CaadEnum::APPROVED_BY_DISTRICT_ACCOUNTANT->label(),
+            'businesshub_manager' => CaadEnum::APPROVED_BY_BUSINESS_HUB_MANAGER->label(),
+            'audit' => CaadEnum::APPROVED_BY_AUDIT->label(),
+            'regional_manager' => CaadEnum::APPROVED_BY_REGIONAL_MANAGER->label(),
+            'hcs' => CaadEnum::APPROVED_BY_HCS->label(),
+            'cco' => CaadEnum::APPROVED_BY_CCO->label(),
+            'md' => CaadEnum::APPROVED_BY_MD->label(),
+            'admin' => CaadEnum::ADMIN->label(),
+            default => '',
+        };
+
+      return  $caadComment = CAADCommentApproval::create([
+            'process_caad_id' => $request->id,
+            'approval_type' => $request->batch_type,
+            'batch_id' => isset($request->batch_id) ? $request->batch_id : 0,
+            'approval_by' => Auth::user()->name,
+            'comments' =>  $userRoleLabel . ' @ ' . ' ' . Date('Y-m-d H:i:s'),
+        ]);
+    }
+
+
+    private function addRejectComment(Request $request, string $userRole)
+    {
+
+        $caadComment = CAADCommentApproval::create([
+            'process_caad_id' => $request->id,
+            'approval_type' => $request->batch_type,
+            'batch_id' => isset($request->batch_id) ? $request->batch_id : 0,
+            'approval_by' => Auth::user()->name,
+            'comments' =>  'Rejected By ' . $userRole. ' @ ' . ' ' . Date('Y-m-d H:i:s'),
+        ]);
+    }
+
 
     
 /*
@@ -464,7 +587,9 @@ class CaadController extends BaseApiController
 
         $getSingleCAAD = ProcessCAAD::with('fileUpload')->with('CaadComment')
             ->where('batch_type', 'single')
-            ->when($userRole === 'district_accountant', function ($query, $userid, $getUserRoleObject) {
+            ->when($userRole === 'credit_control', function ($query, $userid, $getUserRoleObject) {
+                return $query->where('created_by', $userid)->orderBy("created_at", "desc");
+            })->when($userRole === 'district_accountant', function ($query, $userid, $getUserRoleObject) {
                 return $query->where('district_accountant', $userid)->where("business_hub", $getUserRoleObject['business_hub'])->orderBy("created_at", "desc");
             })
             ->when($userRole === 'businesshub_manager', function ($query, $userid,  $getUserRoleObject) {

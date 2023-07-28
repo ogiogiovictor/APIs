@@ -39,15 +39,18 @@ class UserController extends BaseApiController
 
     public function getAllUsers() {
 
-        $users = User::paginate(20);
+        $users = User::orderby("id", "desc")->paginate(20);
         // Modify the date format and status values
         $users->getCollection()->transform(function ($user) {
             // Convert created_at to human-readable date format
-            $user->created_at = Carbon::parse($user->created_at)->format('Y-m-d H:i:s');
+            $user->created_at = Carbon::parse($user->created_at)->subMinutes(2)->diffForHumans();
            // $user->created_at = Carbon::parse($user->created_at)->diffForHumans();
 
             // Convert status values to human-readable strings
             $user->status = $user->status == 1 ? 'Active' : 'Inactive';
+
+            // Get user role name (assuming one user has one primary role)
+             $user->roles = $user->roles->pluck('name')->first();
 
             return $user;
         });
@@ -60,31 +63,53 @@ class UserController extends BaseApiController
     public function addUser(Request $request) {
 
      
-        $validator = Validator::make($request->all(), [
-            'name' => 'required',
-            'email' => 'required|unique:users|max:255',
-            'password' => 'required',
-            'role' => 'required',
-        ]);
+        if(!$request->user_id){
+            $validator = Validator::make($request->all(), [
+                'name' => 'required',
+                'email' => 'required|unique:users|max:255',
+                'password' => 'required',
+                'role' => 'required',
+            ]);
 
-        if ($validator->fails()) {
-            return $this->sendError("Validation Error", $validator->errors(), Response::HTTP_BAD_REQUEST);
+            if ($validator->fails()) {
+                return $this->sendError("Validation Error", $validator->errors(), Response::HTTP_BAD_REQUEST);
+            }
+
+            $user = User::create([
+                'name' => $request->name,
+                'email' => $request->email,
+                'status' => "1",
+                'authority' => $request->authority,
+                'password' => Hash::make($request->password),
+                'level' => $request->level ?? []
+            ]);
+    
+              //Atach User to a Role
+              $user->assignRole($request->role);
+        }else {
+
+            $validator = Validator::make($request->all(), [
+               // 'name' => 'required',
+               // 'email' => 'required|unique:users|max:255',
+                'role' => 'required',
+            ]);
+
+            if ($validator->fails()) {
+                return $this->sendError("Validation Error", $validator->errors(), Response::HTTP_BAD_REQUEST);
+            }
+
+            $user = User::find($request->user_id);
+            //$user->name = $request->name;
+            //$user->email = $request->email;
+            $user->status = isset($request->status) ? $request->status :  0;
+            $user->authority = isset($request->authority) ? $request->authority : null;
+            $user->password = Hash::make($request->password);
+            $user->level = isset($request->level) ? $request->level : '';
+            $user->save();
+
+            //Atach User to a Role
+            $user->assignRole($request->role);
         }
-
-        $user = User::create([
-            'name' => $request->name,
-            'email' => $request->email,
-            'status' => "1",
-            'authority' => $request->authority,
-            'password' => Hash::make($request->password),
-            'level' => $request->level ?? []
-        ]);
-
-        // $request->business_hub, $request->region, $request->service_center
-
-          //Atach User to a Role
-          //$user->assignRole('admin');
-          $user->assignRole($request->role);
 
           dispatch(new RegistrationJob($user, $request->password));
 
