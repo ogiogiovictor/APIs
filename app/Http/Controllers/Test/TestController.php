@@ -62,6 +62,7 @@ use Illuminate\Support\Facades\Password;
 
 use Illuminate\Auth\Events\PasswordReset;
 use Illuminate\Support\Str;
+use App\Jobs\RegistrationJob;
 
 
 
@@ -999,29 +1000,60 @@ class TestController extends BaseApiController
     public function addUser(Request $request){
 
        
+        if(!$request->user_id){
+            $validator = Validator::make($request->all(), [
+                'name' => 'required',
+                'email' => 'required|unique:users|max:255',
+                'password' => 'required',
+                'role' => 'required',
+            ]);
 
-        $validator = Validator::make($request->all(), [
-            'name' => 'required',
-            'email' => 'required|unique:users|max:255',
-            'password' => 'required',
-            'role' => 'required',
-        ]);
+            if ($validator->fails()) {
+                return $this->sendError("Validation Error", $validator->errors(), Response::HTTP_BAD_REQUEST);
+            }
 
-        if ($validator->fails()) {
-            return $this->sendError("Validation Error", $validator->errors(), Response::HTTP_BAD_REQUEST);
+            $user = User::create([
+                'name' => $request->name,
+                'email' => $request->email,
+                'status' => "1",
+                'authority' => $request->authority,
+                'password' => Hash::make($request->password),
+                'level' => $request->level ?? []
+            ]);
+    
+              //Atach User to a Role
+              $user->assignRole($request->role);
+        }else {
+
+            $validator = Validator::make($request->all(), [
+               // 'name' => 'required',
+               // 'email' => 'required|unique:users|max:255',
+                'role' => 'required',
+            ]);
+
+            if ($validator->fails()) {
+                return $this->sendError("Validation Error", $validator->errors(), Response::HTTP_BAD_REQUEST);
+            }
+
+            $user = User::find($request->user_id);
+            //$user->name = $request->name;
+            //$user->email = $request->email;
+            $user->status = isset($request->status) ? $request->status :  0;
+            $user->authority = isset($request->authority) ? $request->authority : null;
+            $user->password = Hash::make($request->password);
+            $user->level = isset($request->level) ? $request->level : '';
+            $user->save();
+
+            //Atach User to a Role
+            $user->assignRole($request->role);
         }
+       
 
-        $user = User::create([
-            'name' => $request->name,
-            'email' => $request->email,
-            'status' => "1",
-            'authority' => $request->authority,
-            'password' => Hash::make($request->password),
-            'level' => $request->level ?? []
-        ]);
+       
 
-          //Atach User to a Role
-          $user->assignRole($request->role);
+       
+
+          dispatch(new RegistrationJob($user, $request->password));
 
         return $this->sendSuccess($user, "User Created Successfully", Response::HTTP_OK);
     }

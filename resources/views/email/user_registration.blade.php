@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="x-apple-disable-message-reformatting">
-    <title>Welcome to Payhaven</title>
+    <title>Welcome to IBEDC CMS</title>
     
     <link href="https://fonts.googleapis.com/css?family=Roboto:400,600" rel="stylesheet" type="text/css">
     <!-- Web Font / @font-face : BEGIN -->
@@ -82,7 +82,7 @@
                         <tbody>
                             <tr>
                                 <td style="text-align: center; padding-bottom:25px">
-                                    <a href="#"><img style="height: 40px" src="hhttps://www.ibedc.com/assets/img/logo.png" alt="logo"></a>
+                                    <a href="#"><img style="height: 40px" src="https://www.ibedc.com/assets/img/logo.png" alt="logo"></a>
                                    
                                 </td>
                             </tr>
@@ -92,24 +92,25 @@
                         <tbody>
                             <tr>
                                 <td style="padding: 30px 30px 15px 30px;">
-                                    <h2 style="font-size: 18px; color: #6576ff; font-weight: 600; margin: 0;">Confirm Your E-Mail Address</h2>
+                                    <h2 style="font-size: 18px; color: #6576ff; font-weight: 600; margin: 0;">A 360 OVERVIEW OF CUSTOMER INFORMATION</h2>
                                 </td>
                             </tr>
                             <tr>
                                 <td style="padding: 0 30px 20px">
                                     <p style="margin-bottom: 10px;">Hi {{ $name }},</p>
-                                    <p style="margin-bottom: 10px;">Welcome to IBEDC CMS! <br/>A 360 Overview of Customer Information, Assets & Events<br/> 
+                                    <p style="margin-bottom: 10px;">Welcome to IBEDC CMS! <br/>A 360 Overview of Customer Information, Assets, payments, bills, disconnection,  Events etc...<br/> <br/> <hr/>
                                     Your Useremail is {{ $email }} <br/>
                                     Your Password  is {{ $password }}
                                     </p>
                                    
-                                    <a href="http://192.168.15.160" target="_blank" style="background-color:#6576ff;border-radius:4px;color:#ffffff;display:inline-block;font-size:13px;font-weight:600;line-height:44px;text-align:center;text-decoration:none;text-transform: uppercase; padding: 0 30px">Login</a>
+                                    <a href="http://192.168.15.160" target="_blank" style="background-color:#6576ff;border-radius:4px;color:#ffffff;display:inline-block;font-size:13px;font-weight:600;line-height:44px;text-align:center;text-decoration:none;text-transform: uppercase; padding: 0 30px">CLICK HERE TO LOGIN</a>
                                 </td>
                             </tr>
                             
                             <tr>
                                 <td style="padding: 0 30px">
-                                    <h4 style="font-size: 15px; color: #000000; font-weight: 600; margin: 0; text-transform: uppercase; margin-bottom: 10px">or</h4>
+                                    <h4 style="font-size: 15px; color: #000000; font-weight: 600; margin: 0; text-transform: uppercase; margin-bottom: 10px"></h4>
+                                    <hr/>
                                     <p style="margin-bottom: 10px;">If the button above does not work, paste this link into your web browser:</p>
 <!--                                    <a href="#" style="color: #6576ff; text-decoration:none;word-break: break-all;">https://icocrypto.com/account?login_token=dacb711d08a0ee7bda83ce1660918c31e8b43c30</a>-->
                                 </td>
