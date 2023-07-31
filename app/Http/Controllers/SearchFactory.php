@@ -31,6 +31,9 @@ class SearchFactory extends Controller
                 return new SearchTicketRepository($request);
             case 'search_events_summary':
                 return new AmiRepository($request);
+            case 'search_events_summary':
+                return new AmiRepository($request);
+            
             default:
                 throw new \InvalidArgumentException('Invalid payment type');  
         }

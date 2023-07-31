@@ -4,6 +4,7 @@ namespace App\Imports;
 
 use App\Models\ProcessCAAD;
 use App\Models\BulkCAAD;
+use Illuminate\Support\Facades\Auth;
 use Maatwebsite\Excel\Concerns\ToModel;
 use Maatwebsite\Excel\Concerns\WithHeadingRow;
 
@@ -11,11 +12,11 @@ use Maatwebsite\Excel\Concerns\WithHeadingRow;
 class CAADImport implements ToModel, WithHeadingRow
 {
 
-    private $batch_id;
+    private $bulkCAAD;
     
-    public function __construct($batch_id)
+    public function __construct($bulkCAAD)
     {
-        $this->batch_id = $batch_id;
+        $this->bulkCAAD = $bulkCAAD;
     }
     
     /**
@@ -25,15 +26,17 @@ class CAADImport implements ToModel, WithHeadingRow
     */
     public function model(array $row)
     {
-
+       //echo $row['accountno'];
+        //return;
+        
         return new ProcessCAAD([
-            'accountNo'  => $row['accountno'],
-            'phoneNo'    => $row['phoneno'], 
-            'surname'    => $row['surname'], 
-            'lastname'    => $row['lastname'], 
-            'othername'    => $row['othername'], 
-            'service_center'    => $row['service_center'], 
-            'meterno'    => $row['meterno'], 
+            'accountNo' => $row['accountno'],
+            'phoneNo'   => $row['phoneno'], 
+            'surname'   => $row['surname'], 
+            'lastname'  => $row['lastname'], 
+            'othername' => $row['othername'], 
+            'service_center' => $row['service_center'], 
+            'meterno'  => $row['meterno'], 
             'accountType'    => $row['accounttype'], 
             'transtype'    => $row['transtype'], 
             'meter_reading'    => $row['meter_reading'], 
@@ -41,9 +44,13 @@ class CAADImport implements ToModel, WithHeadingRow
             'effective_date'    => $row['effective_date'], 
             'amount'    => $row['amount'], 
             'remarks'    => $row['remarks'], 
-            'file_upload_id'    => $row['file_upload_id'], 
             'batch_type'    => "batched", 
-            'batch_id' => $this->batch_id
+            'file_upload_id'    => $this->bulkCAAD->batch_file_name, 
+            'batch_id' => $this->bulkCAAD->id,
+            'region'    => $this->bulkCAAD->region,
+            'business_hub'    => $this->bulkCAAD->business_hub,
+            'created_by' => Auth::user()->id,
+            'status' => 0
         ]);
     }
 }

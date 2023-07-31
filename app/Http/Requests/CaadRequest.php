@@ -26,9 +26,10 @@ class CaadRequest extends FormRequest
     {
         return [
             "accountNo" => 'required',
-            "phoneNo" => 'required',
+            //"phoneNo" => 'required',
             "surname" => 'required',
-            "service_center" => 'required',
+            "region" => 'required',
+            "business_hub" => 'required',
             "transtype" => 'required',
             "accountType" => 'required',
             "transaction_type" => 'required',
