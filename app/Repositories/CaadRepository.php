@@ -8,7 +8,7 @@ use App\Models\BulkCAAD;
 use App\Models\FileCAAD;
 use App\Models\ProcessCAAD;
 
-class AmiRepository implements CaadRepositoryInterface
+class CaadRepository implements CaadRepositoryInterface
 {
   
     private $request;

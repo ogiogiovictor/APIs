@@ -177,7 +177,7 @@ class CaadController extends BaseApiController
         $getUserRoleObject = (new GeneralService)->getUserLevelRole();
 
         $getSingleCAAD = ProcessCAAD::with('fileUpload')->with('CaadComment')
-            ->where('batch_type', 'single')
+           // ->where('batch_type', 'single')
             ->when($userRole === 'district_accountant', function ($query) use ($getUserRoleObject) {
                 return $query->where('status', CaadEnum::PENDING->value)->where("business_hub", $getUserRoleObject['business_hub']);
             })
@@ -209,16 +209,16 @@ class CaadController extends BaseApiController
 
 
         $getBatchCAAD = BulkCAAD::with('withmanycaads')->withCount('withmanycaads')->with('withmayncomments')->withCount('withmayncomments')
-            ->when($userRole === 'district_accountant', function ($query, $getUserRoleObject) {
+            ->when($userRole === 'district_accountant', function ($query) use ($getUserRoleObject) {
                 return $query->where('batch_status', CaadEnum::PENDING->value)->where("business_hub", $getUserRoleObject['business_hub']);
             })
-            ->when($userRole === 'businesshub_manager', function ($query, $getUserRoleObject) {
+            ->when($userRole === 'businesshub_manager', function ($query) use ($getUserRoleObject) {
                 return $query->where('batch_status', CaadEnum::APPROVED_BY_DISTRICT_ACCOUNTANT->value)->where("business_hub", $getUserRoleObject['business_hub']);
             })
-            ->when($userRole === 'audit', function ($query, $getUserRoleObject) {
+            ->when($userRole === 'audit', function ($query) use ($getUserRoleObject) {
                 return $query->where('batch_status', CaadEnum::APPROVED_BY_BUSINESS_HUB_MANAGER->value)->where("region", $getUserRoleObject['region']);
             })
-            ->when($userRole === 'regional_manager', function ($query, $getUserRoleObject) {
+            ->when($userRole === 'regional_manager', function ($query) use ($getUserRoleObject) {
                 return $query->where('batch_status', CaadEnum::APPROVED_BY_AUDIT->value)->where("region", $getUserRoleObject['region']);
             })
             ->when($userRole === 'hcs', function ($query) {
@@ -257,7 +257,7 @@ class CaadController extends BaseApiController
           //Handle file upload
          if ($request->has('file')) {
 
-            $file = $request->file('file');
+          $file = $request->file('file');
 
                 $timestamp = now()->timestamp; // Generate the current Unix timestamp
                 $date = now()->format('Ymd'); // Format the current date as YYYYMMDD  
@@ -278,12 +278,12 @@ class CaadController extends BaseApiController
                 ]);
         
                 $batch_id = $bulkCAAD->id; // Get the batch_id from the newly created BulkCAAD model
+
                 
         }
 
       
-
-        $result =  Excel::import(new CAADImport($batch_id), $request->file('file'));
+        $result =  Excel::import(new CAADImport($bulkCAAD),  $file);
 
         return $this->sendSuccess(200, "Record Successfully Updated", Response::HTTP_OK);
          
@@ -425,15 +425,22 @@ class CaadController extends BaseApiController
             'md' => 'md',
         ];
     
-        $table = $batchType === 'single' ? 'ProcessCAAD' : 'BulkCAAD';
+       // $table = $batchType === 'single' ? 'ProcessCAAD' : 'BulkCAAD';
+          // Determine the table based on the batch type
+        $table = $batchType === 'single' ? ProcessCAAD::class : BulkCAAD::class;
+
+     
         
+        
+
         if (array_key_exists($userRole, $positions)) {
             $column = $positions[$userRole];
     
             // Update the specified column with the user ID
-            $affectedRows = DB::table($table)
-                ->where('id', $id)
-                ->update([$column => $user]);
+            //$affectedRows = DB::table($table)->where('id', $id)->update([$column => $user]);
+              // Update the specified column with the user ID
+            $affectedRows = $table::where('id', $id)->update([$column => $user]);
+
     
             return $affectedRows; // Return the number of affected rows
         }
@@ -587,38 +594,38 @@ class CaadController extends BaseApiController
         $userRole = Auth::user()->roles->pluck('name')->first();
 
         $getSingleCAAD = ProcessCAAD::with('fileUpload')->with('CaadComment')
-                ->where('batch_type', 'single')
+                //->where('batch_type', 'single')
                 ->when($userRole === 'credit_control', function ($query)  use ($userid, $getUserRoleObject){
-                    return $query->where('created_by', $userid)->where("region", $getUserRoleObject['region'])->orderBy("created_at", "desc");
+                    return $query->where('created_by', $userid)->where("region", $getUserRoleObject['region']);
                 })
                 ->when($userRole === 'district_accountant', function ($query) use ($userid, $getUserRoleObject) {
-                    return $query->where('district_accountant', $userid)->where("business_hub", $getUserRoleObject['business_hub'])->orderBy("created_at", "desc");
+                    return $query->where('district_accountant', $userid)->where("business_hub", $getUserRoleObject['business_hub']);
                 })
                 ->when($userRole === 'businesshub_manager', function ($query) use ($userid, $getUserRoleObject) {
-                    return $query->where('business_hub_manager', $userid)->where("business_hub", $getUserRoleObject['business_hub'])->orderBy("created_at", "desc");
+                    return $query->where('business_hub_manager', $userid)->where("business_hub", $getUserRoleObject['business_hub']);
                 })
                 ->when($userRole === 'audit', function ($query) use ($userid, $getUserRoleObject) {
-                    return $query->where('audit', $userid)->where("business_hub", $getUserRoleObject['business_hub'])->orderBy("created_at", "desc");
+                    return $query->where('audit', $userid)->where("business_hub", $getUserRoleObject['business_hub']);
                 })
                 ->when($userRole === 'regional_manager', function ($query) use ($userid, $getUserRoleObject) {
-                    return $query->where('regional_manager', $userid)->where("region", $getUserRoleObject['region'])->orderBy("created_at", "desc");
+                    return $query->where('regional_manager', $userid)->where("region", $getUserRoleObject['region']);
                 })
                 ->when($userRole === 'hcs', function ($query) {
-                    return $query->whereIn('accountType', ['Prepaid', 'Postpaid'])->orderBy("created_at", "desc");
+                    return $query->whereIn('accountType', ['Prepaid', 'Postpaid']);
                 })
                 ->when($userRole === 'cco', function ($query) {
-                    return $query->whereIn('accountType', ['Prepaid', 'Postpaid'])->orderBy("created_at", "desc");
+                    return $query->whereIn('accountType', ['Prepaid', 'Postpaid']);
                 })
                 ->when($userRole === 'md', function ($query) {
-                    return $query->where('accountType',  ['Prepaid', 'Postpaid'])->orderBy("created_at", "desc");
+                    return $query->where('accountType',  ['Prepaid', 'Postpaid']);
                 }) 
                 ->when($userRole === 'admin', function ($query) {
-                    return $query->whereIn('status', [0, 1, 2, 3, 4, 5, 6, 7, 10])->orderBy("created_at", "desc");
+                    return $query->whereIn('status', [0, 1, 2, 3, 4, 5, 6, 7, 10]);
                 }, function ($query) {
                     // Default logic for roles that do not match any of the previous conditions
-                    return $query->whereIn('accountType', ['Prepaid', 'Postpaid'])->orderBy("created_at", "desc");
+                    return $query->whereIn('accountType', ['Prepaid', 'Postpaid']);
                 })
-                ->orderBy('id', 'desc')
+                ->orderBy('created_at', 'desc')
                 ->paginate(30);
 
 
@@ -646,35 +653,6 @@ class CaadController extends BaseApiController
                 ->orderBy('id', 'desc')
             ->paginate(10);
 
-
-
-      /*  $getBatchCAAD = BulkCAAD::with('withmanycaads')->withCount('withmanycaads')->with('withmayncomments')->withCount('withmayncomments')
-            ->when($userRole === 'district_accountant', function ($query, $getUserRoleObject) {
-                return $query->where('district_accountant', $userid)->where("business_hub", $getUserRoleObject['business_hub'])->orderBy("created_at", "desc");
-            })
-            ->when($userRole === 'businesshub_manager', function ($query, $getUserRoleObject) {
-                return $query->where('business_hub_manager', $userid)->where("business_hub", $getUserRoleObject['business_hub'])->orderBy("created_at", "desc");
-            })
-            ->when($userRole === 'audit', function ($query, $getUserRoleObject) {
-                return $query->where('batch_status', $userid)->where("business_hub", $getUserRoleObject['business_hub'])->orderBy("created_at", "desc");
-            })
-            ->when($userRole === 'regional_manager', function ($query, $getUserRoleObject) {
-                return $query->where('batch_status', $userid)->where("region", $getUserRoleObject['region'])->orderBy("created_at", "desc");
-            })
-            ->when($userRole === 'hcs', function ($query) {
-                return $query->orderBy("created_at", "desc");
-            })
-            ->when($userRole === 'cco', function ($query) {
-                return $query->orderBy("created_at", "desc");
-            })
-            ->when($userRole === 'md', function ($query) {
-                return $query->orderBy("created_at", "desc");
-            }) 
-            ->when($userRole === 'admin', function ($query) {
-                return $query->orderBy("created_at", "desc");
-            })
-        ->orderBy('id', 'desc')->paginate(20);
-        */
 
         $data = [
             'single' => $getSingleCAAD,

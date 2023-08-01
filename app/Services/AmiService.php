@@ -73,6 +73,24 @@ class AmiService
          return $getConnection;
     }
 
+  /*  $getConnection = DB::connection("ami")->table("PowerSys.dbo.ACHV_METER AS AC")
+        ->leftJoin("PowerSys.dbo.ACHV_POC AS POC", "AC.ID", "POC.Meter_ID")
+        ->leftJoin("PowerSys.dbo.ACHV_CUSTOMER AS CUS", "CUS.ID", "POC.Customer_ID")
+        ->leftJoin("PowerSys.dbo.DATA_F_DPS_DAY AS FDAY", "FDAY.MSNO", "AC.MSNO")
+        ->leftJoin("PowerSys.dbo.SYS_BASE AS SYS", "SYS.Key", "CUS.CustomerType")
+        ->select(
+            "AC.MSNO",
+            DB::raw("CONVERT(Varchar(50), 
+                SUM(CASE WHEN FDAY.KWH_ABS IS NULL THEN (FDAY.KWH_IMPORT + FDAY.KWM_EXPORT) ELSE Cast(FDAY.KWH_ABS as money) END),
+                1) as consumption")
+        )
+        ->where("SYS.Tag", '=', 'CustomerType')
+        ->where("SYS.Value", 'Governments/Organizations')
+        ->whereYear("FDAY.BEGINTIME", $request->year)
+        ->whereMonth("FDAY.BEGINTIME", $request->month)
+        ->groupBy('AC.MSNO')
+        ->get();
+  */
 
     public function getSummary($request){
         $getConnection = DB::connection("ami")->table("PowerSys.dbo.ACHV_METER AS AC")
@@ -80,7 +98,13 @@ class AmiService
         ->leftJoin("PowerSys.dbo.ACHV_CUSTOMER AS CUS", "CUS.ID", "POC.Customer_ID")
         ->leftJoin("PowerSys.dbo.DATA_F_DPS_DAY AS FDAY", "FDAY.MSNO", "AC.MSNO")
         ->leftJoin("PowerSys.dbo.SYS_BASE AS SYS", "SYS.Key", "CUS.CustomerType")
-        ->select("AC.MSNO", DB::raw('CONVERT(Varchar(50), SUM(Cast(FDAY.KWH_ABS as money)),1) as consumption'))
+        ->select(
+            "AC.MSNO",
+            DB::raw("CONVERT(Varchar(50), 
+                SUM(CASE WHEN FDAY.KWH_ABS IS NULL THEN (FDAY.KWH_IMPORT + FDAY.KWH_EXPORT) ELSE Cast(FDAY.KWH_ABS as money) END),
+                1) as consumption")
+        )
+        //->select("AC.MSNO", DB::raw('CONVERT(Varchar(50), SUM(Cast(FDAY.KWH_ABS as money)),1) as consumption'))
         ->where("SYS.Tag", '=', 'CustomerType')->where("SYS.Value", 'Governments/Organizations')
         ->whereYear("FDAY.BEGINTIME", $request->year)->whereMonth("FDAY.BEGINTIME", $request->month)
         ->groupBy('AC.MSNO')->get();

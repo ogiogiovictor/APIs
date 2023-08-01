@@ -18,6 +18,7 @@ use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use App\Models\TestModelPayments;
+use Illuminate\Support\Facades\Http;
 
 
 class PaymentProcessingController extends BaseApiController
@@ -29,24 +30,15 @@ class PaymentProcessingController extends BaseApiController
 
         try {
 
-            if($request->account_type == "Prepaid"){
-                $payment = $this->createPayment($request);
-            } elseif ($request->account_type == "Postpaid") {
-                $payment = $this->createPayment($request);
+            if($request->account_type == "Postpaid"){
+               return $payment = $this->createPostPayment($request);
+
+            } elseif ($request->account_type == "Prepaid") {
+               return $payment = $this->createPrePayment($request);
+
             } else {
                 return $this->sendError('Error', "Invalid Account Type", Response::HTTP_BAD_REQUEST);
             }
-
-
-            if ($payment) {
-                DB::commit();
-                return $this->sendSuccess($payment, "Payment Process Initiated", Response::HTTP_OK);
-            } else {
-                DB::rollBack();
-                return $this->sendError('Error', "Error Initiating Payment", Response::HTTP_BAD_REQUEST);
-            }
-    
-
 
         }catch(\Exception $e){
             DB::rollBack();
@@ -55,6 +47,135 @@ class PaymentProcessingController extends BaseApiController
         }
 
     }
+
+
+    private function createPostPayment($request){
+        $custInfo = ZoneCustomer::where("AccountNo", $request->account_number)->first();
+
+        if(!$custInfo){
+            return $this->sendError('Error', "No Record Found", Response::HTTP_BAD_REQUEST);
+        }
+
+        $transactionID = StringHelper::generateTransactionReference();
+      
+        DB::beginTransaction();
+
+        try {
+
+            $uuid = Str::uuid()->toString();
+            $limitedUuid = substr($uuid, 0, 18);
+
+            $payment =  PaymentModel::create([
+                'email' => $request->email ?? '',
+                'transaction_id' => strtoUpper($limitedUuid),   //strtoUpper(Str::uuid()->toString()) ?? $transactionID,
+                'phone' => $request->phone ?? '',
+                'amount' => $request->amount,
+                'account_type' => $request->account_type,
+                'account_number' => $request->account_number,
+                'payment_source' => $request->payment_source,
+               // 'meter_no' => $request->meter_no,
+                'status' => "pending",
+                'customer_name' => $custInfo->Surname.' '. $custInfo->FirstName,
+                'date_entered' => Carbon::now(),
+                'BUID' => $custInfo->BUID
+    
+            ]);
+            DB::commit();
+         
+            $response = [
+                'payment' => $payment,
+                'payment_key_authData' => "G3cf/VTtAHCdHZNxc5GXWRI8z5P0goL2amXWDVFgb6D3XK/QMtZW90TYdl5zffDCNpiZThJzk0+eEU/Y/aYS6fyIOpQZGFrOr8hmvx5869sl2kr5u8qjnM7q5b4ZnTqdKDLtNxr3Qr7anj6YLpox1FOsiyT26mktXL+7SFOaZ15NMtne1z4xrj4R2SndowI/Znsapo7Gfzvp+L7XJyQ8kLYYRk3INjvmRPPQoJg1R0Nnh6EQE3ldIdwylB7GKtr6a71N/yCd4ZtyIcqq1ZNzdWcZyy5eEBAlDIxuECdBqH6hRq2/RbkfARqidNN4Kq0WviSRaRYGbiNjl2W9pNcM8g==",
+                'currency' => "NGN",
+                 "mcode" => "MX19329",
+                 "pay_item_id" => "Default_Payable_MX19329",
+    
+            ];
+
+            return $this->sendSuccess($response, "Payment Process Initiated", Response::HTTP_OK);
+
+        }catch(\Exception $e){
+            DB::rollBack();
+            return $this->sendError('Error', "Error Initiating Payment: " . $e->getMessage(), Response::HTTP_BAD_REQUEST);
+        
+        }
+
+        
+    }
+
+
+
+    /* {
+        "provider": "IBEDC",
+        "meterno": "70004984442",
+        "amount": "1",
+        "vendtype": "Prepaid",              
+        "custname": "OMOWELE ADEKUMBI FUNMILAYO 16",
+        "businesshub": "Molete",
+        "custphoneno": "2348062665117", 
+        "payreference": "MDWTESTLIVE-1",
+        "colagentid": "IB001" // leave
+      }
+      */
+
+      
+
+      private function createPrePayment($request) {
+
+        $zoneECMI = ZoneECMI::where("MeterNo", $request->MeterNo)->first();
+      
+
+        if(!$zoneECMI){
+            return $this->sendError('Error', "No Record Found", Response::HTTP_BAD_REQUEST);
+        }
+
+        $transactionID = StringHelper::generateTransactionReference();
+      
+        DB::beginTransaction();
+
+        try {
+
+            $uuid = Str::uuid()->toString();
+            $limitedUuid = substr($uuid, 0, 18);
+
+            $payment =  PaymentModel::create([
+                'email' => $request->EMail ?: '',
+                'transaction_id' => strtoUpper($limitedUuid),   //strtoUpper(Str::uuid()->toString()) ?? $transactionID,
+                'phone' => $request->Mobile ?? '',
+                'amount' => $request->amount,
+                'account_type' => $request->account_type,
+                'account_number' => $request->account_number,
+                'payment_source' => $request->payment_source,
+                'meter_no' => $request->MeterNo,
+                'status' => "pending",
+                'customer_name' => $zoneECMI->Surname.' '. $zoneECMI->OtherNames,
+                'date_entered' => Carbon::now(),
+                'BUID' => $zoneECMI->BUID
+    
+            ]);
+
+            DB::commit();
+         
+            $response = [
+                'payment' => $payment,
+                'payment_key_authData' => "G3cf/VTtAHCdHZNxc5GXWRI8z5P0goL2amXWDVFgb6D3XK/QMtZW90TYdl5zffDCNpiZThJzk0+eEU/Y/aYS6fyIOpQZGFrOr8hmvx5869sl2kr5u8qjnM7q5b4ZnTqdKDLtNxr3Qr7anj6YLpox1FOsiyT26mktXL+7SFOaZ15NMtne1z4xrj4R2SndowI/Znsapo7Gfzvp+L7XJyQ8kLYYRk3INjvmRPPQoJg1R0Nnh6EQE3ldIdwylB7GKtr6a71N/yCd4ZtyIcqq1ZNzdWcZyy5eEBAlDIxuECdBqH6hRq2/RbkfARqidNN4Kq0WviSRaRYGbiNjl2W9pNcM8g==",
+                'currency' => "NGN",
+                 "mcode" => "MX19329",
+                 "pay_item_id" => "Default_Payable_MX19329",
+    
+            ];
+
+            return $this->sendSuccess($response, "Payment Process Initiated", Response::HTTP_OK);
+
+
+
+        }catch(\Exception $e){
+            DB::rollBack();
+            return $this->sendError('Error', "Error Initiating Payment: " . $e->getMessage(), Response::HTTP_BAD_REQUEST);
+        }
+
+
+    }
+
 
 
 
@@ -157,51 +278,11 @@ class PaymentProcessingController extends BaseApiController
 
 
 
-    private function createPayment($request){
-        $zoneECMI = ZoneECMI::where("MeterNo", $request->MeterNo)->orWhere("AccountNo", $request->account_number)->first();
-        $custInfo = ZoneCustomer::where("AccountNo", $request->account_number)->first();
-        $transactionID = StringHelper::generateTransactionReference();
-      
-        DB::beginTransaction();
 
-        try {
 
-            $uuid = Str::uuid()->toString();
-            $limitedUuid = substr($uuid, 0, 18);
 
-            $payment =  PaymentModel::create([
-                'email' => $request->email ?? '',
-                'transaction_id' => strtoUpper($limitedUuid),   //strtoUpper(Str::uuid()->toString()) ?? $transactionID,
-                'phone' => $request->phone ?? '',
-                'amount' => $request->amount,
-                'account_type' => $request->account_type,
-                'account_number' => $request->account_number,
-                'payment_source' => $request->payment_source,
-               // 'meter_no' => $request->meter_no,
-                'status' => "pending",
-                'customer_name' => $custInfo->Surname.' '. $custInfo->FirstName,
-                'date_entered' => Carbon::now(),
-                'BUID' => $custInfo->BUID
-    
-            ]);
-            DB::commit();
-            return  $response = [
-                'payment' => $payment,
-                'payment_key_authData' => "G3cf/VTtAHCdHZNxc5GXWRI8z5P0goL2amXWDVFgb6D3XK/QMtZW90TYdl5zffDCNpiZThJzk0+eEU/Y/aYS6fyIOpQZGFrOr8hmvx5869sl2kr5u8qjnM7q5b4ZnTqdKDLtNxr3Qr7anj6YLpox1FOsiyT26mktXL+7SFOaZ15NMtne1z4xrj4R2SndowI/Znsapo7Gfzvp+L7XJyQ8kLYYRk3INjvmRPPQoJg1R0Nnh6EQE3ldIdwylB7GKtr6a71N/yCd4ZtyIcqq1ZNzdWcZyy5eEBAlDIxuECdBqH6hRq2/RbkfARqidNN4Kq0WviSRaRYGbiNjl2W9pNcM8g==",
-                'currency' => "NGN",
-                 "mcode" => "MX19329",
-                 "pay_item_id" => "Default_Payable_MX19329",
-    
-            ];
+   
 
-        }catch(\Exception $e){
-            DB::rollBack();
-            return $this->sendError('Error', "Error Initiating Payment: " . $e->getMessage(), Response::HTTP_BAD_REQUEST);
-        
-        }
-
-        
-    }
 }
 
 

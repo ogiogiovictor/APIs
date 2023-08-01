@@ -10,6 +10,7 @@ use App\Repositories\SearchBillingRepository;
 use App\Repositories\SearchFeederRepository;
 use App\Repositories\SearchTicketRepository;
 use App\Repositories\AmiRepository;
+use App\Repositories\CaadRepository;
 
 class SearchFactory extends Controller
 {
@@ -31,8 +32,8 @@ class SearchFactory extends Controller
                 return new SearchTicketRepository($request);
             case 'search_events_summary':
                 return new AmiRepository($request);
-            case 'search_events_summary':
-                return new AmiRepository($request);
+            case 'mycaads':
+                return new CaadRepository($request);
             
             default:
                 throw new \InvalidArgumentException('Invalid payment type');  

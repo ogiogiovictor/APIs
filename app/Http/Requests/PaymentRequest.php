@@ -26,7 +26,7 @@ class PaymentRequest extends FormRequest
             "phone" =>  ["required", "regex:/^0\d{10}$/"],
             "amount" => ['required', 'numeric'],
             "account_type" => "required",
-            "account_number" => "required",
+           // "account_number" => "required",
         ];
     }
 }

@@ -26,31 +26,31 @@ class CAADImport implements ToModel, WithHeadingRow
     */
     public function model(array $row)
     {
-       //echo $row['accountno'];
-        //return;
-        
+    
         return new ProcessCAAD([
-            'accountNo' => $row['accountno'],
-            'phoneNo'   => $row['phoneno'], 
-            'surname'   => $row['surname'], 
-            'lastname'  => $row['lastname'], 
-            'othername' => $row['othername'], 
-            'service_center' => $row['service_center'], 
-            'meterno'  => $row['meterno'], 
-            'accountType'    => $row['accounttype'], 
-            'transtype'    => $row['transtype'], 
-            'meter_reading'    => $row['meter_reading'], 
-            'transaction_type'    => $row['transaction_type'], 
-            'effective_date'    => $row['effective_date'], 
-            'amount'    => $row['amount'], 
-            'remarks'    => $row['remarks'], 
-            'batch_type'    => "batched", 
-            'file_upload_id'    => $this->bulkCAAD->batch_file_name, 
+            'accountNo' => trim($row['accountno']),
+            'phoneNo'   => trim($row['phoneno']), 
+            'surname'   => trim($row['surname']), 
+            'lastname'  => trim($row['lastname']), 
+            'othername' => trim($row['othername']), 
+            'service_center' => trim($row['service_center']), 
+            'meterno'  => trim($row['meterno']), 
+            'accountType' => trim($row['accounttype']), 
+            'transtype'  => trim($row['transtype']), 
+            'meter_reading' => trim($row['meter_reading']), 
+            'transaction_type' => trim($row['transaction_type']), 
+            'effective_date' => trim($row['effective_date']), 
+            'amount' => trim($row['amount']), 
+            'remarks' => trim($row['remarks']), 
+            'batch_type' => "single", 
+            'file_upload_id' => $this->bulkCAAD->batch_file_name, 
             'batch_id' => $this->bulkCAAD->id,
-            'region'    => $this->bulkCAAD->region,
-            'business_hub'    => $this->bulkCAAD->business_hub,
+            'region'  => $this->bulkCAAD->region,
+            'business_hub' => $this->bulkCAAD->business_hub,
             'created_by' => Auth::user()->id,
             'status' => 0
         ]);
     }
 }
+
+

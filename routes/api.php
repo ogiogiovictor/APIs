@@ -42,9 +42,6 @@ use App\Http\Controllers\FileDownloadController;
 //////////////////////////////////////////////////////////////
 
 
-
-
-
 Route::post('auth_login', [LoginController::class, 'login']); // normal login
 Route::post('authenticate_with_ad', [SocialController::class, 'authenticate']); // with on-prem
 
@@ -370,6 +367,8 @@ Route::group(['prefix' => 'v3ibedc_AUTH_token', 'namespace' => 'Api\v3', 'middle
           Route::post("process_payment", [PaymentProcessingController::class, 'makePayment']);
           Route::post("complete_payment", [PaymentProcessingController::class, 'processPayment']);
           Route::get("payment_source", [PaymentProcessingController::class, 'paymentSource']);
+
+          Route::post('plogout', [LogoutController::class, 'userLogout']);
            // });
         });
         
