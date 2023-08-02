@@ -342,10 +342,10 @@ class CaadController extends BaseApiController
             $roleApprovalMapping = [
                 'district_accountant' => CaadEnum::APPROVED_BY_DISTRICT_ACCOUNTANT->value,
                 'businesshub_manager' => CaadEnum::APPROVED_BY_BUSINESS_HUB_MANAGER->value,
-                'audit' => CaadEnum::APPROVED_BY_AUDIT->value,
-                'regional_manager' => ($amount <= $getLimit) ? CaadEnum::BILLING->value : CaadEnum::APPROVED_BY_REGIONAL_MANAGER->value,
-                'hcs' => ($amount <= $getLimit) ? CaadEnum::BILLING->value : CaadEnum::APPROVED_BY_HCS->value,
-                'cco' => ($amount <= $getLimit) ? CaadEnum::BILLING->value : CaadEnum::APPROVED_BY_CCO->value,
+                'audit' => $this->checkWheretopush($amount, $userRole),
+                'regional_manager' => ($amount <= $getLimit) ? CaadEnum::APPROVED_BY_REGIONAL_MANAGER->value : $this->checkWheretopush($amount, $userRole),
+                'hcs' => ($amount <= $getLimit) ? CaadEnum::APPROVED_BY_HCS->value : $this->checkWheretopush($amount, $userRole),
+                'cco' => ($amount <= $getLimit) ? CaadEnum::APPROVED_BY_CCO->value : $this->checkWheretopush($amount, $userRole),
                 'md' => CaadEnum::APPROVED_BY_MD->value,
                 'billing' => CaadEnum::BILLING->value,
                 'admin' => CaadEnum::ADMIN->value,
@@ -358,6 +358,76 @@ class CaadController extends BaseApiController
 
             return $roleApprovalMapping[$userRole];
         }
+
+        private function checkWheretopush($amount, $role) {
+            // Get the role's approval limit from the database
+            $limit = Caad::where("approvals", 1)->where("role", $role)->first();
+        
+            if (!$limit) {
+                // If the role's limit is not found, it cannot approve, so go to the next role.
+                return $this->getNextRoleApproval($amount, $role);
+            }
+        
+            $end_limit = $limit->end_limit;
+        
+            if ((int)$amount <= (int)$end_limit) {
+                // If the amount is within the limit, approve
+                return $this->getApprovalStatusForRole($role);
+            } else {
+                // If the amount is beyond the limit, go to the next role.
+                return $this->getNextRoleApproval($amount, $role);
+            }
+        }
+
+
+        private function getNextRoleApproval($amount, $currentRole) {
+            // Define the role approval order
+            $roleApprovalOrder = [
+                'audit', 'regional_manager', 'hcs', 'cco', 'md', 'billing'
+            ];
+        
+            // Get the index of the current role in the order
+            $currentIndex = array_search($currentRole, $roleApprovalOrder);
+        
+             // Find the next role to check for approval
+            for ($i = $currentIndex + 1; $i < count($roleApprovalOrder); $i++) {
+                $nextRole = $roleApprovalOrder[$i];
+                // Check if the next role has an approval limit in the database
+                $nextLimit = Caad::where("approvals", 1)->where("role", $nextRole)->first();
+                if ($nextLimit) {
+                    if ((int)$amount <= (int)$nextLimit->end_limit) {
+                        // If the next role has a limit and the amount is within it, approve
+                        return $this->getApprovalStatusForRole($nextRole);
+                    }
+                } else {
+                    // If the next role doesn't have an approval limit, go to the next one.
+                    continue;
+                }
+            }
+        
+            // If no roles are left, return a default status (e.g., rejected)
+            return CaadEnum::APPROVED_BY_REGIONAL_MANAGER;
+        }
+
+
+        private function getApprovalStatusForRole($role) {
+            // Define the approval statuses for each role
+            $roleApprovalMapping = [
+                'audit' => CaadEnum::APPROVED_BY_AUDIT->value,
+                'regional_manager' => CaadEnum::APPROVED_BY_REGIONAL_MANAGER->value,
+                'hcs' => CaadEnum::APPROVED_BY_HCS->value,
+                'cco' => CaadEnum::APPROVED_BY_CCO->value,
+                'md' => CaadEnum::APPROVED_BY_MD->value,
+                'billing' => CaadEnum::BILLING->value,
+               // 'admin' => CaadEnum::ADMIN->value,
+            ];
+        
+            // Return the approval status for the given role
+            return $roleApprovalMapping[$role];
+        }
+
+
+        
 
 
       

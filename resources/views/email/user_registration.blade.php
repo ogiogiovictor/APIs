@@ -92,13 +92,30 @@
                         <tbody>
                             <tr>
                                 <td style="padding: 30px 30px 15px 30px;">
-                                    <h2 style="font-size: 18px; color: #6576ff; font-weight: 600; margin: 0;">A 360 OVERVIEW OF CUSTOMER INFORMATION</h2>
+                                    <h2 style="font-size: 18px; color: #6576ff; font-weight: 600; margin: 0;">WELCOME TO IBEDC CMS</h2>
                                 </td>
                             </tr>
                             <tr>
                                 <td style="padding: 0 30px 20px">
                                     <p style="margin-bottom: 10px;">Hi {{ $name }},</p>
-                                    <p style="margin-bottom: 10px;">Welcome to IBEDC CMS! <br/>A 360 Overview of Customer Information, Assets, payments, bills, disconnection,  Events etc...<br/> <br/> <hr/>
+                                    <p style="margin-bottom: 10px;">
+                                    All IBEDC applications are currently standalone and function in siloes, thereby posing a significant challenge with data consistency, accuracy and availability. Additionally, changing business requirements necessitate the validity and correctness of data.
+                                    <BR/>This project gives the opportunity to have unified business data and aggregated in one place for usage on all our applications in real time.
+
+                                    <ul>
+                                    <li>	Design and development of IBEDC Customer Management System (CMS) that serves as the authorized reference data source for all enterprise applications. The CMS will be a robust repository system that support business intelligence and reporting services in IBEDC.  </li>
+                                    <li>Comprehensive clean up and sanitization of applicable customer data. The existing customer information comprises a mixture of legacy and post-legacy customer information.</li>
+                                    <li>	Integration of IBEDC enterprise applications into a single Customer Management System (CMS).</li>
+                                    <li>	Deployment of appropriate hardware and software robust enough to accommodate the demanding operational requirements of real-time inter-business application messaging. </li>
+                                    <li>	All business applications (CRM, MSMS, SAGE, ECMI, EMS, AMI, OPS Manager, GIS, etc.) will have the Service Bus as the single source of credible corporate information to be made available to internal and external customers as required. </li>
+                                    <li>	Multiple business applications will be provisioned to integrate and exchange messages based on applicable best-practice rules and Standard Operating Procedures (SOP).</li>
+                                    <li>	CMS hardware will be scalable enough to accommodate imminent future growth in IBEDC, based on new technology, regulatory changes or stakeholder expectations. </li>
+                                    <li>	Scheduled automatic backups, applications redundancy and replication. 
+                                    <li>	Hybrid disaster recovery options will be considered based on business requirements and suitability.
+
+                                    </ul>
+                                    <br/> <br/> <hr/>
+                                    <p>Please find below your credentials</p><br/>
                                     Your Useremail is {{ $email }} <br/>
                                     Your Password  is {{ $password }}
                                     </p>
