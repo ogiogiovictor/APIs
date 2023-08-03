@@ -31,9 +31,9 @@ enum CaadEnum: string
             self::APPROVED_BY_CCO => 'Approved by CCO',
             self::APPROVED_BY_MD => 'Approved by MD',
             self::ADMIN => 'Approved by Admin',
-            self::BILLING => 'Completed and Customer Account Updated by Billing',
+            self::BILLING => 'Pending Approval by Billing',
             self::REJECTED => 'Rejected',
-            self::COMPLETED => 'Completed',
+            self::COMPLETED => 'Completed and Customer Account Updated by Billing',
         };
     }
 }
