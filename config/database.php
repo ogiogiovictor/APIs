@@ -255,6 +255,41 @@ return [
         ],
 
 
+        'middleware' => [
+            'driver' => 'mysql',
+            'url' => env('DATABASE_URL'),
+            'host' => env('DB_HOST_MIDDLEWARE', '127.0.0.1'),
+            'port' => env('DB_PORT_MIDDLEWARE', '3306'),
+            'database' => env('DB_DATABASE_MIDDLEWARE', 'forge'),
+            'username' => env('DB_USERNAME_MIDDLEWARE', 'forge'),
+            'password' => env('DB_PASSWORD_MIDDLEWARE', ''),
+            'unix_socket' => env('DB_SOCKET_MIDDLEWARE', ''),
+            'charset' => 'utf8mb4',
+            'collation' => 'utf8mb4_unicode_ci',
+            'prefix' => '',
+            'prefix_indexes' => true,
+            'strict' => true,
+            'engine' => null,
+            'options' => extension_loaded('pdo_mysql') ? array_filter([
+                PDO::MYSQL_ATTR_SSL_CA => env('MYSQL_ATTR_SSL_CA'),
+            ]) : [],
+        ],
+
+
+        'msdb_ecmi_prod' => [
+            'driver' => 'sqlsrv',
+            'url' => env('DATABASE_URL'),
+            'host' => env('DB_HOST_MSDB', 'localhost'),
+            'port' => env('DB_PORT_MSDB', '1433'),
+            'database' => env('DB_DATABASE_MSDB', 'forge'),
+            'username' => env('DB_USERNAME_MSDB', 'forge'),
+            'password' => env('DB_PASSWORD_MSDB', ''),
+            'charset' => 'utf8',
+            'prefix' => '',
+            'prefix_indexes' => true,
+        ],
+
+
 
     ],
 

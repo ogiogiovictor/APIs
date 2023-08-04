@@ -331,15 +331,6 @@ Route::group(['prefix' => 'v2', 'namespace' => 'Api\v2', 'middleware' => 'OAuth'
         Route::post('change_password', [TestController::class, 'changePassword']); // When i am logged in 
 
         Route::get('caads', [TestController::class, 'allCAAD']);
-        
-
-        
-       
-        
-
-
-        
-       
 
         
       
@@ -375,3 +366,8 @@ Route::group(['prefix' => 'v3ibedc_AUTH_token', 'namespace' => 'Api\v3', 'middle
     });
 
 });
+
+
+
+
+require_once __DIR__.'/custom.php';
