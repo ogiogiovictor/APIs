@@ -155,7 +155,13 @@ class AmiService
         ->leftJoin("PowerSys.dbo.ACHV_POWERGRID AS PG", "PG.ID", "PNG.ID")
         ->leftJoin("PowerSys.dbo.DATA_F_DPS_DAY AS FDAY", "FDAY.MSNO", "AC.MSNO")
         ->leftJoin("PowerSys.dbo.SYS_BASE AS SYS", "SYS.Key", "CUS.CustomerType")
-        ->select("AC.MSNO", "PG.Descr", DB::raw('CONVERT(Varchar(50), SUM(Cast(FDAY.KWH_ABS as money)),1) as consumption'))
+        //->select("AC.MSNO", "PG.Descr", DB::raw('CONVERT(Varchar(50), SUM(Cast(FDAY.KWH_ABS as money)),1) as consumption'))
+        ->select(
+            "AC.MSNO", "PG.Descr",
+            DB::raw("CONVERT(Varchar(50), 
+                SUM(CASE WHEN FDAY.KWH_ABS IS NULL THEN (FDAY.KWH_IMPORT + FDAY.KWH_EXPORT) ELSE Cast(FDAY.KWH_ABS as money) END),
+                1) as consumption")
+        )
         ->where("SYS.Tag", '=', 'CustomerType')->where("SYS.Value", $reqStatus)
         ->whereYear("FDAY.BEGINTIME", $year)->whereMonth("FDAY.BEGINTIME", $month)
         //->groupBy('AC.MSNO', 'PNG.Region', 'FDAY.BEGINTIME', "PNG.BusinessHub", "PNG.Transformer", "FDAY.ENDTIME")

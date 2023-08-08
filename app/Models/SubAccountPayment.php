@@ -5,11 +5,11 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class SubAccount extends Model
+class SubAccountPayment extends Model
 {
     use HasFactory;
 
-    protected $table = "ECMI.dbo.SubAccount";
+    protected $table = "ECMI.dbo.SubAccPayment";
 
     protected $connection = 'ecmi_prod';
 

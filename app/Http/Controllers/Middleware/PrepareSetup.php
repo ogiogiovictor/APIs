@@ -18,6 +18,7 @@ use App\Models\ECMITransactions;
 use App\Models\ECMIPaymentTransaction;
 use App\Models\ECMITokenLogs;
 use App\Models\ECMIHoldMode;
+use App\Models\SubAccountPayment;
 
 
 class PrepareSetup extends BaseApiController
@@ -170,6 +171,10 @@ class PrepareSetup extends BaseApiController
           //  return  $createData;
         //Delete token from Transaction Table,
         $checkTExist = ECMITransactions::where("transref", $data['transactionReference'])->first();
+
+        $checkSubAccount = SubAccountPayment::where("TransactionNo",  $checkTExist->TransactionNo)->first();
+        if($checkSubAccount){  $checkSubAccount->forceDelete(); }
+
         if($checkTExist){  $checkTExist->forceDelete(); }
 
          //Delete token from paymentTransaction
@@ -194,21 +199,15 @@ class PrepareSetup extends BaseApiController
         //[HoldModeTransactions] Delete Token if Exists  // check this
         $HoldMode = ECMIHoldMode::where("Token", $trimSpaces)->first();
         if($HoldMode){ HoldMode->forceDelete(); }
-     
-        
-
-        //[log_deletedtransactions]	transactionno  Delete if Neccesary
-        // logs_InsertSubAccountDeductions	[transactionno] Delete if Neccessary
 
           // Enable the trigger again for the same connection
          DB::connection('ecmi_prod')->unprepared('ENABLE TRIGGER [TRANSACTION_TRIGGER] ON [ECMI].[dbo].[Transactions]');
 
-         return $this->sendSuccess($createData, "loaded-Successfully", Response::HTTP_OK);
+         return $this->sendSuccess($createData, "loaded-Successfully". ' '. $trimSpaces, Response::HTTP_OK);
 
         }catch(\Exception $e){
-         //   return $e;
            
-            return $this->sendError('Error', "Error Initiating Payment: " . $e->getMessage(), Response::HTTP_BAD_REQUEST);
+            return $this->sendError('Error', "Error Initiating Payment: ". $e->getMessage(), Response::HTTP_BAD_REQUEST);
 
         }
         
