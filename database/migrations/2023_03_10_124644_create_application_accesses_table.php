@@ -17,6 +17,7 @@ return new class extends Migration
             $table->string('ip_address')->nullable();
             $table->string('app-secret')->nullable();
             $table->string('app-token')->nullable();
+            $table->string('App_Name')->nullable();
             $table->enum('status', ['on', 'off'])->default('off');
             $table->timestamps();
         });

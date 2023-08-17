@@ -12,6 +12,7 @@ use App\Ldap\AlphaUser;
 use App\Http\Requests\ADRequest;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
+use App\Models\BTransaction;
 
 class SocialController extends BaseApiController
 {
@@ -104,6 +105,9 @@ class SocialController extends BaseApiController
 
     }
 
+
+
+ 
 
 
 }

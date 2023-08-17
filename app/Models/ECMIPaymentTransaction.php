@@ -13,5 +13,7 @@ class ECMIPaymentTransaction extends Model
 
     protected $connection = 'ecmi_prod';
 
+    protected $primaryKey = 'transref';
+
     public $timestamps = false;
 }

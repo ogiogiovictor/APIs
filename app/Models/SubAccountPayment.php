@@ -13,6 +13,8 @@ class SubAccountPayment extends Model
 
     protected $connection = 'ecmi_prod';
 
+    protected $primaryKey = 'TransactionNo';
+
     public $timestamps = false;
 
 }

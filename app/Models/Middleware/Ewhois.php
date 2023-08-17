@@ -14,4 +14,6 @@ class Ewhois extends Model
     protected $connection = 'msdb_ecmi_prod';
 
     public $timestamps = false;
+
+    protected $primaryKey = 'Login_name';
 }

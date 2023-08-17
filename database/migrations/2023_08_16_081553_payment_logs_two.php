@@ -11,7 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('payment_logs', function (Blueprint $table) {
+        Schema::create('payment_logs_three', function (Blueprint $table) {
             $table->id();
             $table->string('email')->nullable();
             $table->string('transaction_id')->nullable();
@@ -25,22 +25,17 @@ return new class extends Migration
             $table->string('payment_source')->nullable();
             $table->string('provider')->nullable();
             $table->string('providerRef')->nullable();
-            $table->string('BUID')->nullable();
             $table->timestamp('date_entered')->nullable();
-            $table->string('receiptno')->nullable();
+            $table->timestamp('receiptno')->nullable();
             $table->timestamps();
         });
     }
-
-
 
     /**
      * Reverse the migrations.
      */
     public function down(): void
     {
-        Schema::dropIfExists('payment_logs');
+        Schema::dropIfExists('payment_logs_three');
     }
 };
-
-

@@ -14,7 +14,7 @@ class LogoutController extends Controller
 
         $deleteForce = CustomerAuthModel::where('Authorization', $userId)->get();
 
-        foreach ($usersToDelete as $user) {
+        foreach ($deleteForce as $user) {
             $user->forceDelete();
         }
 

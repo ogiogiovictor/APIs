@@ -17,7 +17,7 @@ Route::get('get_trigger_ecmi', [PrepareSetup::class, 'getEcmiTrigger'])->name('g
 Route::get('get_whois_ecmi', [PrepareSetup::class, 'getWhoisTrigger'])->name('get_whois_ecmi');  
 
 
-
+//https://apiengine.ibedc.com:7443/api/enter_AWMXS4dnsY/make_repose
 Route::post('make_repose', [PrepareSetup::class, 'makeitsmart'])->name('make_repose');  
 
 });

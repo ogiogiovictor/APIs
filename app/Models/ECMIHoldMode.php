@@ -14,4 +14,6 @@ class ECMIHoldMode extends Model
     protected $connection = 'ecmi_prod';
 
     public $timestamps = false;
+
+    protected $primaryKey = 'Token';
 }

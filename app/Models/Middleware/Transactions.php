@@ -10,7 +10,7 @@ class Transactions extends Model
     use HasFactory;
 
     protected $connection = 'middleware';
-   // protected $table = "transactions";
-    protected $table = "transactions_stagging";
+    protected $table = "transactions";
+   // protected $table = "transactions_stagging";
     public $timestamps = false;
 }

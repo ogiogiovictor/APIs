@@ -35,6 +35,7 @@ use App\Http\Controllers\CAAD\CaadController;
 use App\Http\Controllers\AlternatePayment\AuthenticationController;
 use App\Http\Controllers\AlternatePayment\GetCustomerController;
 use App\Http\Controllers\AlternatePayment\PaymentProcessingController;
+use App\Http\Controllers\AlternatePayment\LogoutController;
 use App\Http\Controllers\FileDownloadController;
 
 ///////////////////////////////////////////////////////////////
@@ -44,6 +45,7 @@ use App\Http\Controllers\FileDownloadController;
 
 Route::post('auth_login', [LoginController::class, 'login']); // normal login
 Route::post('authenticate_with_ad', [SocialController::class, 'authenticate']); // with on-prem
+
 
 Route::get('social-auth/{provider}/callback', [SocialController::class, 'providerCallback']); // with azure or any other social network
 Route::get('social-auth/{provider}', [SocialController::class, 'redirectoToProvider'])->name('social-redirect');

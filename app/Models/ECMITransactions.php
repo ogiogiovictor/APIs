@@ -15,6 +15,7 @@ class ECMITransactions extends Model
 
     public $timestamps = false;
 
+    protected $primaryKey = 'Token';
     
 
     public function nonSTSCustomers(){

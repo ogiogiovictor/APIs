@@ -19,29 +19,35 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use App\Models\TestModelPayments;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
+use App\Models\AuditLog;
 
 
 class PaymentProcessingController extends BaseApiController
 {
+
+   
     public function makePayment(PaymentRequest $request){
        
-
-        DB::beginTransaction();
 
         try {
 
             if($request->account_type == "Postpaid"){
+
                return $payment = $this->createPostPayment($request);
 
             } elseif ($request->account_type == "Prepaid") {
+
                return $payment = $this->createPrePayment($request);
 
             } else {
+
                 return $this->sendError('Error', "Invalid Account Type", Response::HTTP_BAD_REQUEST);
             }
 
         }catch(\Exception $e){
-            DB::rollBack();
+
+          
             return $this->sendError('Error', "Error Initiating Payment: " . $e->getMessage(), Response::HTTP_BAD_REQUEST);
         
         }
@@ -50,25 +56,33 @@ class PaymentProcessingController extends BaseApiController
 
 
     private function createPostPayment($request){
-        $custInfo = ZoneCustomer::where("AccountNo", $request->account_number)->first();
+       $custInfo = ZoneCustomer::where("AccountNo", $request->account_number)->first();
 
         if(!$custInfo){
             return $this->sendError('Error', "No Record Found", Response::HTTP_BAD_REQUEST);
         }
 
-        $transactionID = StringHelper::generateTransactionReference();
+       $transactionID = StringHelper::generateTransactionReference();
+
+       $checkTransaID = PaymentModel::where("transaction_id",  $transactionID)->value("transaction_id");
+
+       if($checkTransaID){
+        $transactionID = StringHelper::generateTransactionReference(). ''.time().data('Ymd');
+       }
       
         DB::beginTransaction();
 
         try {
 
+           //return $request->all();
             $uuid = Str::uuid()->toString();
             $limitedUuid = substr($uuid, 0, 18);
 
+            // Create payment record using query builder
             $payment =  PaymentModel::create([
                 'email' => $request->email ?? '',
-                'transaction_id' => strtoUpper($limitedUuid),   //strtoUpper(Str::uuid()->toString()) ?? $transactionID,
-                'phone' => $request->phone ?? '',
+             'transaction_id' => strtoUpper($limitedUuid),   //strtoUpper(Str::uuid()->toString()) ?? $transactionID,
+               'phone' => $request->phone ?? '',
                 'amount' => $request->amount,
                 'account_type' => $request->account_type,
                 'account_number' => $request->account_number,
@@ -78,9 +92,8 @@ class PaymentProcessingController extends BaseApiController
                 'customer_name' => $custInfo->Surname.' '. $custInfo->FirstName,
                 'date_entered' => Carbon::now(),
                 'BUID' => $custInfo->BUID
-    
             ]);
-            DB::commit();
+           
          
             $response = [
                 'payment' => $payment,
@@ -91,10 +104,12 @@ class PaymentProcessingController extends BaseApiController
     
             ];
 
+            DB::commit();
             return $this->sendSuccess($response, "Payment Process Initiated", Response::HTTP_OK);
 
         }catch(\Exception $e){
             DB::rollBack();
+            Log::error("Error Initiating Payment: " . $e->getMessage());
             return $this->sendError('Error', "Error Initiating Payment: " . $e->getMessage(), Response::HTTP_BAD_REQUEST);
         
         }
@@ -138,12 +153,12 @@ class PaymentProcessingController extends BaseApiController
             $limitedUuid = substr($uuid, 0, 18);
 
             $payment =  PaymentModel::create([
-                'email' => $request->EMail ?: '',
+                'email' => $request->EMail ?: $request->email,
                 'transaction_id' => strtoUpper($limitedUuid),   //strtoUpper(Str::uuid()->toString()) ?? $transactionID,
-                'phone' => $request->Mobile ?? '',
+                'phone' => $request->Mobile ?? $request->phone,
                 'amount' => $request->amount,
                 'account_type' => $request->account_type,
-                'account_number' => $request->account_number,
+                'account_number' => $zoneECMI->AccountNo,
                 'payment_source' => $request->payment_source,
                 'meter_no' => $request->MeterNo,
                 'status' => "pending",
@@ -152,6 +167,32 @@ class PaymentProcessingController extends BaseApiController
                 'BUID' => $zoneECMI->BUID
     
             ]);
+
+            if($payment){
+                $baseUrl = env('MIDDLEWARE_URL');
+               // $addCustomerUrl = $baseUrl . 'vendelect';
+
+                $data = [
+                    'meter_number' => $request->MeterNo,
+                    'vendtype' => $request->account_type,
+                    'amount' => $request->amount,
+                ];
+        
+
+                $response = Http::withHeaders([
+                    'Authorization' => 'Bearer LIVEKEY_711E5A0C138903BBCE202DF5671D3C18',
+                ])->post($addCustomerUrl , $data);
+        
+                 $newResponse =  $response->json();
+
+                 if($newResponse['status'] == "true"){
+
+                    return $newResponse;
+
+                 }else {
+                    return $newResponse;
+                }
+            }
 
             DB::commit();
          
@@ -181,16 +222,17 @@ class PaymentProcessingController extends BaseApiController
 
     public function processPayment(Request $request){
 
+       // return $request;
         //return $request->payment_status['provider'];
        // return $request->payment_status['txnref'];
         if(!$request->payment_status){
             return $this->sendError('Error', "Error Initiating Payment", Response::HTTP_BAD_REQUEST);
         }
 
-        $checkRef =  PaymentModel::where("transaction_id", $request->payment_status['txnref'])->first();
+        $checkRef =  PaymentModel::where("transaction_id", (int)$request->payment_status['txnref'])->first();
 
     
-       // return $request->payment_status['resp'];
+       //return $checkRef;
        if($checkRef && $request->payment_status['payRef'] && $request->payment_status['resp']){
 
            $custInfo = ZoneCustomer::where("AccountNo", $checkRef->account_number)->first();

@@ -36,7 +36,7 @@ class AmiService
          ->leftJoin("PowerSys.dbo.ACHV_POWERGRID AS PG", "PG.ID", "PNG.ID")
          ->leftJoin("PowerSys.dbo.ACHV_CUSTOMER AS CUS", "CUS.ID", "POC.Customer_ID")
          ->leftJoin("PowerSys.dbo.SYS_BASE AS SYS", "SYS.Key", "CUS.CustomerType")
-         ->select("FDAY.MSNO", "FDAY.DATE", "PG.Descr", "FDAY.SAVEDB_TIME", "FDAY.BEGINTIME", "FDAY.ENDTIME", "FDAY.KWH_ABS", "FDAY.KWH_ABS_START", "FDAY.KWH_ABS_END", "PNG.Region", "PNG.BusinessHub", "PNG.Transformer", "SYS.Value AS AssetType")
+         ->select("FDAY.MSNO", "FDAY.DATE", "PG.Descr", "FDAY.SAVEDB_TIME", "FDAY.BEGINTIME", "FDAY.ENDTIME", "FDAY.KWH_ABS", "FDAY.KWH_ABS_START", "KWH_IMPORT", "KWH_EXPORT", "FDAY.KWH_ABS_END", "PNG.Region", "PNG.BusinessHub", "PNG.Transformer", "SYS.Value AS AssetType")
          ->where("SYS.Tag", '=', "CustomerType")->where("SYS.Value", $reqStatus)->orderBy("FDAY.SAVEDB_TIME", "DESC")->paginate(100);
      
          return $getConnection;
@@ -67,7 +67,7 @@ class AmiService
          ->leftJoin("PowerSys.dbo.ACHV_POWERGRID AS PG", "PG.ID", "PNG.ID")
          ->leftJoin("PowerSys.dbo.ACHV_CUSTOMER AS CUS", "CUS.ID", "POC.Customer_ID")
          ->leftJoin("PowerSys.dbo.SYS_BASE AS SYS", "SYS.Key", "CUS.CustomerType")
-         ->select("FDAY.MSNO", "FDAY.DATE", "FDAY.SAVEDB_TIME", "FDAY.BEGINTIME", "FDAY.ENDTIME", "FDAY.KWH_ABS", "FDAY.KWH_ABS_START", "FDAY.KWH_ABS_END", "PNG.Region", "PNG.BusinessHub", "PNG.Transformer", "SYS.Value AS AssetType")
+         ->select("FDAY.MSNO", "FDAY.DATE", "FDAY.SAVEDB_TIME", "FDAY.BEGINTIME", "FDAY.ENDTIME", "FDAY.KWH_ABS", "KWH_IMPORT", "KWH_IMPORT_START", "KWH_EXPORT", "KWH_IMPORT_END", "FDAY.KWH_ABS_START", "FDAY.KWH_ABS_END", "PNG.Region", "PNG.BusinessHub", "PNG.Transformer", "SYS.Value AS AssetType")
          ->where("FDAY.BEGINTIME", '=',  $date)->where("SYS.Tag", '=', "CustomerType")->where("SYS.Value", '=', "Governments/Organizations")->paginate(100);
      
          return $getConnection;

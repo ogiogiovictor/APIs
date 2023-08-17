@@ -14,4 +14,6 @@ class Ecmsdb extends Model
     protected $connection = 'msdb_ecmi_prod';
 
     public $timestamps = false;
+
+    protected $primaryKey = 'Token_before';
 }

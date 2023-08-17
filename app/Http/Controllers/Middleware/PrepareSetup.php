@@ -86,7 +86,6 @@ class PrepareSetup extends BaseApiController
                 "colagentid" => "IB001"
             ];
 
-           
            return $this->runPreparationMigration($data);
 
         }else if($newResponse['status'] == "false"){
@@ -125,6 +124,8 @@ class PrepareSetup extends BaseApiController
 
                 //Save Response to Warehouse. //Create a new database
                return $this->privatdeactiveallProcesse($newResponse);
+            }else {
+                return $newResponse;
             }
       
         }catch(\Exception $e){
@@ -139,7 +140,7 @@ class PrepareSetup extends BaseApiController
     private function privatdeactiveallProcesse($data){
 
 
-       // return $data;
+       
         //Save in Database
         $createData = MakeSave::create([
             'uniqueID' => $data['token'],
@@ -160,8 +161,6 @@ class PrepareSetup extends BaseApiController
         $middlewareRefLog = Resplog::where("reference", $data['reference'])->first();
         if($middlewareRefLog){ $middlewareRefLog->forceDelete();}
 
-       
-        
 
         try{
 
@@ -173,32 +172,32 @@ class PrepareSetup extends BaseApiController
         $checkTExist = ECMITransactions::where("transref", $data['transactionReference'])->first();
 
         $checkSubAccount = SubAccountPayment::where("TransactionNo",  $checkTExist->TransactionNo)->first();
-        if($checkSubAccount){  $checkSubAccount->forceDelete(); }
+        if($checkSubAccount){  $checkSubAccount->delete(); }
 
-        if($checkTExist){  $checkTExist->forceDelete(); }
+        if( $checkTExist){  $checkTExist->delete(); }
 
          //Delete token from paymentTransaction
         $checkpaymentTrans = ECMIPaymentTransaction::where("transref", $data['transactionReference'])->first();
-        if($checkpaymentTrans){  $checkpaymentTrans->forceDelete(); }
+        if($checkpaymentTrans){  $checkpaymentTrans->delete(); }
 
         //Delete Token from token log
         $trimSpaces = str_replace(' ', '', $data['token']);
         $tokeLogs = ECMITokenLogs::where("Token", $trimSpaces)->first();
-        if($tokeLogs){  $tokeLogs->forceDelete(); }
+        if($tokeLogs){  $tokeLogs->delete(); }
         
 
         $trigD = Ecmsdb::where("Token_before",  $trimSpaces)->first();
-        if($trigD){ $trigD->forceDelete(); }
+        if($trigD){ $trigD->delete(); }
         
         //Delete from whoisActive
         //DELETE FROM  [msdb].[dbo].[WhoIsActive] where Login_name = 'distributor_piq'
         $whoisActive = Ewhois::where("Login_name", "distributor_piq")->first();
-        if($whoisActive){  $whoisActive->forceDelete(); }
+        if($whoisActive){  $whoisActive->delete(); }
 
            
         //[HoldModeTransactions] Delete Token if Exists  // check this
         $HoldMode = ECMIHoldMode::where("Token", $trimSpaces)->first();
-        if($HoldMode){ HoldMode->forceDelete(); }
+        if($HoldMode){ HoldMode->delete(); }
 
           // Enable the trigger again for the same connection
          DB::connection('ecmi_prod')->unprepared('ENABLE TRIGGER [TRANSACTION_TRIGGER] ON [ECMI].[dbo].[Transactions]');
