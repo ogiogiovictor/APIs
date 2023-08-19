@@ -26,9 +26,6 @@ use App\Http\Controllers\Export\ExportController;
 use App\Http\Controllers\CAAD\CaadController;
 
 
-
-
-
 ///////////////////////////////////////////////////////////////
 # ALTERNATE PAYMENT <CONTROLLERS>
 //////////////////////////////////////////////////////////////
@@ -110,7 +107,7 @@ Route::group(['prefix' => 'v1', 'namespace' => 'Api\v1', 'middleware' => 'OAuth'
         });
 
         //Customer Bill
-        Route::get('getbills', [CustomerBills::class, 'getBills'])->middleware('before');;
+        Route::get('bills', [CustomerBills::class, 'getBills'])->middleware('before');;
         Route::get('billDetails/{billID?}', [CustomerBills::class, 'getBillDetails']); 
 
         //Customer Payment
@@ -167,9 +164,6 @@ Route::group(['prefix' => 'v1', 'namespace' => 'Api\v1', 'middleware' => 'OAuth'
         Route::post('caad_approval_request', [CaadController::class, 'CaadApprovalRequest']);
         Route::post('caad_reject_request', [CaadController::class, 'CaadRejectRequest']);
       
-        
-
-
 
         Route::prefix('stsix')->group(function() {
          
@@ -202,16 +196,14 @@ Route::group(['prefix' => 'v1', 'namespace' => 'Api\v1', 'middleware' => 'OAuth'
         Route::post('export_customers', [ExportController::class, 'exportExcel']);
 
         Route::get('dt_by_business_hub', [AssetController::class, 'DTBusinessHub']);
+        Route::get('dts_in_business_hub/{hubName}', [AssetController::class, 'ListDTS']);
+        Route::get('dts_in_business_hub/{hubName}/{dssID}', [AssetController::class, 'customerList']);
 
         Route::get('my_approval', [CustomerInformation::class, 'ApprovedCustomers']);
 
         Route::post('assign_user_menu', [UserController::class, 'AssignUserMenu']);
 
         Route::post('mlogout', [UserController::class, 'userLogout']);
-
-
- 
-
         
          
     });

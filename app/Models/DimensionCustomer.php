@@ -65,7 +65,20 @@ class DimensionCustomer extends Model
             ->where('BillMonth', '6');
     }
 
+    public function dtinformation()
+    {
+        return $this->hasOne(DTWarehouse::class,  'Assetid', 'DistributionID',);
+    }
 
+    public function getCustomerCount()
+    {
+    return $this->hasOne(DimensionCustomer::class, 'DistributionID', 'DistributionID')
+        ->selectRaw('DistributionID, count(*) as customer_count')
+        ->groupBy('DistributionID');
+    }
+
+
+    
    
     
 }

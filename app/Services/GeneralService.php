@@ -9,7 +9,7 @@ class GeneralService
 {
 
     public function getSpecialRole(){
-        return $roleName = ['project_office', 'billing', 'cfo', 'coo', 'admin', 'md', 'ami', 'audit', 'md', 'hcs', 'cco', 'it', 'cfo', 'coo'];
+        return $roleName = ['project_officer', 'billing', 'cfo', 'coo', 'admin', 'md', 'ami', 'audit', 'md', 'hcs', 'cco', 'it', 'cfo', 'coo'];
     }
 
     public function getUserLevelRole(){

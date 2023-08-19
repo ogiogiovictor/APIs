@@ -157,7 +157,7 @@ class CustomerService
 
     public function getWarehouseDashboard() {
 
-    $roleName = ['project_office', 'billing', 'cfo', 'coo', 'admin', 'md', 'ami', 'audit', 'md', 'hcs', 'cco', 'it', 'cfo', 'coo'];
+    $roleName = ['project_officer', 'billing', 'cfo', 'coo', 'admin', 'md', 'ami', 'audit', 'md', 'hcs', 'cco', 'it', 'cfo', 'coo'];
 
     $role_name = Auth::user()->roles->pluck('name')->first();
     $user = Auth::user();

@@ -125,10 +125,40 @@ class AssetController extends BaseApiController
          return DTBusinessHubResource::collection(DTWarehouse::select("hub_name", DB::raw("COUNT(Assetid) as asset_count"))->groupBy('hub_name')->get());
           
         });
-        //$getDSS = DTBusinessHubResource::collection(DTWarehouse::select("hub_name", DB::raw("COUNT(Assetid) as asset_count"))->groupBy('hub_name')->get());
-
+      
        return $this->sendSuccess($data, "loaded Successfully", Response::HTTP_OK);
 
+    }
+
+
+    public function ListDTS($buhs){
+        $cacheKey = 'dt_in_business_hubs';
+        $minutes = 30;
+
+        $data = Cache::remember($cacheKey, $minutes, function () use ($buhs) {
+            return DimensionCustomer::with(["dtinformation" => function ($query) {
+                $query->select("Assetid", "DSS_11KV_415V_Name", "DSS_11KV_415V_Owner", "DSS_11KV_415V_Address", "Status");
+            }])
+            ->addSelect(["DistributionID", "BusinessHub"])
+            ->withCount('getCustomerCount') // This will add the customer count as a property
+            ->where("BusinessHub", $buhs)
+            ->distinct('DistributionID')
+            ->get();
+        });
+
+        return $this->sendSuccess($data, "loaded Successfully", Response::HTTP_OK);
+    }
+
+    public function customerList($buhs, $dssID){
+
+        $cacheKey = 'customers_in_hub_dt';
+        $minutes = 30;
+
+        $data = Cache::remember($cacheKey, $minutes, function () use ($buhs, $dssID) {
+            return DimensionCustomer::where("BusinessHub", $buhs)->where("DistributionID", $dssID)->paginate(1000);
+        });
+
+        return $this->sendSuccess($data, "loaded Successfully", Response::HTTP_OK);
     }
    
 
