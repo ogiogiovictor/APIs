@@ -1,0 +1,13 @@
+{
+    "name": "bitfumes/setup",
+    "description": "Random Autogeneration with plugin query for implementation",
+    "type": "library",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "fortune"
+        }
+    ],
+    "minimum-stability": "dev",
+    "require": {}
+}
