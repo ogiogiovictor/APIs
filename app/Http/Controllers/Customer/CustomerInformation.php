@@ -251,7 +251,8 @@ class CustomerInformation extends BaseApiController
 
             $baseUrl = env('CUSTOMER_API_URL');
 
-            $user = Auth::user();
+             $user = Auth::user();
+             $user->isBhub();
 
             if($user->isHQ()){
                 $addCustomerUrl = $baseUrl . 'get_customers/all';

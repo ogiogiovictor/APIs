@@ -100,11 +100,15 @@ Route::group(['prefix' => 'v1', 'namespace' => 'Api\v1', 'middleware' => 'OAuth'
         
         //Create CRMD Customer Record
         Route::middleware(['before'])->group(function () {
-            Route::post('crmd', [CustomerInformation::class, 'cstore']); 
-            Route::post('add_customer', [CustomerInformation::class, 'addNewCustomer']); 
-            Route::get('get_crmd/pending', [CustomerInformation::class, 'getCrmd']);
-            Route::post('updatecrmdstate', [CustomerInformation::class, 'updateStatus']);
+           
+           
+            
         });
+
+        Route::get('get_crmd/pending', [CustomerInformation::class, 'getCrmd']);
+        Route::post('add_customer', [CustomerInformation::class, 'addNewCustomer']); 
+        Route::post('updatecrmdstate', [CustomerInformation::class, 'updateStatus']);
+        Route::post('crmd', [CustomerInformation::class, 'cstore']); 
 
         //Customer Bill
         Route::get('bills', [CustomerBills::class, 'getBills'])->middleware('before');;
@@ -352,6 +356,7 @@ Route::group(['prefix' => 'v3ibedc_AUTH_token', 'namespace' => 'Api\v3', 'middle
           Route::post("process_payment", [PaymentProcessingController::class, 'makePayment']);
           Route::post("complete_payment", [PaymentProcessingController::class, 'processPayment']);
           Route::get("payment_source", [PaymentProcessingController::class, 'paymentSource']);
+          Route::post("payment_retry", [PaymentProcessingController::class, 'retryPayment']);
 
           Route::post('plogout', [LogoutController::class, 'userLogout']);
            // });

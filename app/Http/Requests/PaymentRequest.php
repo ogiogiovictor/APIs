@@ -22,8 +22,8 @@ class PaymentRequest extends FormRequest
     public function rules(): array
     {
         return [
-            "email" => "email",
-            "phone" =>  ["required", "regex:/^0\d{10}$/"],
+            //"email" => "email",
+            "phone" =>  "required",
             "amount" => ['required', 'numeric'],
             "account_type" => "required",
            // "account_number" => "required",
