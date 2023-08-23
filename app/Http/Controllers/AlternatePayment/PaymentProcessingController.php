@@ -67,7 +67,7 @@ class PaymentProcessingController extends BaseApiController
        $checkTransaID = PaymentModel::where("transaction_id",  $transactionID)->value("transaction_id");
 
        if($checkTransaID){
-        $transactionID = StringHelper::generateTransactionReference(). ''.time().data('Ymd');
+        $transactionID = StringHelper::generateTransactionReference(). ''.time().data('YmdHis');
        }
       
         DB::beginTransaction();
@@ -75,7 +75,7 @@ class PaymentProcessingController extends BaseApiController
         try {
 
            //return $request->all();
-            $uuid = Str::uuid()->toString();
+            $uuid = Str::uuid()->toString()."-".Carbon::now()->format('YmdHis');
             $limitedUuid = substr($uuid, 0, 18);
 
             // Create payment record using query builder
@@ -212,44 +212,50 @@ class PaymentProcessingController extends BaseApiController
 
                 $receiptNo = Carbon::now()->format('YmdHis');  //YmdHisu
 
+                $checkExist = TestModel::where("receiptnumber", $checkRef->transaction_id)->exists();
+
+                if($checkExist){
+                    return $this->sendError('Error', "Duplicate Reference Key". $checkRef->transaction_id, Response::HTTP_BAD_REQUEST);
+                }
+
 
                 try{
+                            //Update Billing Status
+                        $addPayment = TestModel::create([
+                            //"PaymentID" =>  $checkRef->transaction_id,
+                            "BillID" => strval($mainBills->BillID),
+                            "PaymentTransactionId" =>  strtoupper(Str::uuid()->toString()),   // strval($request->payment_status['payRef']),  //$checkRef->providerRef,
+                            "receiptnumber" => $checkRef->transaction_id,  //?? strval($receiptNo),
+                            "PaymentSource" => 101,
+                            "MeterNo" => strval($custInfo->MeterNo) ?? 'NULL',
+                            "AccountNo" => strval($custInfo->AccountNo) ?? 'NULL',
+                            "PayDate" =>  strval(Carbon::now()->format('Y-m-d H:i:s')),
+                            "PayMonth" => Carbon::now()->format('m'),
+                            "PayYear" => Carbon::now()->format('Y'),
+                            "OperatorID" => 1,
+                            "TotalDue" => 0.00,
+                            "Payments" => $request->payment_status['apprAmt'],
+                            //"Balance" => 'NULL',
+                            "Processed" => 0,
+                            //"ProcessedDate" => 'NULL',
+                            "BusinessUnit" => strval($custInfo->BUID),
+                            "DateEngtered" => strval(Carbon::now()->format('Y-m-d H:i:s')),
+                            "CustomerID" => strval($custInfo->CustomerID),
+                        ]);
 
-                      //Update Billing Status
-                $addPayment = TestModel::create([
-                    //"PaymentID" =>  $checkRef->transaction_id,
-                    "BillID" => strval($mainBills->BillID),
-                    "PaymentTransactionId" =>  strtoupper(Str::uuid()->toString()),   // strval($request->payment_status['payRef']),  //$checkRef->providerRef,
-                    "receiptnumber" => $checkRef->transaction_id ?? strval($receiptNo),
-                    "PaymentSource" => 101,
-                    "MeterNo" => strval($custInfo->MeterNo) ?? 'NULL',
-                    "AccountNo" => strval($custInfo->AccountNo) ?? 'NULL',
-                    "PayDate" =>  strval(Carbon::now()->format('Y-m-d H:i:s')),
-                    "PayMonth" => Carbon::now()->format('m'),
-                    "PayYear" => Carbon::now()->format('Y'),
-                    "OperatorID" => 1,
-                    "TotalDue" => 0.00,
-                    "Payments" => $request->payment_status['apprAmt'],
-                    //"Balance" => 'NULL',
-                    "Processed" => 0,
-                    //"ProcessedDate" => 'NULL',
-                    "BusinessUnit" => strval($custInfo->BUID),
-                    "DateEngtered" => strval(Carbon::now()->format('Y-m-d H:i:s')),
-                    "CustomerID" => strval($custInfo->CustomerID),
-                ]);
+                        $addPaymentStatus = TestModelPayments::create([
+                            'transid' =>  strval($addPayment->PaymentTransactionId),
+                            'transref' =>  $checkRef->transaction_id,
+                            'enteredby' => $checkRef->payment_source,  //An account to be created by Joseph
+                            'transdate' => Carbon::now()->format('Y-m-d H:i:s'),
+                            'transamount' => $request->payment_status['apprAmt'],
+                            'transstatus' =>  $request->payment_status['resp'] == '00' ?  'success' : 'failed', 
+                            'accountno' => $checkRef->account_number,
+                            'transactionresponsemessage' => $request->payment_status['payRef'],
+                            'paymenttype' => 3, //We need to check this later,
+                            'TransactionBusinessUnit' => $custInfo->BUID,
+                        ]);
 
-                $addPaymentStatus = TestModelPayments::create([
-                     'transid' =>  strval($addPayment->PaymentTransactionId),
-                     'transref' =>  $checkRef->transaction_id,
-                     'enteredby' => $checkRef->payment_source,  //An account to be created by Joseph
-                     'transdate' => Carbon::now()->format('Y-m-d H:i:s'),
-                     'transamount' => $request->payment_status['apprAmt'],
-                     'transstatus' =>  $request->payment_status['resp'] == '00' ?  'success' : 'failed', 
-                     'accountno' => $checkRef->account_number,
-                     'transactionresponsemessage' => $request->payment_status['payRef'],
-                     'paymenttype' => 3, //We need to check this later,
-                     'TransactionBusinessUnit' => $custInfo->BUID,
-                 ]);
 
                  $update = PaymentModel::where("transaction_id", $checkRef->transaction_id)->update([
                     'status' => $request->payment_status['resp'] == '00' ?  'success' : 'failed', //"resp": "00",
@@ -400,6 +406,9 @@ class PaymentProcessingController extends BaseApiController
     private function generateToken($meterNo, $accountType, $amount, $provider, $customerName, $buid, $phone, $transactionID){
 
        try {
+        return $this->sendError('Error', "Prepaid Processing Disabled", Response::HTTP_BAD_REQUEST);
+
+
                 $baseUrl = env('MIDDLEWARE_URL');
                 $addCustomerUrl = $baseUrl . 'vendelect';
 
