@@ -27,7 +27,8 @@ class PaymentModel extends Model
         'providerRef',
         'receiptno',
         'payment_source',
-        'Descript'
+        'Descript',
+        'owner'
     ];
 
 }

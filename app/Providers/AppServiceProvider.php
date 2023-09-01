@@ -8,6 +8,9 @@ use App\Repositories\AssetRepository;
 use Illuminate\Support\Collection;
 use Illuminate\Pagination\LengthAwarePaginator;
 
+use App\Models\PaymentModel;
+use App\Observers\PaymentObserver;
+
 class AppServiceProvider extends ServiceProvider
 {
     /**
@@ -39,6 +42,6 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        //
+       // PaymentModel::observe(PaymentObserver::class);
     }
 }

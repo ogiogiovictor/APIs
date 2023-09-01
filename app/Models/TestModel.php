@@ -43,5 +43,17 @@ class TestModel extends Model
         'CustomerID',
     ];
 
+
+    public function checkForDuplicates()
+    {
+        $duplicates = DB::table('Payments')
+            ->select('receiptnumber', DB::raw('COUNT(*) AS DuplicateCount'))
+            ->where('PayYear', '2023')
+            ->groupBy('receiptnumber')
+            ->having('DuplicateCount', '>', 1)
+            ->get();
+
+        return $duplicates;
+    }
      
 }

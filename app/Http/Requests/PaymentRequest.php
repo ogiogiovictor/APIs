@@ -26,7 +26,7 @@ class PaymentRequest extends FormRequest
             "phone" =>  "required",
             "amount" => ['required', 'numeric'],
             "account_type" => "required",
-           // "account_number" => "required",
+            "owner" => "required",
         ];
     }
 }

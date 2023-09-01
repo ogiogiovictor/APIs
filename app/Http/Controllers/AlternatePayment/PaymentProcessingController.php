@@ -21,6 +21,10 @@ use App\Models\TestModelPayments;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use App\Models\AuditLog;
+use App\Models\BusinessUnit;
+use App\Events\PaymentCreated; // Import the event class
+use App\Jobs\PaymentLogJobs;
+use App\Models\ContactUs;
 
 
 class PaymentProcessingController extends BaseApiController
@@ -29,7 +33,6 @@ class PaymentProcessingController extends BaseApiController
    
     public function makePayment(PaymentRequest $request){
        
-
         try {
 
             if($request->account_type == "Postpaid"){
@@ -78,6 +81,8 @@ class PaymentProcessingController extends BaseApiController
             $uuid = Str::uuid()->toString()."-".Carbon::now()->format('YmdHis');
             $limitedUuid = substr($uuid, 0, 18);
 
+            $buCode = BusinessUnit::where("BUID", $custInfo->BUID)->value("Name");
+
             // Create payment record using query builder
             $payment =  PaymentModel::create([
                 'email' => $request->email ?? '',
@@ -85,22 +90,21 @@ class PaymentProcessingController extends BaseApiController
                'phone' => $request->phone ?? '',
                 'amount' => $request->amount,
                 'account_type' => $request->account_type,
-                'account_number' => $request->account_number,
+                'account_number' => trim($request->account_number),
                 'payment_source' => $request->payment_source,
                // 'meter_no' => $request->meter_no,
                 'status' => "pending",
                 'customer_name' => $custInfo->Surname.' '. $custInfo->FirstName,
                 'date_entered' => Carbon::now(),
-                'BUID' => $custInfo->BUID
+                'BUID' => $buCode ?? $custInfo->BUID,
+                'owner' => $request->owner
             ]);
            
          
             $response = [
                 'payment' => $payment,
-                'payment_key_authData' => "G3cf/VTtAHCdHZNxc5GXWRI8z5P0goL2amXWDVFgb6D3XK/QMtZW90TYdl5zffDCNpiZThJzk0+eEU/Y/aYS6fyIOpQZGFrOr8hmvx5869sl2kr5u8qjnM7q5b4ZnTqdKDLtNxr3Qr7anj6YLpox1FOsiyT26mktXL+7SFOaZ15NMtne1z4xrj4R2SndowI/Znsapo7Gfzvp+L7XJyQ8kLYYRk3INjvmRPPQoJg1R0Nnh6EQE3ldIdwylB7GKtr6a71N/yCd4ZtyIcqq1ZNzdWcZyy5eEBAlDIxuECdBqH6hRq2/RbkfARqidNN4Kq0WviSRaRYGbiNjl2W9pNcM8g==",
-                'currency' => "NGN",
-                 "mcode" => "MX19329",
-                 "pay_item_id" => "Default_Payable_MX19329",
+                'mpk' => "FLWPUBK_TEST-579a209dc157adc5b4156e03df9ddd25-X",
+                 "sub_account" => $this->subaccountmatch($buCode),
     
             ];
 
@@ -116,21 +120,6 @@ class PaymentProcessingController extends BaseApiController
 
         
     }
-
-
-
-    /* {
-        "provider": "IBEDC",
-        "meterno": "70004984442",
-        "amount": "1",
-        "vendtype": "Prepaid",              
-        "custname": "OMOWELE ADEKUMBI FUNMILAYO 16",
-        "businesshub": "Molete",
-        "custphoneno": "2348062665117", 
-        "payreference": "MDWTESTLIVE-1",
-        "colagentid": "IB001" // leave
-      }
-      */
 
       
 
@@ -159,22 +148,21 @@ class PaymentProcessingController extends BaseApiController
                 'phone' => $request->Mobile ?? $request->phone,
                 'amount' => 1, // $request->amount,
                 'account_type' => $request->account_type,
-                'account_number' => $zoneECMI->AccountNo,
+                'account_number' => trim($zoneECMI->AccountNo),
                 'payment_source' => $request->payment_source,
                 'meter_no' => $request->MeterNo,
                 'status' => "pending",
                 'customer_name' => $zoneECMI->Surname.' '. $zoneECMI->OtherNames,
                 'date_entered' => Carbon::now(),
-                'BUID' => $zoneECMI->BUID
+                'BUID' => $zoneECMI->BUID,
+                'owner' => $request->owner
     
             ]);
 
             $response = [
                 'payment' => $payment,
-                'payment_key_authData' => "G3cf/VTtAHCdHZNxc5GXWRI8z5P0goL2amXWDVFgb6D3XK/QMtZW90TYdl5zffDCNpiZThJzk0+eEU/Y/aYS6fyIOpQZGFrOr8hmvx5869sl2kr5u8qjnM7q5b4ZnTqdKDLtNxr3Qr7anj6YLpox1FOsiyT26mktXL+7SFOaZ15NMtne1z4xrj4R2SndowI/Znsapo7Gfzvp+L7XJyQ8kLYYRk3INjvmRPPQoJg1R0Nnh6EQE3ldIdwylB7GKtr6a71N/yCd4ZtyIcqq1ZNzdWcZyy5eEBAlDIxuECdBqH6hRq2/RbkfARqidNN4Kq0WviSRaRYGbiNjl2W9pNcM8g==",
-                'currency' => "NGN",
-                 "mcode" => "MX19329",
-                 "pay_item_id" => "Default_Payable_MX19329",
+                 'mpk' => "FLWPUBK_TEST-579a209dc157adc5b4156e03df9ddd25-X",
+                 "sub_account" => $this->subaccountmatch($zoneECMI->BUID),
     
             ];
 
@@ -220,7 +208,7 @@ class PaymentProcessingController extends BaseApiController
 
 
                 try{
-                            //Update Billing Status
+                        //Update Billing Status
                         $addPayment = TestModel::create([
                             //"PaymentID" =>  $checkRef->transaction_id,
                             "BillID" => strval($mainBills->BillID),
@@ -238,7 +226,7 @@ class PaymentProcessingController extends BaseApiController
                             //"Balance" => 'NULL',
                             "Processed" => 0,
                             //"ProcessedDate" => 'NULL',
-                            "BusinessUnit" => strval($custInfo->BUID),
+                            "BusinessUnit" => BusinessUnit::where("BUID", $custInfo->BUID)->value("Name")  ?? strval($custInfo->BUID),
                             "DateEngtered" => strval(Carbon::now()->format('Y-m-d H:i:s')),
                             "CustomerID" => strval($custInfo->CustomerID),
                         ]);
@@ -257,17 +245,25 @@ class PaymentProcessingController extends BaseApiController
                         ]);
 
 
-                 $update = PaymentModel::where("transaction_id", $checkRef->transaction_id)->update([
-                    'status' => $request->payment_status['resp'] == '00' ?  'success' : 'failed', //"resp": "00",
-                    'provider' => $request->payment_status['provider'] ?? '',
-                    'providerRef' => $request->payment_status['payRef'],
-                    'receiptno' =>  $receiptNo,  //Carbon::now()->format('YmdHis').time()
-                    'BUID' => $custInfo->BUID,
-                    'Descript' => $request->payment_status['desc'],
-                ]);
+                        $update = PaymentModel::where("transaction_id", $checkRef->transaction_id)->update([
+                            'status' => $request->payment_status['resp'] == '00' ?  'success' : 'failed', //"resp": "00",
+                            'provider' => $request->payment_status['provider'] ?? '',
+                            'providerRef' => $request->payment_status['payRef'],
+                            'receiptno' =>  $receiptNo,  //Carbon::now()->format('YmdHis').time()
+                            'BUID' => $custInfo->BUID,
+                            'Descript' => $request->payment_status['desc'],
+                        ]);
+                       
+                        //Dispatch the event
+                       
+                        //check for successful resonse
+                       // $addPaymentStatus->transstatus == 'success' ? dispatch : ''
+                        //event(new PaymentCreated($checkRef));
 
-                 //I still have one table to add here
-                 return $this->sendSuccess($addPayment, "Payment Successfully Completed", Response::HTTP_OK);
+                        dispatch(new PaymentLogJobs($checkRef));
+                        
+                        //I still have one table to add here
+                        return $this->sendSuccess($addPayment, "Payment Successfully Completed", Response::HTTP_OK);
 
 
                 }catch(\Exception $e){
@@ -302,57 +298,7 @@ class PaymentProcessingController extends BaseApiController
                $phone = $request->payment_status['phone']  ?? $zoneECMI->Mobile;
 
                return $this->generateToken($request->payment_status['MeterNo'], $request->payment_status['account_type'], 
-               $amount, "IBEDC", $customerName, $zoneECMI->BUID, $phone, $checkRef->transaction_id);
-
-               /* try {
-                   
-
-                    $baseUrl = env('MIDDLEWARE_URL');
-                    $addCustomerUrl = $baseUrl . 'vendelect';
-
-                    $data = [
-                            'meterno' => $request->payment_status['MeterNo'],
-                            'vendtype' => $request->payment_status['account_type'],
-                            'amount' => 1, //$request->amount,
-                            "provider" => "IBEDC",
-                            "custname" => $zoneECMI->Surname.' '. $zoneECMI->OtherNames,
-                            "businesshub" => $zoneECMI->BUID,
-                            "custphoneno" => $request->payment_status['phone']  ?? $zoneECMI->Mobile,
-                            "payreference" => StringHelper::generateTransactionReference(),
-                            "colagentid" => "IB001",
-        
-                        ];
-                
-        
-                        $response = Http::withHeaders([
-                            'Authorization' => 'Bearer LIVEKEY_711E5A0C138903BBCE202DF5671D3C18',
-                        ])->post($addCustomerUrl , $data);
-                
-                         $newResponse =  $response->json();
-        
-                         if($newResponse['status'] == "true"){                 
-        
-                            $update = PaymentModel::where("transaction_id", $checkRef->transaction_id)->update([
-                                'status' => $newResponse['status'] == "true" ?  'success' : 'failed', //"resp": "00",
-                                'provider' => "IBEDC-MIDDLEWARE" ?? '',
-                                'providerRef' => $newResponse['transactionReference'],
-                                'receiptno' =>   $newResponse['recieptNumber'],  //Carbon::now()->format('YmdHis').time()
-                                'BUID' => $zoneECMI->BUID,
-                                'Descript' => $newResponse['message'],
-                            ]);
-        
-                            return $newResponse;
-        
-                         }else {
-                            return $newResponse;
-                        }
-                    
-
-                  
-                }catch(\Exception $e){
-                    return $this->sendError('Error', $e->getMessage(), Response::HTTP_BAD_REQUEST);
-                }
-                */
+               $amount, "IBEDC", $customerName, $zoneECMI->BUID, $phone, $checkRef->transaction_id);  
 
             }
         
@@ -378,8 +324,12 @@ class PaymentProcessingController extends BaseApiController
 
             $checkNull = PaymentModel::where("providerRef", $retryToken)->first();
 
-            if($checkNull->receiptno && $checkNull->receiptno !== 'NULL'){
-                return $this->sendSuccess( $checkNull->receiptno , "Token Generated Successfully", Response::HTTP_OK);
+            if(!$checkNull){
+                return $this->sendError('Error', "Invalid Payment Reference", Response::HTTP_BAD_REQUEST);
+            }
+
+            if($checkNull->receiptno && $checkNull->receiptno != 'NULL'){
+                return $this->sendSuccess($checkNull->receiptno , "Token Generated Successfully", Response::HTTP_OK);
             }else {
                 //Use here to generate token
                 return $this->generateToken($checkNull->meter_no, $checkNull->account_type, 
@@ -406,8 +356,7 @@ class PaymentProcessingController extends BaseApiController
     private function generateToken($meterNo, $accountType, $amount, $provider, $customerName, $buid, $phone, $transactionID){
 
        try {
-        return $this->sendError('Error', "Prepaid Processing Disabled", Response::HTTP_BAD_REQUEST);
-
+        //return $this->sendError('Error', "Prepaid Processing Disabled", Response::HTTP_BAD_REQUEST);
 
                 $baseUrl = env('MIDDLEWARE_URL');
                 $addCustomerUrl = $baseUrl . 'vendelect';
@@ -443,6 +392,22 @@ class PaymentProcessingController extends BaseApiController
                             'Descript' => $newResponse['message'],
                         ]);
 
+                        //Send SMS to User
+                        $token = $newResponse['recieptNumber'];
+                        
+                        $baseUrl = env('SMS_MESSAGE');
+                        $data = [
+                            'token' => "p42OVwe8CF2Sg6VfhXAi8aBblMnADKkuOPe65M41v7jMzrEynGQoVLoZdmGqBQIGFPbH10cvthTGu0LK1duSem45OtA076fLGRqX",
+                            'sender' => "IBEDC",
+                            'to' => $phone,
+                            "message" => "IBEDC - Your Payment Token is $token",
+                            "type" => 0,
+                            "routing" => 3,
+                        ];
+
+                        $response = Http::asForm()->post($baseUrl, $data);
+
+
                        return $newResponse;
                      }else {
                         return $newResponse;
@@ -457,7 +422,64 @@ class PaymentProcessingController extends BaseApiController
 
 
 
+    public function ContactUs(Request $request) {
 
+        $validatedData = $request->validate([
+            'name' => 'required|string|max:255',
+            'message' => 'required',
+            'email' => 'required',
+            'subject' => 'required',
+            'accountType' => 'required',
+            'unique_code' => 'required',
+        ]);
+
+        $createResponse = ContactUs::create([
+            'name' => $request->name,
+            'message' => $request->message,
+            'email' => $request->email,
+            'subject' => $request->subject,
+            'accountType' => $request->accountType,
+            'unique_code' => $request->unique_code
+        ]);
+
+        return $this->sendSuccess($createResponse, "Successfully Sent", Response::HTTP_OK);
+    
+        
+    }
+
+
+    private function subaccountmatch($bhub){
+
+        $result = match($bhub) {
+            'Apata' => 'RS_574474F4E2F1F8869DA149F013AD46BF',
+            'Baboko' => 'RS_5E98D9ED0312C61164A8E56110C14E8C',
+            'Challenge' => 'RS_670F1F1ADD7EDD1889A06C08A65D1354',
+            'Dugbe' => 'RS_F024FC80D2B37BBB161C15D953D8ABD2',
+            'Ede' => 'RS_FA398AF4C99DF389B7A649D830579A9F',
+            'Ijebu-Igbo' => 'RS_837E356137FE0769E8BCAD838E59DF98',
+            'Ijebu-Ode' => 'RS_837E356137FE0769E8BCAD838E59DF98',
+            'Ijeun' => 'RS_B12093C86C582AD8D8B7326FB18C3DEA',
+            'Ikirun' => 'RS_06AFCD1863267082B54B8E3FCDAD62F1',
+            'Ile-Ife' => 'RS_EEE99494819217C67585CE58DF42F588',
+            'Ilesha' => 'RS_D92ED8526F01534AF5407ABD414BA2B0',
+            'Jebba' => 'RS_8C77EC3FB59345FFBF0BFCEC3739CE7C',
+            'Molete' => 'RS_DDB5E0FA054A1316E2596CA1FACA5ADE',
+            'Mowe-Ibafo' => 'RS_AC3A9226FB50420E4CEE6373EF14F6AB',
+            'Ogbomosho' => 'RS_D14FCA3EE69480E42E258EA6A407888C',
+            'Ojoo' => 'RS_98C44993545A6B3B524FCCE67CC07F3A',
+            'Olumo' => 'RS_A1FCAFD99DF6616E829FC7F88C8F9F37',
+            'Omu-Aran' => 'RS_5C739F0B882560F58655C75C6E62AEAC',
+            'Osogbo' => 'RS_AFF4E372E211882A1A088A2D0C393E14',
+            'Ota' => 'RS_2FB023CAE1C09618910D50442A5B437A',
+            'Oyo' => 'RS_93F84120037937B4AEBEEA80852450C3',
+            'Sagamu' => 'RS_9D2E84A4F2A9E33343BDA7B027E8B004',
+            'Sango' => 'RS_7FAC2496BEBA5E77AA0359DBF22BA884',
+            default => 'RS_574474F4E2F1F8869DA149F013AD46BF',
+        };
+
+        return $result;
+
+    }
 
 
    

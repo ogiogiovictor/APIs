@@ -357,6 +357,7 @@ Route::group(['prefix' => 'v3ibedc_AUTH_token', 'namespace' => 'Api\v3', 'middle
           Route::post("complete_payment", [PaymentProcessingController::class, 'processPayment']);
           Route::get("payment_source", [PaymentProcessingController::class, 'paymentSource']);
           Route::post("payment_retry", [PaymentProcessingController::class, 'retryPayment']);
+          Route::post("help", [PaymentProcessingController::class, 'ContactUs']);
 
           Route::post('plogout', [LogoutController::class, 'userLogout']);
            // });
