@@ -35,8 +35,7 @@ class PaymentController extends BaseApiController
         $ems_payment = ZonePayments::whereYear('PayDate', '=', now()->year)
                                           ->whereMonth('PayDate', '=', now()->month)
                                           ->sum('Payments');
-
-                                    
+                                          
         // Payment from Spectrum Bill now()->subMonth()->month
         $specBill = ZoneBills::whereYear('Billdate', '=', now()->year)
         ->whereMonth('Billdate', '=', now()->month)
@@ -73,7 +72,7 @@ class PaymentController extends BaseApiController
         $data = [
             'ecmi_payment' => naira_format($ecmi_payment),
             'ems_payment' => naira_format($ems_payment),
-            'total_payments' => naira_format($ecmi_payment + $ems_payment),
+            'total_payments' => naira_format($total_payments),
             'spec_bills' => naira_format($specBill),
             'spec_bill_lastMonth' => naira_format($specBillLastMonth),
             'last_month_prepaid' => naira_format($ecmi_payment_lastMonth),

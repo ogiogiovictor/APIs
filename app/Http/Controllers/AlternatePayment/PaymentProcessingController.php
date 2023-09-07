@@ -125,6 +125,10 @@ class PaymentProcessingController extends BaseApiController
 
       private function createPrePayment($request) {
 
+        $checkRequest = $request->MeterNo;
+        if(!$checkRequest){
+            return $this->sendError('Error', "Invalid Key Sent", Response::HTTP_BAD_REQUEST);
+        }
 
         $zoneECMI = ZoneECMI::where("MeterNo", $request->MeterNo)->first();
       
@@ -140,11 +144,11 @@ class PaymentProcessingController extends BaseApiController
         try {
 
             $uuid = Str::uuid()->toString();
-            $limitedUuid = substr($uuid, 0, 18);
+            $limitedUuid = str_replace('-', '', substr($uuid, 0, 15));
 
             $payment =  PaymentModel::create([
                 'email' => $request->EMail ?: $request->email,
-                'transaction_id' => strtoUpper($limitedUuid),   //strtoUpper(Str::uuid()->toString()) ?? $transactionID,
+                'transaction_id' => $transactionID ?? strtoUpper($limitedUuid),   //strtoUpper(Str::uuid()->toString()) ?? $transactionID,
                 'phone' => $request->Mobile ?? $request->phone,
                 'amount' => 1, // $request->amount,
                 'account_type' => $request->account_type,
@@ -293,13 +297,21 @@ class PaymentProcessingController extends BaseApiController
                     'providerRef' => $request->payment_status['payRef'],
                 ]);
 
-               $amount = 1; //$request->amount; // please remove this on live later and add the amount request to the generate token;
+               $amount = 10; //$request->amount; // please remove this on live later and add the amount request to the generate token;
                $customerName = $zoneECMI->Surname.' '. $zoneECMI->OtherNames;
                $phone = $request->payment_status['phone']  ?? $zoneECMI->Mobile;
 
-               return $this->generateToken($request->payment_status['MeterNo'], $request->payment_status['account_type'], 
-               $amount, "IBEDC", $customerName, $zoneECMI->BUID, $phone, $checkRef->transaction_id);  
+               //Before you generate token check if txnref exist;
+               $checkExist = PaymentModel::where("transaction_id", $request->payment_status['txnref'])->value("receiptno");
+               if($checkExist){
+                return $this->sendSuccess($checkExist, "PaymentSource Successfully Loaded", Response::HTTP_OK);
+               }else{
+                return $this->generateToken($request->payment_status['MeterNo'], $request->payment_status['account_type'], 
+                $amount, "IBEDC", $customerName, $zoneECMI->BUID, $phone, $checkRef->transaction_id);  
+ 
+               }
 
+              
             }
         
 
@@ -358,6 +370,7 @@ class PaymentProcessingController extends BaseApiController
        try {
         //return $this->sendError('Error', "Prepaid Processing Disabled", Response::HTTP_BAD_REQUEST);
 
+        
                 $baseUrl = env('MIDDLEWARE_URL');
                 $addCustomerUrl = $baseUrl . 'vendelect';
 
@@ -369,7 +382,7 @@ class PaymentProcessingController extends BaseApiController
                         "custname" => $customerName,
                         "businesshub" => $buid,
                         "custphoneno" => $phone,
-                        "payreference" => StringHelper::generateTransactionReference(),
+                        "payreference" => $transactionID ?? StringHelper::generateTransactionReference(),
                         "colagentid" => "IB001",
 
                     ];
@@ -405,7 +418,7 @@ class PaymentProcessingController extends BaseApiController
                             "routing" => 3,
                         ];
 
-                        $response = Http::asForm()->post($baseUrl, $data);
+                        $iresponse = Http::asForm()->post($baseUrl, $data);
 
 
                        return $newResponse;
@@ -414,7 +427,7 @@ class PaymentProcessingController extends BaseApiController
                      }
         }catch(\Exception $e){
             return $this->sendError('Error', $e->getMessage(), Response::HTTP_BAD_REQUEST);
-           // return $e->getMessage();
+           //return $e->getMessage();
           
         }
     }   

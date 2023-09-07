@@ -80,14 +80,15 @@ class StringHelper
 
     public static function generateTransactionReference()
     {
-        $length = 15;
-        $characters = '984765432100123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
+        $length = 6;
+        //$characters = '9876543210ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+        $characters = '9876182ABCDEF';
         $charactersLenth = strlen($characters);
         $generatedTransactionReference = '';
         for ($i = 0; $i < $length; $i++) {
             $generatedTransactionReference .= $characters[rand(0, $charactersLenth - 1)];
         }
-        return $generatedTransactionReference . time(). "-IBEDC";
+        return $generatedTransactionReference . time();
     }
 
     

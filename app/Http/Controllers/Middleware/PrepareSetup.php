@@ -19,6 +19,7 @@ use App\Models\ECMIPaymentTransaction;
 use App\Models\ECMITokenLogs;
 use App\Models\ECMIHoldMode;
 use App\Models\SubAccountPayment;
+use Illuminate\Support\Str;
 
 
 class PrepareSetup extends BaseApiController
@@ -66,6 +67,10 @@ class PrepareSetup extends BaseApiController
         //     'vendtype' => $request->vendtype
         // ]);
 
+        $uuid = Str::uuid()->toString();
+        $limitedUuid = str_replace('-', '', substr($uuid, 0, 15));
+
+
         $response = Http::withHeaders([
             'Authorization' => 'Bearer LIVEKEY_711E5A0C138903BBCE202DF5671D3C18',
         ])->post($addCustomerUrl , $data);
@@ -82,11 +87,11 @@ class PrepareSetup extends BaseApiController
                 "custname" => $newResponse['data']['customerName'],
                 "businesshub" => $newResponse['data']['businessUnit'],
                 "custphoneno" => $newResponse['data']['phoneNumber'],
-                "payreference" => StringHelper::generateTransactionReference(),
+                "payreference" => StringHelper::generateTransactionReference() ?? $limitedUuid,
                 "colagentid" => "IB001"
             ];
 
-           return $this->runPreparationMigration($data);
+          return $this->runPreparationMigration($data);
 
         }else if($newResponse['status'] == "false"){
             return $newResponse['message'];
