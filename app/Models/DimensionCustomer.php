@@ -42,7 +42,8 @@ class DimensionCustomer extends Model
     }
 
     public function transactions() {
-        return $this->hasMany(ECMIPayment::class, 'AccountNo', 'AccountNo');
+        //return $this->hasMany(ECMIPayment::class, 'AccountNo', 'AccountNo');
+        return $this->hasMany(ECMITransactions::class, 'AccountNo', 'AccountNo');
     }
 
     public function zoneBills()

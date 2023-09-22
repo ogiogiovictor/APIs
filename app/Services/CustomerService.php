@@ -450,17 +450,33 @@ class CustomerService
 
 /************************************* IBEDC ALTERNATE PAYMENT SYSTEM **************************************************/
 
+
     public function authenticateCustomers($meterNo, $accountType) {
-        $customers =  DimensionCustomer::select('*')->where(function ($query) use ($meterNo, $accountType) {
-            $query->whereNotIn("StatusCode", ["0, I, C, N"]);
-            $query->where('AccountNo', 'like', '%'. $meterNo .  '%');
-            $query->orWhere('MeterNo', $meterNo );
-            $query->Where('AccountType', $accountType);
-        })->first(); 
-
+        $customers = DimensionCustomer::where(function ($query) use ($meterNo, $accountType) {
+            $query->where("MeterNo", $meterNo)
+                  ->where("AccountType", $accountType);
+        })->orWhere(function ($query) use ($meterNo, $accountType) {
+            $query->where("AccountNo", $meterNo)
+                  ->where("AccountType", $accountType);
+        })->first();
+    
         return $customers;
-
     }
+    
+
+
+    // public function authenticateCustomersOLD($meterNo, $accountType) {
+    //     $customers =  DimensionCustomer::select('*')->where(function ($query) use ($meterNo, $accountType) {
+    //         $query->whereNotIn("StatusCode", ["0, I, C, N"]);
+    //         $query->where('AccountNo', 'like', '%'. $meterNo .  '%');
+    //         $query->orWhere('MeterNo', $meterNo );
+    //         $query->Where('AccountType', $accountType);
+    //     })->first(); 
+
+    //     return $customers;
+
+    // }
+
 
 
 

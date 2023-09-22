@@ -13,19 +13,19 @@ use Carbon\Carbon;
 
 class BillService
 {
-   
+    
 
     public function getBills($currentMonth, $currentYear)
     {
         $thisMonthBills = ZoneBills::where('BillMonth', $currentMonth)
             ->where('BillYear', $currentYear)
-            ->sum('CurrentChgTotal');
+            ->sum(DB::raw('CurrentChgTotal + VAT'));
 
         $lastMonth = Carbon::now()->subMonth()->month;
 
         $lastMonthBill = ZoneBills::where('BillMonth', $lastMonth)
             ->where('BillYear', $currentYear)
-            ->sum('CurrentChgTotal');
+            ->sum(DB::raw('CurrentChgTotal + VAT'));
 
 
         // $topCustomers = ZoneBills::where('BillMonth', $lastMonth)
@@ -33,12 +33,12 @@ class BillService
         //     ->orderByDesc('CurrentChgTotal', 'desc')
         //     ->sum('CurrentChgTotal');
 
-            $topCustomers = ZoneBills::where('BillMonth', $lastMonth)
-            ->where('BillYear', $currentYear)
-            ->orderByDesc('CurrentChgTotal')
-            ->take(100)
-            ->get()
-            ->sum('CurrentChgTotal');
+            // $topCustomers = ZoneBills::where('BillMonth', $lastMonth)
+            // ->where('BillYear', $currentYear)
+            // ->orderByDesc('CurrentChgTotal')
+            // ->take(100)
+            // ->get()
+            // ->sum('CurrentChgTotal');
 
     
         
@@ -59,8 +59,8 @@ class BillService
             'thisMonthBills' => naira_format($thisMonthBills),
             'lastMonthBills' => naira_format($lastMonthBill),
             'bills' => $bills,
-           'totalHighestBill' => $totalAmountOwed,
-            'highestBilledCustomers' => naira_format($topCustomers),
+           //'totalHighestBill' => $totalAmountOwed,
+           // 'highestBilledCustomers' => naira_format($topCustomers),
         ];
         
 

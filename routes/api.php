@@ -34,6 +34,7 @@ use App\Http\Controllers\AlternatePayment\GetCustomerController;
 use App\Http\Controllers\AlternatePayment\PaymentProcessingController;
 use App\Http\Controllers\AlternatePayment\LogoutController;
 use App\Http\Controllers\FileDownloadController;
+use App\Http\Models\CRMDCustomers;
 
 ///////////////////////////////////////////////////////////////
 # END OF ALTERNATE PAYMENT <CONTROLLERS>
@@ -208,6 +209,14 @@ Route::group(['prefix' => 'v1', 'namespace' => 'Api\v1', 'middleware' => 'OAuth'
         Route::post('assign_user_menu', [UserController::class, 'AssignUserMenu']);
 
         Route::post('mlogout', [UserController::class, 'userLogout']);
+
+        Route::get('bill_payment_summary', [CustomerInformation::class, 'PaymentBillSummary']);
+
+        Route::post('crmd_store', [CustomerOveriewController::class, 'crmdStore']);
+        Route::get('get_crmd_customers', [CustomerOveriewController::class, 'getCustomers']);
+        Route::get('get_crmd_pending', [CustomerOveriewController::class, 'getPendingCustomers']);
+        Route::post('process_crmd_transaction', [CustomerOveriewController::class, 'processTransaction']);
+        Route::post('reject_crmd_transaction', [CustomerOveriewController::class, 'rejectTransaction']);
         
          
     });
@@ -329,6 +338,8 @@ Route::group(['prefix' => 'v2', 'namespace' => 'Api\v2', 'middleware' => 'OAuth'
         Route::post('change_password', [TestController::class, 'changePassword']); // When i am logged in 
 
         Route::get('caads', [TestController::class, 'allCAAD']);
+
+      
 
         
       

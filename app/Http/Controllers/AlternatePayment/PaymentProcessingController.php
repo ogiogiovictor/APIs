@@ -25,6 +25,8 @@ use App\Models\BusinessUnit;
 use App\Events\PaymentCreated; // Import the event class
 use App\Jobs\PaymentLogJobs;
 use App\Models\ContactUs;
+use App\Models\ZonePayments;
+use App\Models\ZonePaymentTransaction;
 
 
 class PaymentProcessingController extends BaseApiController
@@ -77,9 +79,9 @@ class PaymentProcessingController extends BaseApiController
 
         try {
 
-           //return $request->all();
-            $uuid = Str::uuid()->toString()."-".Carbon::now()->format('YmdHis');
-            $limitedUuid = substr($uuid, 0, 18);
+           //return $request->all();  //$uuid = str_replace(['_', '-'], '', Str::uuid()->toString());
+            $uuid = str_replace("-", "", Str::uuid()->toString());
+            $limitedUuid = "113-".substr($uuid, 0, 7).Carbon::now()->format('His');
 
             $buCode = BusinessUnit::where("BUID", $custInfo->BUID)->value("Name");
 
@@ -150,7 +152,7 @@ class PaymentProcessingController extends BaseApiController
                 'email' => $request->EMail ?: $request->email,
                 'transaction_id' => $transactionID ?? strtoUpper($limitedUuid),   //strtoUpper(Str::uuid()->toString()) ?? $transactionID,
                 'phone' => $request->Mobile ?? $request->phone,
-                'amount' => 1, // $request->amount,
+                'amount' =>  $request->amount, //1
                 'account_type' => $request->account_type,
                 'account_number' => trim($zoneECMI->AccountNo),
                 'payment_source' => $request->payment_source,
@@ -204,7 +206,7 @@ class PaymentProcessingController extends BaseApiController
 
                 $receiptNo = Carbon::now()->format('YmdHis');  //YmdHisu
 
-                $checkExist = TestModel::where("receiptnumber", $checkRef->transaction_id)->exists();
+                $checkExist = ZonePayments::where("receiptnumber", $checkRef->transaction_id)->exists();  // //ZonePayments   // TestModel
 
                 if($checkExist){
                     return $this->sendError('Error', "Duplicate Reference Key". $checkRef->transaction_id, Response::HTTP_BAD_REQUEST);
@@ -212,11 +214,27 @@ class PaymentProcessingController extends BaseApiController
 
 
                 try{
-                        //Update Billing Status
-                        $addPayment = TestModel::create([
+
+                    $generateRefRand = strtoupper(Str::uuid()->toString());
+
+                    $addPaymentStatus = ZonePaymentTransaction::create([  // ZonePaymentTransaction   //TestModelPayments
+                        'transid' =>  $generateRefRand, //strval($addPayment->PaymentTransactionId),
+                        'transref' =>  $checkRef->transaction_id,
+                        'enteredby' => 1926,//113, //$checkRef->payment_source,  //An account to be created by Joseph
+                        'transdate' => Carbon::now()->format('Y-m-d H:i:s'),
+                        'transamount' => $request->payment_status['apprAmt'],
+                        'transstatus' =>  $request->payment_status['resp'] == '00' ?  'success' : 'failed', 
+                        'accountno' => $checkRef->account_number,
+                        'transactionresponsemessage' => $request->payment_status['payRef'],
+                        'paymenttype' => 3, //We need to check this later,
+                        'TransactionBusinessUnit' => $custInfo->BUID,
+                    ]);
+
+                        //Update Billing Status  //ZonePayments   // TestModel
+                        $addPayment = ZonePayments::create([
                             //"PaymentID" =>  $checkRef->transaction_id,
                             "BillID" => strval($mainBills->BillID),
-                            "PaymentTransactionId" =>  strtoupper(Str::uuid()->toString()),   // strval($request->payment_status['payRef']),  //$checkRef->providerRef,
+                            "PaymentTransactionId" => $addPaymentStatus->transid,// strtoupper(Str::uuid()->toString()),   // strval($request->payment_status['payRef']),  //$checkRef->providerRef,
                             "receiptnumber" => $checkRef->transaction_id,  //?? strval($receiptNo),
                             "PaymentSource" => 101,
                             "MeterNo" => strval($custInfo->MeterNo) ?? 'NULL',
@@ -224,7 +242,7 @@ class PaymentProcessingController extends BaseApiController
                             "PayDate" =>  strval(Carbon::now()->format('Y-m-d H:i:s')),
                             "PayMonth" => Carbon::now()->format('m'),
                             "PayYear" => Carbon::now()->format('Y'),
-                            "OperatorID" => 1,
+                            "OperatorID" => 1926,
                             "TotalDue" => 0.00,
                             "Payments" => $request->payment_status['apprAmt'],
                             //"Balance" => 'NULL',
@@ -235,18 +253,7 @@ class PaymentProcessingController extends BaseApiController
                             "CustomerID" => strval($custInfo->CustomerID),
                         ]);
 
-                        $addPaymentStatus = TestModelPayments::create([
-                            'transid' =>  strval($addPayment->PaymentTransactionId),
-                            'transref' =>  $checkRef->transaction_id,
-                            'enteredby' => $checkRef->payment_source,  //An account to be created by Joseph
-                            'transdate' => Carbon::now()->format('Y-m-d H:i:s'),
-                            'transamount' => $request->payment_status['apprAmt'],
-                            'transstatus' =>  $request->payment_status['resp'] == '00' ?  'success' : 'failed', 
-                            'accountno' => $checkRef->account_number,
-                            'transactionresponsemessage' => $request->payment_status['payRef'],
-                            'paymenttype' => 3, //We need to check this later,
-                            'TransactionBusinessUnit' => $custInfo->BUID,
-                        ]);
+                       
 
 
                         $update = PaymentModel::where("transaction_id", $checkRef->transaction_id)->update([
@@ -297,7 +304,7 @@ class PaymentProcessingController extends BaseApiController
                     'providerRef' => $request->payment_status['payRef'],
                 ]);
 
-               $amount = 10; //$request->amount; // please remove this on live later and add the amount request to the generate token;
+               $amount = $request->amount; // please remove this on live later and add the amount request to the generate token;
                $customerName = $zoneECMI->Surname.' '. $zoneECMI->OtherNames;
                $phone = $request->payment_status['phone']  ?? $zoneECMI->Mobile;
 
@@ -377,7 +384,7 @@ class PaymentProcessingController extends BaseApiController
                 $data = [
                         'meterno' => $meterNo,
                         'vendtype' => $accountType,
-                        'amount' => 1, //$amount,
+                        'amount' => $amount, 
                         "provider" => "IBEDC",
                         "custname" => $customerName,
                         "businesshub" => $buid,

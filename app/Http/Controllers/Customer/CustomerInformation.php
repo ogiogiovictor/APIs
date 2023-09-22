@@ -19,6 +19,10 @@ use App\Models\KCTGenerator;
 use Illuminate\Support\Facades\Auth;
 use App\Services\GeneralService;
 use App\Models\ZoneECMI;
+use App\Models\ZoneBills;
+use App\Models\ZonePayments;
+use App\Models\ECMITransactions;
+use App\Http\Resources\CollectionSummary;
 
 class CustomerInformation extends BaseApiController
 {
@@ -434,6 +438,74 @@ class CustomerInformation extends BaseApiController
 
         return $response = Http::get($getCustomerApproval);        
        
+    }
+
+
+    public function PaymentBillSummary() { 
+
+        $billpayments = ZoneBills::selectRaw('BillYear, BillMonth, SUM(CurrentChgTotal + VAT) AS Bills, 
+        SUM(Payment) AS Payment') //FORMAT(SUM(CurrentChgTotal + VAT), \'N0\')
+        ->groupBy('BillYear', 'BillMonth')
+        ->orderBy('BillYear', 'desc')
+        ->orderBy('BillMonth', 'desc')
+        ->get();
+
+        return $this->sendSuccess(CollectionSummary::collection($billpayments), "Payment Information Loaded", Response::HTTP_OK);
+
+    }
+
+    public function PaymentBillSummaryOLD() {
+
+        $payments = ZonePayments::selectRaw('PayYear, PayMonth, SUM(Payments) AS Payments')  //FORMAT(SUM(Payments), \'N0\') AS Payments
+                    ->groupBy('PayYear', 'PayMonth')
+                    ->orderBy('PayYear', 'desc')
+                    ->orderBy('PayMonth', 'desc')
+                    ->get();
+
+        $billpayments = ZoneBills::selectRaw('BillYear, BillMonth, SUM(CurrentChgTotal + VAT) AS Bills, 
+                                            SUM(Payment) AS Payment') //FORMAT(SUM(CurrentChgTotal + VAT), \'N0\')
+                    ->groupBy('BillYear', 'BillMonth')
+                    ->orderBy('BillYear', 'desc')
+                    ->orderBy('BillMonth', 'desc')
+                    ->get();
+
+        $transactions = ECMITransactions::selectRaw('
+                            YEAR(TransactionDateTime) AS ePAYEAR,
+                            MONTH(TransactionDateTime) AS ePAYMONTH,
+                            SUM(Amount) as Amount
+                        ')
+                            ->groupByRaw('YEAR(TransactionDateTime), MONTH(TransactionDateTime)')
+                            ->orderByRaw('YEAR(TransactionDateTime) DESC, MONTH(TransactionDateTime) DESC')
+                            ->get();
+
+        $merged = [];
+
+        foreach($payments as $payment){
+            foreach($billpayments as $bills){
+                foreach($transactions as $trans){
+
+                    if($payment['PayYear'] == $bills['BillYear'] && $payment['PayMonth'] == $bills['BillMonth']  &&
+                      $payment['PayYear'] == $trans['ePAYEAR']  && $payment['PayMonth'] == $trans['ePAYMONTH'] ){
+                        $merged[] = [
+                            'PayYear' => (int)$payment['PayYear'],
+                            'PayMonth' => (int)$payment['PayMonth'],
+                            'Payments' =>  number_format($payment['Payments'], 2),
+                            'BillYear' =>  (int)$bills['BillYear'],
+                            'BillMonth' => (int)($bills['BillMonth']),
+                            'Bills' => number_format($bills['Bills'], 2),
+                            'specBillPayment' => number_format($bills['Payment'], ),
+                            'ecmiAmount' => number_format($trans['Amount'], 2),
+                            'totalCollection' => number_format((int)$bills['Payment'] + (int)$trans['Amount'], 2)
+                        ];
+
+                    }
+                }
+            }
+        }
+        
+
+        return $this->sendSuccess($merged, "Payment Information Loaded", Response::HTTP_OK);
+
     }
 
      

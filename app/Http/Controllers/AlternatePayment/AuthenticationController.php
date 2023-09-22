@@ -31,7 +31,7 @@ class AuthenticationController extends BaseApiController
                 $customers = (new CustomerService)->authenticateCustomers($meterNo, $accountType);
 
                 if(!$customers){
-                    return $this->sendError("Error", "No Result Found", Response::HTTP_BAD_REQUEST);
+                    return $this->sendError("Error", "No Customer Result Found", Response::HTTP_BAD_REQUEST);
                 }
                // $success['Authorizations'] = hash('sha256', $plainTextToken = Str::random(80));
                 $success['customer'] = new NewResource($customers);

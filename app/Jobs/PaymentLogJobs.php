@@ -10,6 +10,7 @@ use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Mail; // Import the Mail facade
 use App\Mail\PaymentConfirmation; 
+use Illuminate\Support\Facades\Http;
 
 class PaymentLogJobs implements ShouldQueue
 {

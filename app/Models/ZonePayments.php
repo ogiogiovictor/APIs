@@ -20,4 +20,46 @@ class ZonePayments extends Model
         return $this->belongsTo(DimensionCustomer::class, 'AccountNo', 'AccountNo');
     }
 
+    protected $fillable = [
+        'PaymentID',
+        'BillID',
+        'PaymentTransactionId',
+        'receiptnumber',
+        'PaymentSource',
+        'MeterNo',
+        'AccountNo',
+        'PayDate',
+        'PayMonth',
+        'PayYear',
+        'OperatorID',
+        'TotalDue',
+        'Payments',
+        'Balance',
+        'Processed',
+        'ProcessedDate',
+        'BusinessUnit',
+        'Reconciled',
+        'ReconciledBy',
+        'ReversedBy',
+        'BatchUniqueID',
+        'rowguid',
+        'DateEngtered',
+        'CustomerID',
+    ];
+
+
+    public function checkForDuplicates()
+    {
+        $duplicates = DB::table('Payments')
+            ->select('receiptnumber', DB::raw('COUNT(*) AS DuplicateCount'))
+            ->where('PayYear', '2023')
+            ->groupBy('receiptnumber')
+            ->having('DuplicateCount', '>', 1)
+            ->get();
+
+        return $duplicates;
+    }
+     
+    
+
 }

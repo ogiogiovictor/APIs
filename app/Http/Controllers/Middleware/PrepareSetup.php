@@ -20,6 +20,8 @@ use App\Models\ECMITokenLogs;
 use App\Models\ECMIHoldMode;
 use App\Models\SubAccountPayment;
 use Illuminate\Support\Str;
+use App\Models\ZoneECMI;
+use Illuminate\Support\Facades\Validator;
 
 
 class PrepareSetup extends BaseApiController
@@ -134,39 +136,79 @@ class PrepareSetup extends BaseApiController
             }
       
         }catch(\Exception $e){
-
-           
             return $this->sendError('Error', "Error Initiating Payment: " . $e->getMessage(), Response::HTTP_BAD_REQUEST);
         }
 
     }
 
 
-    private function privatdeactiveallProcesse($data){
 
+    public function prepareIntegration(Request $request) {
+        // Validate the incoming request data
+        $validator = Validator::make($request->all(), [
+            'meter_number' => 'required|string',
+            'amount' => 'required|numeric',
+        ]);
+    
+        if ($validator->fails()) {
+            return $this->sendError("Invalid input data", "Validation Error", Response::HTTP_BAD_REQUEST);
+        }
+    
+        $checkMeter = ZoneECMI::where("MeterNo", $request->meter_number)->first();
+    
+        if (!$checkMeter) {
+            return $this->sendError("No Record Found", "Error!", Response::HTTP_BAD_REQUEST);
+        }
 
-       
+       // return $checkMeter;
+    
+        $uuid = Str::uuid()->toString();
+        $limitedUuid = str_replace('-', '', substr($uuid, 0, 15));
+    
+        $meterNo = $checkMeter->MeterNo;
+        $transReference = StringHelper::generateTransactionReference() ?? $limitedUuid;
+        $amount = $request->amount;
+        $merchant = "ABCD";
+        $transDate = date("Y-m-d");
+        $buid = $checkMeter->BUID;
+        $mobile = $checkMeter->Mobile ?? "234500000009";
+    
+        // Construct the URL
+        $originalnotify = "http://192.168.15.156:9494/IBEDCWebServices/webresources/Payment/$meterNo/prepaid/113/$transReference/$amount/$merchant/$transDate/$buid/$mobile";
+    
+        try {
+            $response = Http::post($originalnotify);
+            // $response->json(); // Return the response content as JSON
+             $newResponse =  $response->json();
+
+             if($newResponse['transactionStatus'] == "success"){
+                 //Save Response to Warehouse. //Create a new database
+                return $this->processMainTransaction($newResponse);
+             }else {
+                return $newResponse;
+            }
+        } catch (\Exception $e) {
+            // Return a structured error response
+            return $this->sendError("Request failed", $e->getMessage(), Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
+    }
+    
+
+    private function processMainTransaction($data){
+
         //Save in Database
         $createData = MakeSave::create([
-            'uniqueID' => $data['token'],
+            'uniqueID' => $data['recieptNumber'],
             'amount' => $data['paidamount'],
             'unit' => $data['Units'],
             'transaction_ref' => $data['transactionReference'],
             'account_no' => $data['customer']['accountNumber'],
             'meter_no' => $data['customer']['meterNumber'],
             'name' => $data['customer']['customerName'],
-            'ecmi_ref' => $data['reference'],
+            'ecmi_ref' => $data['transactionReference'],
         ]);
 
-        //Delete Result from Middleware 
-         $middlewareTrans = Transactions::where("reference", $data['reference'])->first();
-         if($middlewareTrans){  $middlewareTrans->forceDelete(); }
-
-        // //Delet from Reflog
-        $middlewareRefLog = Resplog::where("reference", $data['reference'])->first();
-        if($middlewareRefLog){ $middlewareRefLog->forceDelete();}
-
-
+       
         try{
 
         // Disable the trigger for the specific connection
@@ -185,8 +227,8 @@ class PrepareSetup extends BaseApiController
         $checkpaymentTrans = ECMIPaymentTransaction::where("transref", $data['transactionReference'])->first();
         if($checkpaymentTrans){  $checkpaymentTrans->delete(); }
 
-        //Delete Token from token log
-        $trimSpaces = str_replace(' ', '', $data['token']);
+        //Delete Token from token log // TO FIX THIS
+        $trimSpaces = str_replace(' ', '', $data['recieptNumber']);
         $tokeLogs = ECMITokenLogs::where("Token", $trimSpaces)->first();
         if($tokeLogs){  $tokeLogs->delete(); }
         
@@ -218,6 +260,85 @@ class PrepareSetup extends BaseApiController
      
 
     }
+
+
+
+    // private function privatdeactiveallProcesse($data){
+
+
+       
+    //     //Save in Database
+    //     $createData = MakeSave::create([
+    //         'uniqueID' => $data['token'],
+    //         'amount' => $data['paidamount'],
+    //         'unit' => $data['Units'],
+    //         'transaction_ref' => $data['transactionReference'],
+    //         'account_no' => $data['customer']['accountNumber'],
+    //         'meter_no' => $data['customer']['meterNumber'],
+    //         'name' => $data['customer']['customerName'],
+    //         'ecmi_ref' => $data['reference'],
+    //     ]);
+
+    //     //Delete Result from Middleware 
+    //      $middlewareTrans = Transactions::where("reference", $data['reference'])->first();
+    //      if($middlewareTrans){  $middlewareTrans->forceDelete(); }
+
+    //     // //Delet from Reflog
+    //     $middlewareRefLog = Resplog::where("reference", $data['reference'])->first();
+    //     if($middlewareRefLog){ $middlewareRefLog->forceDelete();}
+
+
+    //     try{
+
+    //     // Disable the trigger for the specific connection
+    //     DB::connection('ecmi_prod')->unprepared('DISABLE TRIGGER [TRANSACTION_TRIGGER] ON [ECMI].[dbo].[Transactions]');
+
+    //       //  return  $createData;
+    //     //Delete token from Transaction Table,
+    //     $checkTExist = ECMITransactions::where("transref", $data['transactionReference'])->first();
+
+    //     $checkSubAccount = SubAccountPayment::where("TransactionNo",  $checkTExist->TransactionNo)->first();
+    //     if($checkSubAccount){  $checkSubAccount->delete(); }
+
+    //     if( $checkTExist){  $checkTExist->delete(); }
+
+    //      //Delete token from paymentTransaction
+    //     $checkpaymentTrans = ECMIPaymentTransaction::where("transref", $data['transactionReference'])->first();
+    //     if($checkpaymentTrans){  $checkpaymentTrans->delete(); }
+
+    //     //Delete Token from token log
+    //     $trimSpaces = str_replace(' ', '', $data['token']);
+    //     $tokeLogs = ECMITokenLogs::where("Token", $trimSpaces)->first();
+    //     if($tokeLogs){  $tokeLogs->delete(); }
+        
+
+    //     $trigD = Ecmsdb::where("Token_before",  $trimSpaces)->first();
+    //     if($trigD){ $trigD->delete(); }
+        
+    //     //Delete from whoisActive
+    //     //DELETE FROM  [msdb].[dbo].[WhoIsActive] where Login_name = 'distributor_piq'
+    //     $whoisActive = Ewhois::where("Login_name", "distributor_piq")->first();
+    //     if($whoisActive){  $whoisActive->delete(); }
+
+           
+    //     //[HoldModeTransactions] Delete Token if Exists  // check this
+    //     $HoldMode = ECMIHoldMode::where("Token", $trimSpaces)->first();
+    //     if($HoldMode){ HoldMode->delete(); }
+
+    //       // Enable the trigger again for the same connection
+    //      DB::connection('ecmi_prod')->unprepared('ENABLE TRIGGER [TRANSACTION_TRIGGER] ON [ECMI].[dbo].[Transactions]');
+
+    //      return $this->sendSuccess($createData, "loaded-Successfully". ' '. $trimSpaces, Response::HTTP_OK);
+
+    //     }catch(\Exception $e){
+           
+    //         return $this->sendError('Error', "Error Initiating Payment: ". $e->getMessage(), Response::HTTP_BAD_REQUEST);
+
+    //     }
+        
+     
+
+    // }
 
 
 

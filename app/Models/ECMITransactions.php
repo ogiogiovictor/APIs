@@ -22,4 +22,18 @@ class ECMITransactions extends Model
         return $this->whereRaw('LEN(MeterNo) >= 15')->orderBy("OpenDate", "desc")->paginate(100);
        
     }
+
+    public function customer()
+    {
+        return $this->belongsTo(DimensionCustomer::class, 'AccountNo', 'AccountNo');
+    }
+
+    public function customerE(): BelongsTo {
+        return $this->belongsTo(DimensionCustomer::class, "AccountNo");
+    }
+
+    public function paymentCount(){
+        return $this->count();
+    }
+
 }

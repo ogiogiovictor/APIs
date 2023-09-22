@@ -41,12 +41,13 @@ class PaymentController extends BaseApiController
         ->whereMonth('Billdate', '=', now()->month)
         ->sum('Payment');
 
+        //Last Month Collection for Postpaid Spectrum Bill
         $specBillLastMonth = ZoneBills::whereYear('Billdate', '=', now()->year)
-        ->whereMonth('Billdate', '=', now()->subMonth()->month)
+        ->whereMonth('Billdate', '=', now()->subMonth()->month - 1)
         ->sum('Payment');
 
-        //Total Payment for Both ECMI and EMS
-        $total_payments = $ecmi_payment + $ems_payment;
+
+        $total_payments = $specBill + $ecmi_payment_lastMonth; // Total Collection for Last Month, we be declared this month
 
         //Today's payment
         $today_payment_ecmi = $newpayment->whereDate('TransactionDateTime', now()->toDateString())->sum('Amount');
@@ -72,13 +73,16 @@ class PaymentController extends BaseApiController
         $data = [
             'ecmi_payment' => naira_format($ecmi_payment),
             'ems_payment' => naira_format($ems_payment),
-            'total_payments' => naira_format($total_payments),
+            'total_payments' =>  naira_format($total_payments),
             'spec_bills' => naira_format($specBill),
             'spec_bill_lastMonth' => naira_format($specBillLastMonth),
             'last_month_prepaid' => naira_format($ecmi_payment_lastMonth),
             'payments' => EcmiPaymentResource::collection($selectECMI)->response()->getData(true),
             'postpaid_payment' => ZoneResource::collection($selectEMS)->response()->getData(true),
-            'today_payments' => naira_format($today_payment_ecmi + $today_payment_ems), 
+            'today_payments' => naira_format($ecmi_payment), 
+            'last_month' => now()->subMonth()->month,
+            'this_month' => now()->month,
+            'prev_last_month' => now()->subMonth()->month - 1
         ];
 
         return $this->sendSuccess($data, "Payment Successfully Loaded", Response::HTTP_OK);

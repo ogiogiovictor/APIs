@@ -13,6 +13,7 @@ class ECMIPayment extends Model
     use HasFactory;
 
     protected $table = "MAIN_WAREHOUSE_STAGGING.dbo.ecmi_transactions";
+   // protected $table = "ECMI.dbo.Transactions";
 
     protected $connection = 'stagging';
 
