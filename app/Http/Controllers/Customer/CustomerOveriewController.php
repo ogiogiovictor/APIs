@@ -116,29 +116,51 @@ class CustomerOveriewController extends BaseApiController
         $getUserRoleObject = (new GeneralService)->getUserLevelRole();
 
         try {
+            $customers = CRMDCustomers::query()->find($request->id);
 
-            $customers = CRMDCustomers::query()->where('id', $request->id)->first()
-            ->when($request->approval_type == 0 && $request->hub ==  $getUserRoleObject['business_hub'] && $getUserRoleObject['role'] = 'teamlead', function ($query) use ($request) {
-                return $query->update([ 'approval_type' => 1, 'confirmed_by' => Auth::user()->id]);
-              })
-            ->when($request->approval_type == 1 && $request->hub ==  $getUserRoleObject['business_hub'] && $getUserRoleObject['role'] = 'businesshub_manager', function ($query) use ($request) {
-                return $query->update(['approval_type' => 2, 'confirmed_by' => Auth::user()->id ]);
-            })
-            ->when($request->approval_type == 2 && $request->hub ==  $getUserRoleObject['business_hub'] && $getUserRoleObject['role'] = 'audit', function ($query) use ($request) {
-                return $query->update(['approval_type' => 3, 'confirmed_by' => Auth::user()->id ]);
-            })
-            ->when($request->approval_type == 3 && $request->hub ==  $getUserRoleObject['business_hub'] && $getUserRoleObject['role'] = 'billing', function ($query) use ($request) {
-                return $query->update(['approval_type' => 4, 'confirmed_by' => Auth::user()->id ]);
-            });
+            if (!$customers) {
+                return $this->sendError("No Result Found", Response::HTTP_BAD_REQUEST);
+            }
+        
+            $updateData = [];
+        
+            // if ($request->approval_type == "Pending" && $request->hub == $getUserRoleObject['business_hub'] && $getUserRoleObject['role'] == 'teamlead') {
+            //     $updateData = ['approval_type' => 1, 'confirmed_by' => Auth::user()->id];
+            // } elseif ($request->approval_type == "Reviewed By TL" && $request->hub == $getUserRoleObject['business_hub'] && $getUserRoleObject['role'] == 'businesshub_manager') {
+            //     $updateData = ['approval_type' => 2, 'confirmed_by' => Auth::user()->id];
+            // } elseif ($request->approval_type == "Approved By BHM" && $request->hub == $getUserRoleObject['business_hub'] && $getUserRoleObject['role'] == 'audit') {
+            //     $updateData = ['approval_type' => 3, 'confirmed_by' => Auth::user()->id];
+            // } elseif ($request->approval_type == "Approved By Audit" && $request->hub == $getUserRoleObject['business_hub'] && $getUserRoleObject['role'] == 'billing') {
+            //     $updateData = ['approval_type' => 4, 'confirmed_by' => Auth::user()->id];
+                  //Run a script to update the customer table in the live Environment.
+            // }
 
+            //You should replace this section of the code with the work at the tope
+            if ($request->approval_type == "Pending") {
+                $updateData = ['approval_type' => 1, 'confirmed_by' => Auth::user()->id];
+            } elseif ($request->approval_type == "Reviewed By TL") {
+                $updateData = ['approval_type' => 2, 'confirmed_by' => Auth::user()->id];
+            } elseif ($request->approval_type == "Approved By BHM") {
+                $updateData = ['approval_type' => 3, 'confirmed_by' => Auth::user()->id];
+            } elseif ($request->approval_type == "Approved By Audit") {
+                $updateData = ['approval_type' => 4, 'confirmed_by' => Auth::user()->id];
+                //Run a script to update the customer table in the live Environment.
+            }
+        
+            if (!empty($updateData)) {
+                $customers->update($updateData);
+            } else {
+                return $this->sendError("Invalid request parameters", Response::HTTP_BAD_REQUEST);
+            }
+        
             $addData = CRMDHistory::create([
                 'user_id' => Auth::user()->id,
                 'crmd_id' => $request->id,
-                'status' => $request->approval_status,
+                'status' => $request->status,
                 'approval' => $request->approval_type,
                 'comment' => $request->comment,
             ]);
-        return $this->sendSuccess(CustomerCRMDResource::collection($customers), "Customer 360 Loaded", Response::HTTP_OK);
+        return $this->sendSuccess($addData, "Customer 360 Loaded", Response::HTTP_OK);
 
         }catch(\Exception $e){
             return $this->sendError($e->getMessage(), "No Result Found", Response::HTTP_BAD_REQUEST);
