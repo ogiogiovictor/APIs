@@ -171,7 +171,7 @@ class PrepareSetup extends BaseApiController
         $merchant = "ABCD";
         $transDate = date("Y-m-d");
         $buid = $checkMeter->BUID;
-        $mobile = $checkMeter->Mobile ?? "234500000009";
+        $mobile = isset($checkMeter->Mobile) ? $checkMeter->Mobile : "23458033426834";
     
         // Construct the URL
         $originalnotify = "http://192.168.15.156:9494/IBEDCWebServices/webresources/Payment/$meterNo/prepaid/113/$transReference/$amount/$merchant/$transDate/$buid/$mobile";

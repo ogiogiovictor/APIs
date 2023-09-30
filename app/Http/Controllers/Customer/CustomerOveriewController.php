@@ -41,7 +41,6 @@ class CustomerOveriewController extends BaseApiController
     public function crmdStore(Request $request){
 
         //if($request->expectsJson()) {
-
             $validatedData = $request->validate([
                 'AccountNo' => 'required|string',
                 //'MeterNo' => 'required',
@@ -50,26 +49,55 @@ class CustomerOveriewController extends BaseApiController
                 'New_FullName' => 'required',
             ]);
 
-            $addData = CRMDCustomers::create([
-                'DateAdded' => date('Y-m-d H:i:s'),
-                'AccountNo' => $request->AccountNo,
-                'MeterNo' => $request->MeterNo,
-                'AcountType' => $request->AcountType,
-                'Old_FullName' => $request->Old_FullName,
-                'New_FullName' => $request->New_FullName,
-                'Address' => $request->Address,
-                'DistributionID' => $request->DistributionID,
-                'hub' => DimensionCustomer::where('AccountNo', $request->AccountNo)->first()->BusinessHub,
-                'region' => DimensionCustomer::where('AccountNo', $request->AccountNo)->first()->Region,
-                'service_center' => DimensionCustomer::where('AccountNo', $request->AccountNo)->value("service_center"),
-                'userid' => Auth::user()->id,
-                'new_firstname' => $request->new_firstname,
-                'new_surname' => $request->new_surname,
-                'new_address' => $request->new_address,
-                'mobile' => $request->mobile,
-            ]);
 
-            return $this->sendSuccess($addData, "Customer 360 Loaded", Response::HTTP_OK);
+            if($request->id){
+                   
+                $addData = CRMDCustomers::where('id', $request->id)->update([
+                    'DateAdded' => date('Y-m-d H:i:s'),
+                    'AccountNo' => $request->AccountNo,
+                    'MeterNo' => $request->MeterNo,
+                    'AcountType' => $request->AcountType,
+                    'Old_FullName' => $request->Old_FullName,
+                    'New_FullName' => $request->New_FullName,
+                    'Address' => $request->Address,
+                    'DistributionID' => $request->DistributionID,
+                    'hub' => DimensionCustomer::where('AccountNo', $request->AccountNo)->first()->BusinessHub,
+                    'region' => DimensionCustomer::where('AccountNo', $request->AccountNo)->first()->Region,
+                    'service_center' => DimensionCustomer::where('AccountNo', $request->AccountNo)->value("service_center"),
+                    'userid' => Auth::user()->id,
+                    'new_firstname' => $request->new_firstname,
+                    'new_surname' => $request->new_surname,
+                    'new_address' => $request->new_address,
+                    'mobile' => $request->mobile,
+                ]);
+    
+                return $this->sendSuccess($addData, "Customer 360 Loaded", Response::HTTP_OK);
+            }else {
+                $addData = CRMDCustomers::create([
+                    'DateAdded' => date('Y-m-d H:i:s'),
+                    'AccountNo' => $request->AccountNo,
+                    'MeterNo' => $request->MeterNo,
+                    'AcountType' => $request->AcountType,
+                    'Old_FullName' => $request->Old_FullName,
+                    'New_FullName' => $request->New_FullName,
+                    'Address' => $request->Address,
+                    'DistributionID' => $request->DistributionID,
+                    'hub' => DimensionCustomer::where('AccountNo', $request->AccountNo)->first()->BusinessHub,
+                    'region' => DimensionCustomer::where('AccountNo', $request->AccountNo)->first()->Region,
+                    'service_center' => DimensionCustomer::where('AccountNo', $request->AccountNo)->value("service_center"),
+                    'userid' => Auth::user()->id,
+                    'new_firstname' => $request->new_firstname,
+                    'new_surname' => $request->new_surname,
+                    'new_address' => $request->new_address,
+                    'mobile' => $request->mobile,
+                ]);
+    
+                return $this->sendSuccess($addData, "Customer 360 Loaded", Response::HTTP_OK);
+
+            }
+
+        
+           
             
         // }else {
         //     Log::info('Request Payload', $request->all());
@@ -174,19 +202,40 @@ class CustomerOveriewController extends BaseApiController
 
         try{
 
-        $customers = CRMDCustomers::query()->where('id', $request->id)->first()
-        ->when((!$request->approval_type == 3 || !$request->approval_type == 4) && $request->hub ==  $getUserRoleObject['business_hub'] && $getUserRoleObject['role'] = 'teamlead', function ($query) use ($request) {
-            return $query->update([ 'approval_type' => 1, 'confirmed_by' => Auth::user()->id]);
-          });
+            $user = Auth::user();
+            $getUserRoleObject = (new GeneralService)->getUserLevelRole();
 
-          $addData = CRMDHistory::create([
-            'user_id' => Auth::user()->id,
-            'crmd_id' => $request->id,
-            'status' => $request->approval_status,
-            'approval' => $request->approval_type,
-            'comment' => $request->comment,
-        ]);
-        return $this->sendSuccess(CustomerCRMDResource::collection($customers), "Customer 360 Loaded", Response::HTTP_OK);
+            // $customers = CRMDCustomers::where('id', $request->id)->update([
+            //     'approval_type' => 5,
+            //     'confirmed_by' => Auth::user()->id,
+            // ]);
+
+        $customers = CRMDCustomers::query()
+            ->where('id', $request->id) // Find the record by ID
+            ->when(
+                !$request->approval_type || (!in_array($request->approval_type, [3, 4]) && $request->hub == $getUserRoleObject['business_hub'] && $getUserRoleObject['role'] == 'teamlead'),
+                function ($query) use ($request) {
+                    return $query->update([
+                        'approval_type' => $request->approval_type,
+                        'confirmed_by' => Auth::user()->id,
+                    ]);
+                }
+            );
+
+        if ($customers) {
+            $addData = CRMDHistory::create([
+                'user_id' => Auth::user()->id,
+                'crmd_id' => $request->id,
+                'status' => $request->status,
+                'approval' => $request->approval_type,
+                'comment' => $request->comment,
+            ]);
+            return $this->sendSuccess($addData, "Customer Information Successfully Rejected", Response::HTTP_OK);
+        }else {
+            return $this->sendError("You do not have permission to update this request.", Response::HTTP_BAD_REQUEST);
+        }
+
+       
 
 
         }catch(\Exception $e){
@@ -207,7 +256,7 @@ class CustomerOveriewController extends BaseApiController
             $customers = CRMDCustomers::query()->latest()
             ->when($getUserRoleObject['role'] == 'teamlead', function ($query) use ($getUserRoleObject) {
                 return $query->where([ 'approval_type' => 0])->where('hub', $getUserRoleObject['business_hub']);
-              })
+            })
             ->when($getUserRoleObject['role'] == 'businesshub_manager', function ($query) use ($getUserRoleObject) {
                 return $query->where(['approval_type' => 1])->where('hub', $getUserRoleObject['business_hub']);
             })

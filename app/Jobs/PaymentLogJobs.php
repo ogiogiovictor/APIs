@@ -43,7 +43,7 @@ class PaymentLogJobs implements ShouldQueue
             'token' => "p42OVwe8CF2Sg6VfhXAi8aBblMnADKkuOPe65M41v7jMzrEynGQoVLoZdmGqBQIGFPbH10cvthTGu0LK1duSem45OtA076fLGRqX",
             'sender' => "IBEDC",
             'to' => $phone,
-            "message" => "Bill Payment $amount for the Month Successful",
+            "message" => "Bill Payment of ₦$amount for the Month Successful",
             "type" => 0,
             "routing" => 3,
         ];
@@ -52,6 +52,7 @@ class PaymentLogJobs implements ShouldQueue
 
         $newResponse =  $response->json();
 
+        //you need to check the email for postpaid
         Mail::to($this->payment->email)->send(new PaymentConfirmation($this->payment));
     }
 }

@@ -27,11 +27,91 @@ use App\Jobs\PaymentLogJobs;
 use App\Models\ContactUs;
 use App\Models\ZonePayments;
 use App\Models\ZonePaymentTransaction;
+use App\Jobs\PrepaidPaymentJob;
 
 
 class PaymentProcessingController extends BaseApiController
 {
 
+    public function textpayment() {
+        
+        try {
+           $checkTransaction = PaymentModel::whereNull('receiptno')
+                ->where('account_type', 'prepaid')
+                ->where('status', 'pending')
+                ->whereNotNull('providerRef')
+                ->chunk(100, function ($paymentLogs) use (&$data) {
+                    // Add the payment logs to the data array
+                    foreach ($paymentLogs as $paymentLog) {
+                       
+                        $baseUrl = env('MIDDLEWARE_URL');
+                        $addCustomerUrl = $baseUrl . 'vendelect';
+        
+                        $data = [
+                                'meterno' => $paymentLog->meter_no,
+                                'vendtype' => $paymentLog->account_type,
+                                'amount' => $paymentLog->amount, 
+                                "provider" => "IBEDC",
+                                "custname" => $paymentLog->customer_name,
+                                "businesshub" => $paymentLog->BUID,
+                                "custphoneno" => $paymentLog->phone,
+                                "payreference" => $paymentLog->transaction_id,
+                                "colagentid" => "IB001",
+        
+                            ];
+                    
+                            // $response = Http::withHeaders([
+                            //     'Authorization' => 'Bearer LIVEKEY_711E5A0C138903BBCE202DF5671D3C18',
+                            // ])->post($addCustomerUrl , $data);
+
+                            $response = Http::withoutVerifying()->withHeaders([
+                                'Authorization' => 'Bearer LIVEKEY_711E5A0C138903BBCE202DF5671D3C18',
+                            ])->post($addCustomerUrl, $data);
+                    
+                            $newResponse =  $response->json();
+
+                    if($newResponse['status'] == "true"){                 
+
+                        $update = PaymentModel::where("transaction_id", $paymentLog->transaction_id)->update([
+                            'status' => $newResponse['status'] == "true" ?  'success' : 'failed', //"resp": "00",
+                            'provider' => isset($newResponse['transactionReference'])  ? $newResponse['transactionReference'] : $newResponse['data']['transactionReference'],
+                        // 'providerRef' => $newResponse['transactionReference'],
+                            'receiptno' =>   isset($newResponse['recieptNumber']) ? $newResponse['recieptNumber'] : $newResponse['data']['recieptNumber'],  //Carbon::now()->format('YmdHis').time()
+                            'BUID' => $paymentLog->BUID,
+                            'Descript' =>  isset($newResponse['message']) ? $newResponse['message'] : $newResponse['transaction_status'],
+                        ]);
+
+                        //Send SMS to User
+                        $token =  isset($newResponse['recieptNumber']) ? $newResponse['recieptNumber'] : $newResponse['data']['recieptNumber'];
+
+                        
+                        $baseUrl = env('SMS_MESSAGE');
+                        $data = [
+                            'token' => "p42OVwe8CF2Sg6VfhXAi8aBblMnADKkuOPe65M41v7jMzrEynGQoVLoZdmGqBQIGFPbH10cvthTGu0LK1duSem45OtA076fLGRqX",
+                            'sender' => "IBEDC",
+                            'to' => $paymentLog->phone,
+                            "message" => "IBEDC - Your Payment Token is $token for this ReferenceNo $paymentLog->transaction_id",
+                            "type" => 0,
+                            "routing" => 3,
+                        ];
+
+                        $iresponse = Http::asForm()->post($baseUrl, $data);
+
+                       return $newResponse;
+                     }
+                       
+
+                    }
+                });
+            return $data;
+        } catch (\Exception $e) {
+            \Log::error($e->getMessage());
+            return $this->sendError('Error', "We are experiencing issues retrieving tokens from ibedc  " . $e->getMessage(), Response::HTTP_BAD_REQUEST);
+        }
+      
+    }
+
+    
    
     public function makePayment(PaymentRequest $request){
        
@@ -106,7 +186,7 @@ class PaymentProcessingController extends BaseApiController
             $response = [
                 'payment' => $payment,
                 'mpk' => "FLWPUBK_TEST-579a209dc157adc5b4156e03df9ddd25-X",
-                 "sub_account" => $this->subaccountmatch($buCode),
+                "sub_account" => $this->subaccountmatch($buCode),
     
             ];
 
@@ -266,11 +346,6 @@ class PaymentProcessingController extends BaseApiController
                         ]);
                        
                         //Dispatch the event
-                       
-                        //check for successful resonse
-                       // $addPaymentStatus->transstatus == 'success' ? dispatch : ''
-                        //event(new PaymentCreated($checkRef));
-
                         dispatch(new PaymentLogJobs($checkRef));
                         
                         //I still have one table to add here
@@ -313,8 +388,27 @@ class PaymentProcessingController extends BaseApiController
                if($checkExist){
                 return $this->sendSuccess($checkExist, "PaymentSource Successfully Loaded", Response::HTTP_OK);
                }else{
-                return $this->generateToken($request->payment_status['MeterNo'], $request->payment_status['account_type'], 
-                $amount, "IBEDC", $customerName, $zoneECMI->BUID, $phone, $checkRef->transaction_id);  
+
+                $payment = [
+                    'meterNo' => $request->payment_status['MeterNo'],
+                    'account_type' => $request->payment_status['account_type'],
+                    'amount' => $amount,
+                    'disco_name' => "IBEDC",
+                    'customerName' => $customerName,
+                    'BUID' => $zoneECMI->BUID,
+                    'phone' => $phone,
+                    'transaction_id' => $checkRef->transaction_id,
+                    'email' => $checkRef->email,
+                    'id' => $checkRef->id,
+                ];
+
+                //Dispatch a job and send token to customer
+                dispatch(new PrepaidPaymentJob($payment))->delay(3);
+
+                return $this->sendSuccess($payment, "Payment Successfully Token will be sent to your email", Response::HTTP_OK);
+
+                // return $this->generateToken($request->payment_status['MeterNo'], $request->payment_status['account_type'], 
+                // $amount, "IBEDC", $customerName, $zoneECMI->BUID, $phone, $checkRef->transaction_id);  
  
                }
 
@@ -347,10 +441,9 @@ class PaymentProcessingController extends BaseApiController
                 return $this->sendError('Error', "Invalid Payment Reference", Response::HTTP_BAD_REQUEST);
             }
 
-            if($checkNull->receiptno && $checkNull->receiptno != 'NULL'){
+            if($checkNull->receiptno  && $checkNull->receiptno != "NULL"){
                 return $this->sendSuccess($checkNull->receiptno , "Token Generated Successfully", Response::HTTP_OK);
             }else {
-                //Use here to generate token
                 return $this->generateToken($checkNull->meter_no, $checkNull->account_type, 
                 $checkNull->amount, "IBEDC", $checkNull->customer_name, $checkNull->BUID, $checkNull->phone, $checkNull->transaction_id);
 
@@ -375,13 +468,11 @@ class PaymentProcessingController extends BaseApiController
     private function generateToken($meterNo, $accountType, $amount, $provider, $customerName, $buid, $phone, $transactionID){
 
        try {
-        //return $this->sendError('Error', "Prepaid Processing Disabled", Response::HTTP_BAD_REQUEST);
-
-        
+     
                 $baseUrl = env('MIDDLEWARE_URL');
                 $addCustomerUrl = $baseUrl . 'vendelect';
 
-                $data = [
+               $data = [
                         'meterno' => $meterNo,
                         'vendtype' => $accountType,
                         'amount' => $amount, 
@@ -394,45 +485,66 @@ class PaymentProcessingController extends BaseApiController
 
                     ];
             
-
-                    $response = Http::withHeaders([
+                    // $response = Http::withHeaders([
+                    //     'Authorization' => 'Bearer LIVEKEY_711E5A0C138903BBCE202DF5671D3C18',
+                    // ])->post($addCustomerUrl , $data);
+                    $response = Http::withoutVerifying()->withHeaders([
                         'Authorization' => 'Bearer LIVEKEY_711E5A0C138903BBCE202DF5671D3C18',
-                    ])->post($addCustomerUrl , $data);
+                    ])->post($addCustomerUrl, $data);
             
                     $newResponse =  $response->json();
 
-                    if($newResponse['status'] == "true"){                 
+                    Log::info('This is an info message.', ['context' =>  $newResponse]);
 
-                        $update = PaymentModel::where("transaction_id", $transactionID)->update([
-                            'status' => $newResponse['status'] == "true" ?  'success' : 'failed', //"resp": "00",
-                            'provider' => "IBEDC-MIDDLEWARE" ?? '',
-                            'providerRef' => $newResponse['transactionReference'],
-                            'receiptno' =>   $newResponse['recieptNumber'],  //Carbon::now()->format('YmdHis').time()
-                            'BUID' => $buid,
-                            'Descript' => $newResponse['message'],
-                        ]);
+                    if ($newResponse === null) {
+                        // Handle the case where $newResponse is null
+                        Log::info('The Response coming from middleware is null', ['MiddlewareError' =>   $response ]);
+                        return $response;
+                    } else {
 
-                        //Send SMS to User
-                        $token = $newResponse['recieptNumber'];
-                        
-                        $baseUrl = env('SMS_MESSAGE');
-                        $data = [
-                            'token' => "p42OVwe8CF2Sg6VfhXAi8aBblMnADKkuOPe65M41v7jMzrEynGQoVLoZdmGqBQIGFPbH10cvthTGu0LK1duSem45OtA076fLGRqX",
-                            'sender' => "IBEDC",
-                            'to' => $phone,
-                            "message" => "IBEDC - Your Payment Token is $token",
-                            "type" => 0,
-                            "routing" => 3,
-                        ];
+                       // return  $newResponse;
+                        // Continue processing with $newResponse
+                        if (isset($newResponse['status']) && $newResponse['status'] == "true") {
+                            // Access $newResponse['status'] and other elements safely
 
-                        $iresponse = Http::asForm()->post($baseUrl, $data);
+                            $update = PaymentModel::where("transaction_id", $transactionID)->update([
+                                'status' => $newResponse['status'] == "true" ?  'success' : 'failed', //"resp": "00",
+                                'provider' => isset($newResponse['transactionReference'])  ? $newResponse['transactionReference'] : $newResponse['data']['transactionReference'],
+                            // 'providerRef' => $newResponse['transactionReference'],
+                                'receiptno' =>   isset($newResponse['recieptNumber']) ? $newResponse['recieptNumber'] : $newResponse['data']['recieptNumber'],  //Carbon::now()->format('YmdHis').time()
+                                'BUID' => $buid,
+                                'Descript' =>  isset($newResponse['message']) ? $newResponse['message'] : $newResponse['transaction_status'],
+                            ]);
+
+                            //Send SMS to User
+                            $token =  isset($newResponse['recieptNumber']) ? $newResponse['recieptNumber'] : $newResponse['data']['recieptNumber'];
+                            
+                            $baseUrl = env('SMS_MESSAGE');
+                            $data = [
+                                'token' => "p42OVwe8CF2Sg6VfhXAi8aBblMnADKkuOPe65M41v7jMzrEynGQoVLoZdmGqBQIGFPbH10cvthTGu0LK1duSem45OtA076fLGRqX",
+                                'sender' => "IBEDC",
+                                'to' => $phone,
+                                "message" => "IBEDC - Your Payment Token is $token",
+                                "type" => 0,
+                                "routing" => 3,
+                            ];
+
+                            $iresponse = Http::asForm()->post($baseUrl, $data);
+
+                            return $newResponse;
+
+                        } else {
+                            // Handle other cases where 'status' is not "true"
+                            Log::info('We do not have any Response', ['Error' =>   $response ]);
+                            return $newResponse ;
+                          
+                        }
+                    }
 
 
-                       return $newResponse;
-                     }else {
-                        return $newResponse;
-                     }
+                   
         }catch(\Exception $e){
+            Log::info('This is an info message.', ['context' =>  $e->getMessage()]);
             return $this->sendError('Error', $e->getMessage(), Response::HTTP_BAD_REQUEST);
            //return $e->getMessage();
           

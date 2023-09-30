@@ -33,6 +33,7 @@ use App\Http\Controllers\AlternatePayment\AuthenticationController;
 use App\Http\Controllers\AlternatePayment\GetCustomerController;
 use App\Http\Controllers\AlternatePayment\PaymentProcessingController;
 use App\Http\Controllers\AlternatePayment\LogoutController;
+use App\Http\Controllers\AlternatePayment\CustomerHistoryController;
 use App\Http\Controllers\FileDownloadController;
 use App\Http\Models\CRMDCustomers;
 
@@ -371,6 +372,11 @@ Route::group(['prefix' => 'v3ibedc_AUTH_token', 'namespace' => 'Api\v3', 'middle
           Route::post("help", [PaymentProcessingController::class, 'ContactUs']);
 
           Route::post('plogout', [LogoutController::class, 'userLogout']);
+
+
+          Route::get("testing", [PaymentProcessingController::class, 'textpayment']);
+
+          Route::get('customerHistory/{account_type?}/{uniqueNo?}', [CustomerHistoryController::class, 'getCustomerHistory']); 
            // });
         });
         
