@@ -19,7 +19,8 @@ class MakeSave extends Model
         'account_no',
         'meter_no',
         'name',
-        'ecmi_ref'
+        'ecmi_ref',
+        'transactdno'
     ];
 
 }

@@ -11,6 +11,7 @@ use Symfony\Component\HttpFoundation\Response;
 use App\Models\ZonePayments;
 use App\Models\ZonePaymentTransaction;
 use App\Helpers\StringHelper;
+use App\Models\ZoneBills;
 
 class CustomerHistoryController extends BaseApiController
 {
@@ -46,6 +47,17 @@ class CustomerHistoryController extends BaseApiController
 
         $formatAccount = StringHelper::formatAccountNumber($accountNo);
         $getHistory = ZonePayments::where('AccountNo', $formatAccount)->paginate(20);
-        return $this->sendError($getHistory, "Postpaid History Retrieved Successfully", Response::HTTP_OK);
+        
+        return $this->sendSuccess($getHistory, "Postpaid History Retrieved Successfully", Response::HTTP_OK);
     }
+
+
+    public function getCustomerBill($accountNo){
+
+        $formatAccount = StringHelper::formatAccountNumber($accountNo);
+        $getBillHistory = ZoneBills::where("AccountNo", $formatAccount)->paginate(20);
+        return $this->sendSuccess($getBillHistory, "Bill History Retrieved Successfully", Response::HTTP_OK);
+    }
+
+
 }

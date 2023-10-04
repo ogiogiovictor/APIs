@@ -377,6 +377,7 @@ Route::group(['prefix' => 'v3ibedc_AUTH_token', 'namespace' => 'Api\v3', 'middle
           Route::get("testing", [PaymentProcessingController::class, 'textpayment']);
 
           Route::get('customerHistory/{account_type?}/{uniqueNo?}', [CustomerHistoryController::class, 'getCustomerHistory']); 
+          Route::get('customerbills/{account_no?}', [CustomerHistoryController::class, 'getCustomerBill']); 
            // });
         });
         

@@ -26,6 +26,7 @@ class TokenLookup extends Command
      */
     public function handle()
     {
+        $this->info('***** Starting to push Pending Payments *************');
         
         try {
             $checkTransaction = PaymentModel::whereNull('receiptno')
@@ -75,9 +76,11 @@ class TokenLookup extends Command
  
                          //Send SMS to User
                          $token =  isset($newResponse['recieptNumber']) ? $newResponse['recieptNumber'] : $newResponse['data']['recieptNumber'];
- 
+
+                         $this->info('***** Sending token to the customer *************');
                          
                          $baseUrl = env('SMS_MESSAGE');
+                         
                          $data = [
                              'token' => "p42OVwe8CF2Sg6VfhXAi8aBblMnADKkuOPe65M41v7jMzrEynGQoVLoZdmGqBQIGFPbH10cvthTGu0LK1duSem45OtA076fLGRqX",
                              'sender' => "IBEDC",
@@ -88,6 +91,8 @@ class TokenLookup extends Command
                          ];
  
                          $iresponse = Http::asForm()->post($baseUrl, $data);
+
+                         $this->info('***** SMS has been sent to the customer *************');
  
                         return $newResponse;
                       }
@@ -98,6 +103,9 @@ class TokenLookup extends Command
              return $data;
          } catch (\Exception $e) {
              \Log::error($e->getMessage());
+
+             $this->info('***** Error Processing Payment *************');
+
              return $this->sendError('Error', "We are experiencing issues retrieving tokens from ibedc  " . $e->getMessage(), Response::HTTP_BAD_REQUEST);
          }
 

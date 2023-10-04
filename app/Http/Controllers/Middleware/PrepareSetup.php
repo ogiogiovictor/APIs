@@ -22,6 +22,14 @@ use App\Models\SubAccountPayment;
 use Illuminate\Support\Str;
 use App\Models\ZoneECMI;
 use Illuminate\Support\Facades\Validator;
+use App\Models\Middleware\AuditSubAccountPayment;
+use App\Models\Middleware\AuditTokenLog;
+use App\Models\Middleware\AuditTransaction;
+use App\Models\Middleware\AuditNewTransactions;
+use App\Models\Middleware\AuditPaymentTransaction;
+use App\Models\Middleware\LogDeletedTransactions;
+use App\Models\Middleware\LogSubAccountPayments;
+use App\Models\Middleware\LogInsertSubAccountDeductions;
 
 
 class PrepareSetup extends BaseApiController
@@ -208,15 +216,17 @@ class PrepareSetup extends BaseApiController
             'ecmi_ref' => $data['transactionReference'],
         ]);
 
+        $checkTExist = ECMITransactions::where("transref", $data['transactionReference'])->first();
+
+        $updateTransanID = MakeSave::where("ecmi_ref", $data['transactionReference'])->update([
+            'transactdno' => $checkTExist->TransactionNo
+        ]);
+
        
         try{
 
         // Disable the trigger for the specific connection
         DB::connection('ecmi_prod')->unprepared('DISABLE TRIGGER [TRANSACTION_TRIGGER] ON [ECMI].[dbo].[Transactions]');
-
-          //  return  $createData;
-        //Delete token from Transaction Table,
-        $checkTExist = ECMITransactions::where("transref", $data['transactionReference'])->first();
 
         $checkSubAccount = SubAccountPayment::where("TransactionNo",  $checkTExist->TransactionNo)->first();
         if($checkSubAccount){  $checkSubAccount->delete(); }
@@ -248,6 +258,40 @@ class PrepareSetup extends BaseApiController
 
           // Enable the trigger again for the same connection
          DB::connection('ecmi_prod')->unprepared('ENABLE TRIGGER [TRANSACTION_TRIGGER] ON [ECMI].[dbo].[Transactions]');
+
+
+############################################### FIX THE ISSUES OF OTHER TABLES ADDED ##########################################################################
+
+        //Check Audit
+        $subAudSubPayment = AuditSubAccountPayment::where("TransactionNo",  $checkTExist->TransactionNo)->first();
+        if($subAudSubPayment){  $subAudSubPayment->delete(); }
+
+        $tokenAudLog = AuditTokenLog::where("Token", $trimSpaces)->first();
+        if($tokenAudLog){  $tokenAudLog->delete(); }
+
+        $auditTrans = AuditTransaction::where("Token", $trimSpaces)->first();
+        if( $auditTrans){  $auditTrans->delete(); }
+
+
+        $auditpTransaction = AuditPaymentTransaction::where("transref", $data['transactionReference'])->first();
+        if($auditpTransaction){  $auditpTransaction->delete(); }
+
+        $checkAduitnew = AuditNewTransactions::where("transref", $data['transactionReference'])->first();
+        if( $checkAduitnew){  $checkAduitnew->delete(); }
+
+        $logDeletedTrans = LogDeletedTransactions::where("transactionno", $checkTExist->TransactionNo)->first();
+        if($logDeletedTrans){  $logDeletedTrans->delete(); }
+
+        $logSubApayment = LogSubAccountPayments::where("TransactionNo", $checkTExist->TransactionNo)->first();
+        if($logSubApayment){  $logSubApayment->delete(); }
+
+        $logInserted = LogInsertSubAccountDeductions::where("transactionno", $checkTExist->TransactionNo)->first();
+        if($logInserted){  $logInserted->delete(); }
+
+
+############################################### FIX THE ISSUES OF OTHER TABLES ADDED ##########################################################################
+
+
 
          return $this->sendSuccess($createData, "loaded-Successfully". ' '. $trimSpaces, Response::HTTP_OK);
 
