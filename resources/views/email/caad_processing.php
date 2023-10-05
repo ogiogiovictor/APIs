@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="x-apple-disable-message-reformatting">
-    <title>MIDDLEWARE ERROR - IBEDC</title>
+    <title>CAAD REQUEST - IBEDC</title>
     
     <link href="https://fonts.googleapis.com/css?family=Roboto:400,600" rel="stylesheet" type="text/css">
     <!-- Web Font / @font-face : BEGIN -->
@@ -92,24 +92,26 @@
                         <tbody>
                             <tr>
                                 <td style="padding: 30px 30px 15px 30px;">
-                                    <h2 style="font-size: 18px; color: #6576ff; font-weight: 600; margin: 0;">TOKEN ERROR {{ $data['custname'] }} </h2>
+                                    <h2 style="font-size: 18px; color: #6576ff; font-weight: 600; margin: 0;">CUSTOMER CAAD REQUEST</h2>
                                 </td>
                             </tr>
                             <tr>
                                 <td style="padding: 0 30px 20px">
-                                    <p style="margin-bottom: 10px;">Hi {{ $custname }},</p>
+                                    <p style="margin-bottom: 10px;">Hi {{ $name }},</p>
                                     <p style="margin-bottom: 10px;">
-                                    Please find below the details:<hr/>
+                                    Please find below the customer CAAD details:<hr/>
                                 
                                     <ul>
-                                    <li> Meter No {{ $meterNo }} </li>
-                                    <li> Phone {{ $custphoneno }} </li>
+                                    <li> Account No {{ $accountNo }} </li>
+                                    <li> Phone {{ $phone }} </li>
                                     <li> Amount {{ $amount }}</li>
-                                    <li> TransactionID {{ $payreference }}</li>
-                                    <li> Response {{ $response }}</li>
-
+                                    <li> Name {{ $surname }}</li>
+                                    <li> Lastname {{ $lastname }}</li>
+                                    <li> Account Type {{ $accountType }}</li>
+                                    <li> Region {{ $region }}</li>
+                                    <li> Date {{ $effective_date }}</li>
                                     </ul>
-                                 
+                                                                    
                                     </td>
                             </tr>
                             
@@ -128,7 +130,7 @@
                         <tbody>
                             <tr>
                                 <td style="text-align: center; padding:25px 20px 0;">
-                                    <p style="font-size: 13px;">Copyright © 2023 IBEDC PAYMENT SYSTEM All rights reserved. <br> <a style="color: #6576ff; text-decoration:none;" href="#">IBEDC</a>.</p>
+                                    <p style="font-size: 13px;">Copyright © 2023 IBEDC CAAD Process rights reserved. <br> <a style="color: #6576ff; text-decoration:none;" href="#">IBEDC</a>.</p>
                                     
                                     <p style="padding-top: 15px; font-size: 12px;">This email was sent to you as a customer of <a style="color: #6576ff; text-decoration:none;" href="#">IBEDC</a></p>
                                 </td>

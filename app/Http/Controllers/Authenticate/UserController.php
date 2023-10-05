@@ -78,7 +78,7 @@ class UserController extends BaseApiController
             $user = User::create([
                 'name' => $request->name,
                 'email' => $request->email,
-                'status' => "1",
+                'status' => 1,
                 'authority' => $request->authority,
                 'password' => Hash::make($request->password),
                 'level' => $request->level ?? []

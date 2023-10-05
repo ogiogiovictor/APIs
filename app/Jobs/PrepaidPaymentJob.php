@@ -15,6 +15,7 @@ use App\Mail\PrepaidPaymentMail;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use GuzzleHttp\Exception\RequestException; 
+use App\Models\PaymentModel;
 
 class PrepaidPaymentJob implements ShouldQueue
 {
@@ -60,23 +61,11 @@ class PrepaidPaymentJob implements ShouldQueue
 
         $newResponse =  $response->json();
 
+
         if ($newResponse === null) {
             //log the error
-            Log::info('The Response coming from middleware is null', ['MiddlewareError' =>   $response ]);
-            //Send a message as notification that token was not recieved with the meter number and date of payment
-            // $to = [
-            //     "fortune.odesanya@ibedc.com",
-            //     "somto.anowai@ibedc.com",
-            //     "victor.ogiogio@ibedc.com",
-            //     "frank.obasogie@ibedc.com"
-            // ];
-            // $subject = "Failed No Response from Middleware". $this->payment['meterNo']. ' '. $this->payment['amount'];
-            // $body = "The Response from the middleware is null for this meterno" . $newResponse;
-
-            // Mail::raw($body, function ($body) use ($to, $subject) {
-            //     $body->to($to)->subject($subject);
-            // });
-
+            Log::info('NULL RESPONSE: - ', ['MiddlewareError Null Response' =>    $newResponse ]);
+            
             $data = [
                 'meterNo' => $this->payment['meterNo'],
                 'amount' => $this->payment['amount'],
@@ -86,10 +75,8 @@ class PrepaidPaymentJob implements ShouldQueue
                 "payreference" => $this->payment['transaction_id'], 
             ];
 
-            Mail::send('emails.middleware_error', $data, function ($message) {
+            Mail::send('email.middleware_error', $data, function ($message) {
                 $message->to('victor.ogiogio@ibedc.com', 'Victor Ogiogio')
-                        ->cc('fortune.odesanya@ibedc.com', 'Fortune Odesanya')
-                        ->bcc('somto.anowai@ibedc.com', 'Somto Anowai')
                         ->subject('Token Error - Not Received');
             });
 
@@ -105,7 +92,7 @@ class PrepaidPaymentJob implements ShouldQueue
                     'provider' => isset($newResponse['transactionReference'])  ? $newResponse['transactionReference'] : $newResponse['data']['transactionReference'],
                 // 'providerRef' => $newResponse['transactionReference'],
                     'receiptno' =>   isset($newResponse['recieptNumber']) ? $newResponse['recieptNumber'] : $newResponse['data']['recieptNumber'],  //Carbon::now()->format('YmdHis').time()
-                    'BUID' => $buid,
+                   // 'BUID' =>  $this->payment['BUID'],
                     'Descript' =>  isset($newResponse['message']) ? $newResponse['message'] : $newResponse['transaction_status'],
                 ]);
 
@@ -117,7 +104,7 @@ class PrepaidPaymentJob implements ShouldQueue
                 $smsdata = [
                     'token' => "p42OVwe8CF2Sg6VfhXAi8aBblMnADKkuOPe65M41v7jMzrEynGQoVLoZdmGqBQIGFPbH10cvthTGu0LK1duSem45OtA076fLGRqX",
                     'sender' => "IBEDC",
-                    'to' => $phone,
+                    'to' => $this->payment['phone'],
                     "message" => "IBEDC - Your Payment Token is $token",
                     "type" => 0,
                     "routing" => 3,
@@ -132,29 +119,17 @@ class PrepaidPaymentJob implements ShouldQueue
                     "payreference" => $this->payment['transaction_id'],    
                 ];
 
+                Log::info('TOKEN SENT: : - ', ['Generated Successfully' =>     $smsdata ]);
+
                 $iresponse = Http::asForm()->post($baseUrl, $smsdata);
                 //Send a Successfully Mail to user
-                Mail::to($this->payment->email)->cc(["fortune.odesanya@ibedc.com, somto.anowai@ibedc.com,victor.ogiogio@ibedc.com, frank.obasogie@ibedc.com"])->send(
+                Mail::to($this->payment['email'])->bcc(["fortune.odesanya@ibedc.com, somto.anowai@ibedc.com,victor.ogiogio@ibedc.com, frank.obasogie@ibedc.com"])->send(
                     new PrepaidPaymentMail($emailData));
               //  return response()->json(['data' => $newResponse], Response::HTTP_BAD_REQUEST);
 
 
             }else {
-                Log::info('The Response coming from middleware is null', ['MiddlewareError' =>   $response ]);
-                // $to = [
-                //     "fortune.odesanya@ibedc.com",
-                //     "somto.anowai@ibedc.com",
-                //     "victor.ogiogio@ibedc.com",
-                //     "frank.obasogie@ibedc.com"
-                // ];
-                // $subject = "Middleware Response ". $this->payment['meterNo']. ' '. $this->payment['amount'];
-                
-                // //$body = isset($response) ? $response : "The Response comfing from the middleware is null". $response;
-                // $body = "We could not get response from the middleware for this request:-" . $response;
-                // Mail::raw($body, function ($body) use ($to, $subject) {
-                //     $body->to($to)->subject($subject);
-                // });
-
+              
                 $data = [
                     'meterNo' => $this->payment['meterNo'],
                     'amount' => $this->payment['amount'],
@@ -164,11 +139,13 @@ class PrepaidPaymentJob implements ShouldQueue
                     "payreference" => $this->payment['transaction_id'], 
                 ];
 
-                Mail::send('emails.middleware_error', $data, function ($message) {
+                Log::info('ERROR ACCESS TOKEN', ['TOKEN ERROR' =>   $newResponse ]);
+
+                Mail::send('email.middleware_error', $data, function ($message) {
                     $message->to('victor.ogiogio@ibedc.com', 'Victor Ogiogio')
-                            ->cc('fortune.odesanya@ibedc.com', 'Fortune Odesanya')
-                            ->bcc('somto.anowai@ibedc.com', 'Somto Anowai')
-                            ->subject('Token Error - Not Received');
+                            //->cc('fortune.odesanya@ibedc.com', 'Fortune Odesanya')
+                           // ->bcc('somto.anowai@ibedc.com', 'Somto Anowai')
+                            ->subject('TOKEN ERROR - '. $this->payment['transaction_id']);
                 });
             
                 //Send a mail of the logged response as token was not recieved and response from the middleware with the error message

@@ -15,5 +15,5 @@ class AuditPaymentTransaction extends Model
 
     public $timestamps = false;
 
-    //protected $primaryKey = 'Token';
+    protected $primaryKey = 'transref';
 }

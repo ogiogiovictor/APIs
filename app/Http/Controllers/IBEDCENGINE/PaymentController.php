@@ -80,9 +80,10 @@ class PaymentController extends BaseApiController
             'payments' => EcmiPaymentResource::collection($selectECMI)->response()->getData(true),
             'postpaid_payment' => ZoneResource::collection($selectEMS)->response()->getData(true),
             'today_payments' => naira_format($ecmi_payment), 
-            'last_month' => now()->subMonth()->month,
-            'this_month' => now()->month,
-            'prev_last_month' => now()->subMonth()->month - 1
+            'last_month' => Carbon::create(null, now()->subMonth()->month, 1)->format('F'), //now()->subMonth()->month,
+            'this_month' =>  Carbon::create(null, now()->month, 1)->format('F'), //now()->month,
+            'prev_last_month' => Carbon::create(null, now()->subMonth()->month - 1, 1)->format('F'),
+            'prepaid_payment_last_month' =>  Carbon::create(null, now()->subMonth()->month, 1)->format('F'),
         ];
 
         return $this->sendSuccess($data, "Payment Successfully Loaded", Response::HTTP_OK);

@@ -34,13 +34,17 @@ class PaymentProcessingController extends BaseApiController
 {
 
     public function textpayment() {
-        
+        $paymentData = []; // Initialize an array to store payment data
+
+        DB::connection()->enableQueryLog();
+
+        \Log::info('***** Starting to push Pending Payments *************');
         try {
-           $checkTransaction = PaymentModel::whereNull('receiptno')
+           PaymentModel::whereNull('receiptno')
                 ->where('account_type', 'prepaid')
                 ->where('status', 'pending')
                 ->whereNotNull('providerRef')
-                ->chunk(100, function ($paymentLogs) use (&$data) {
+                ->chunk(2, function ($paymentLogs) use (&$paymentData) {
                     // Add the payment logs to the data array
                     foreach ($paymentLogs as $paymentLog) {
                        
@@ -59,10 +63,6 @@ class PaymentProcessingController extends BaseApiController
                                 "colagentid" => "IB001",
         
                             ];
-                    
-                            // $response = Http::withHeaders([
-                            //     'Authorization' => 'Bearer LIVEKEY_711E5A0C138903BBCE202DF5671D3C18',
-                            // ])->post($addCustomerUrl , $data);
 
                             $response = Http::withoutVerifying()->withHeaders([
                                 'Authorization' => 'Bearer LIVEKEY_711E5A0C138903BBCE202DF5671D3C18',
@@ -70,21 +70,38 @@ class PaymentProcessingController extends BaseApiController
                     
                             $newResponse =  $response->json();
 
-                    if($newResponse['status'] == "true"){                 
+                    // Log API request and response for debugging
+                        \Log::info('API Request: ' . json_encode($data));
+                        \Log::info('API Response: ' . json_encode($newResponse));
+
+                        $totalRecords = count($paymentLogs);
+                        \Log::info("Total Records to Update: " . $totalRecords);
+
+
+                    if($newResponse['status'] == "true"){   
+                        
+                        $paymentData[] = $data;
+                         // Log added data for debugging
+                        \Log::info('Added Data: ' . json_encode($data));
+
+                        
 
                         $update = PaymentModel::where("transaction_id", $paymentLog->transaction_id)->update([
                             'status' => $newResponse['status'] == "true" ?  'success' : 'failed', //"resp": "00",
                             'provider' => isset($newResponse['transactionReference'])  ? $newResponse['transactionReference'] : $newResponse['data']['transactionReference'],
                         // 'providerRef' => $newResponse['transactionReference'],
                             'receiptno' =>   isset($newResponse['recieptNumber']) ? $newResponse['recieptNumber'] : $newResponse['data']['recieptNumber'],  //Carbon::now()->format('YmdHis').time()
-                            'BUID' => $paymentLog->BUID,
+                          //  'BUID' => $paymentLog->BUID,
                             'Descript' =>  isset($newResponse['message']) ? $newResponse['message'] : $newResponse['transaction_status'],
                         ]);
+
+                        \Log::info("Updated Records: " . $updatedRecords);
 
                         //Send SMS to User
                         $token =  isset($newResponse['recieptNumber']) ? $newResponse['recieptNumber'] : $newResponse['data']['recieptNumber'];
 
-                        
+                        \Log::info('***** Sending token to the customer *************');
+
                         $baseUrl = env('SMS_MESSAGE');
                         $data = [
                             'token' => "p42OVwe8CF2Sg6VfhXAi8aBblMnADKkuOPe65M41v7jMzrEynGQoVLoZdmGqBQIGFPbH10cvthTGu0LK1duSem45OtA076fLGRqX",
@@ -96,14 +113,15 @@ class PaymentProcessingController extends BaseApiController
                         ];
 
                         $iresponse = Http::asForm()->post($baseUrl, $data);
+                        \Log::info('***** SMS has been sent to the customer  *************');
 
-                       return $newResponse;
                      }
                        
 
                     }
                 });
-            return $data;
+                \Log::info(DB::getQueryLog());
+            return $paymentData;
         } catch (\Exception $e) {
             \Log::error($e->getMessage());
             return $this->sendError('Error', "We are experiencing issues retrieving tokens from ibedc  " . $e->getMessage(), Response::HTTP_BAD_REQUEST);
@@ -392,7 +410,7 @@ class PaymentProcessingController extends BaseApiController
                 $payment = [
                     'meterNo' => $request->payment_status['MeterNo'],
                     'account_type' => $request->payment_status['account_type'],
-                    'amount' => $amount,
+                    'amount' => $request->payment_status['amount'],
                     'disco_name' => "IBEDC",
                     'customerName' => $customerName,
                     'BUID' => $zoneECMI->BUID,
@@ -402,13 +420,14 @@ class PaymentProcessingController extends BaseApiController
                     'id' => $checkRef->id,
                 ];
 
+                
                 //Dispatch a job and send token to customer
                 dispatch(new PrepaidPaymentJob($payment))->delay(3);
 
                 return $this->sendSuccess($payment, "Payment Successfully Token will be sent to your email", Response::HTTP_OK);
 
                 // return $this->generateToken($request->payment_status['MeterNo'], $request->payment_status['account_type'], 
-                // $amount, "IBEDC", $customerName, $zoneECMI->BUID, $phone, $checkRef->transaction_id);  
+                // $request->payment_status['amount'], "IBEDC", $customerName, $zoneECMI->BUID, $phone, $checkRef->transaction_id);  
  
                }
 
@@ -484,7 +503,8 @@ class PaymentProcessingController extends BaseApiController
                         "colagentid" => "IB001",
 
                     ];
-            
+
+                 
                     // $response = Http::withHeaders([
                     //     'Authorization' => 'Bearer LIVEKEY_711E5A0C138903BBCE202DF5671D3C18',
                     // ])->post($addCustomerUrl , $data);
@@ -498,8 +518,8 @@ class PaymentProcessingController extends BaseApiController
 
                     if ($newResponse === null) {
                         // Handle the case where $newResponse is null
-                        Log::info('The Response coming from middleware is null', ['MiddlewareError' =>   $response ]);
-                        return $response;
+                        Log::info('TWe are still getting Null', ['MiddlewareError' =>   $response ]);
+                      //  return $newResponse;
                     } else {
 
                        // return  $newResponse;
@@ -536,7 +556,7 @@ class PaymentProcessingController extends BaseApiController
                         } else {
                             // Handle other cases where 'status' is not "true"
                             Log::info('We do not have any Response', ['Error' =>   $response ]);
-                            return $newResponse ;
+                            return $response;
                           
                         }
                     }
@@ -613,6 +633,17 @@ class PaymentProcessingController extends BaseApiController
 
     }
 
+
+
+    public function notificationService($meterNo){
+
+        $checkTransaction =  PaymentModel::where("meter_no", $meterNo)->whereNull('receiptno')
+        ->where('account_type', 'Prepaid')
+        ->where('status', 'pending')
+        ->whereNotNull('providerRef')->get();
+
+        return $this->sendSuccess($checkTransaction, "Notification Successfully Loaded", Response::HTTP_OK);
+    }
 
    
 

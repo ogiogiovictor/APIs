@@ -21,6 +21,7 @@ use App\Models\BulkCAAD;
 use Illuminate\Support\Facades\Auth;
 use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Support\Facades\Storage;
+use App\Jobs\ProcessCAADJob;
 
 class CaadController extends BaseApiController
 {
@@ -113,6 +114,8 @@ class CaadController extends BaseApiController
                     'created_by' => Auth::user()->id,
     
                 ]);
+
+                dispatch(new ProcessCAADJob($processCAAD));
 
             } 
 
@@ -433,6 +436,9 @@ class CaadController extends BaseApiController
                       $processCAAD->save();
 
                       $this->passPosition($userRole, $request->id, $request->batch_type);
+
+                      //This will be either removed or updated
+                      dispatch(new ProcessCAADJob($processCAAD));
                   }else {
                       
                       $processBatch = BulkCAAD::find($request->id);

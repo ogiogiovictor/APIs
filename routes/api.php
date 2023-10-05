@@ -45,6 +45,13 @@ use App\Http\Models\CRMDCustomers;
 Route::post('auth_login', [LoginController::class, 'login']); // normal login
 Route::post('authenticate_with_ad', [SocialController::class, 'authenticate']); // with on-prem
 
+Route::post('forgot-password', [LoginController::class, 'forgotPassword']);
+
+Route::get('reset-password/{token}',  [LoginController::class, 'changePassword'])->middleware('guest')->name('password.reset');
+Route::post('reset-password', [LoginController::class, 'resetPassword']); 
+Route::get('check-password/{token}',  [TestController::class, 'checkPassword'])->middleware('guest');
+
+
 
 Route::get('social-auth/{provider}/callback', [SocialController::class, 'providerCallback']); // with azure or any other social network
 Route::get('social-auth/{provider}', [SocialController::class, 'redirectoToProvider'])->name('social-redirect');
@@ -154,7 +161,6 @@ Route::group(['prefix' => 'v1', 'namespace' => 'Api\v1', 'middleware' => 'OAuth'
 
 
         //CAAD PROCESS FLOW --
-
         Route::get('caad_process_flow', [CaadController::class, 'getApproval'])->middleware('before');; //Admin Router
         Route::post('process_caad_request', [CaadController::class, 'addCAAD']);
     
@@ -163,7 +169,6 @@ Route::group(['prefix' => 'v1', 'namespace' => 'Api\v1', 'middleware' => 'OAuth'
         Route::get('caads', [CaadController::class, 'allCAAD'])->middleware('before');
 
         
-
         Route::post('upload_bulk_caad', [CaadController::class, 'BulkCAADUpload']);
         Route::get('storage/{folder}/{filename}', [FileDownloadController::class, 'show']);
 
@@ -229,11 +234,11 @@ Route::group(['prefix' => 'v1', 'namespace' => 'Api\v1', 'middleware' => 'OAuth'
 /*********************************** ROUTE FOR TESTING ON LOCAL MACHINE ************************************** */
 
 Route::post('auth_login_test', [TestController::class, 'login']);
-Route::post('forgot-password', [TestController::class, 'forgotPassword']);
+// Route::post('forgot-password', [TestController::class, 'forgotPassword']);
 
-Route::get('reset-password/{token}',  [TestController::class, 'changePassword'])->middleware('guest')->name('password.reset');
-Route::post('reset-password', [TestController::class, 'resetPassword']); 
-Route::get('check-password/{token}',  [TestController::class, 'checkPassword'])->middleware('guest');
+// Route::get('reset-password/{token}',  [TestController::class, 'changePassword'])->middleware('guest')->name('password.reset');
+// Route::post('reset-password', [TestController::class, 'resetPassword']); 
+// Route::get('check-password/{token}',  [TestController::class, 'checkPassword'])->middleware('guest');
 
 /////////////////////////////////////// API FOR CUSTOMER MANAGEMEMENT SYSTEM ///////////////////////////////////  'middleware' => 'oAuth'
 Route::group(['prefix' => 'v2', 'namespace' => 'Api\v2', 'middleware' => 'OAuth'], function () {
@@ -378,6 +383,8 @@ Route::group(['prefix' => 'v3ibedc_AUTH_token', 'namespace' => 'Api\v3', 'middle
 
           Route::get('customerHistory/{account_type?}/{uniqueNo?}', [CustomerHistoryController::class, 'getCustomerHistory']); 
           Route::get('customerbills/{account_no?}', [CustomerHistoryController::class, 'getCustomerBill']); 
+
+          Route::get('customernotification/{meter_no?}', [PaymentProcessingController::class, 'notificationService']);
            // });
         });
         
