@@ -8,6 +8,7 @@ use App\Models\PaymentModel;
 use Illuminate\Support\Facades\Http;
 use Symfony\Component\HttpFoundation\Response;
 use App\Mail\PrepaidPaymentMail;
+use Mail;
 
 class RequeryToken extends Command
 {
@@ -30,7 +31,7 @@ class RequeryToken extends Command
      */
     public function handle()
     {
-        $this->info('***** Starting to push Pending Payments *************');
+        $this->info('***** REQUERY API :: Starting to push Pending Payments *************');
         $data = [];
 
         try {
@@ -52,9 +53,9 @@ class RequeryToken extends Command
                              'receiptno' =>    $transactionID->Token,  
                              'Descript' =>   $transactionID->Reasons,
                          ]);
- 
+
                        
-                         $this->info('***** Sending token to the customer *************');
+                         $this->info('***** REQUERY API :: Sending token to the customer *************');
                          
                          $baseUrl = env('SMS_MESSAGE');
 
@@ -74,7 +75,7 @@ class RequeryToken extends Command
  
                          $iresponse = Http::asForm()->post($baseUrl, $idata);
 
-                         $this->info('***** SMS has been sent to the customer *************');
+                         $this->info('***** REQUERY API :: SMS has been sent to the customer *************');
                          $emailData = [
                             'token' => $transactionID->Token,
                             'meterno' => $paymentLog->meter_no,
@@ -84,7 +85,7 @@ class RequeryToken extends Command
                             "payreference" => $paymentLog->transaction_id,
                         ];
 
-                         Mail::to($paymentLog->email)->bcc(["fortune.odesanya@ibedc.com, somto.anowai@ibedc.com,victor.ogiogio@ibedc.com, frank.obasogie@ibedc.com"])->send(
+                         Mail::to($paymentLog->email)->send(
                             new PrepaidPaymentMail($emailData));
  
                         //return $newResponse;
@@ -94,16 +95,16 @@ class RequeryToken extends Command
                      }
                  });
 
-                 $this->info('***** All payments processed successfully *************');
+                 $this->info('***** REQUERY API :: All payments processed successfully *************');
                  
                  return $data; // Return the data collected from payments
              //return $data;
          } catch (\Exception $e) {
              \Log::error($e->getMessage());
 
-             $this->info('***** Error Processing Payment *************');
+             $this->info('***** REQUERY API :: Error Processing Payment *************');
 
-             return $this->sendError('Error', "We are experiencing issues retrieving tokens from ibedc  " . $e->getMessage(), Response::HTTP_BAD_REQUEST);
+            // return $this->sendError('Error', "We are experiencing issues retrieving tokens from ibedc  " . $e->getMessage(), Response::HTTP_BAD_REQUEST);
          }
 
     }

@@ -32,6 +32,7 @@ class LoginController extends BaseApiController
             }
 
             if(Auth::attempt(['email' => $validatedData['email'], 'password' => $validatedData['password'] ])){
+                
                 $authUser = Auth::user();
                 $success['Authorization'] = $authUser->createToken('Sanctom+Socialite')->plainTextToken;
                 $success['user'] = $authUser;

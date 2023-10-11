@@ -28,7 +28,7 @@ use App\Models\HighTension;
 use App\Http\Resources\TransformerResource;
 use App\Http\Resources\NewResource;
 use App\Models\SubAccount;
-
+use App\Models\ZoneECMI;
 
 
 
@@ -187,7 +187,7 @@ class CustomerService
 
     $TotalCustomers =  $this->getLevel($roleName, $user, $checkLevel, $role_name);
     $TotalDSS = $this->getDSS(); //DTWarehouse::count();
-    $TotalFeederEl = FeederEleven::count();
+    $TotalFeederEl =  FeederEleven::count();
     $TotalFeederThirty =  FeederThirty::count();
     $TotalTickets = Tickets::count();
     $CustomerByRegion = $getCustomerByRegion;
@@ -452,15 +452,45 @@ class CustomerService
 
 
     public function authenticateCustomers($meterNo, $accountType) {
-        $customers = DimensionCustomer::where(function ($query) use ($meterNo, $accountType) {
-            $query->where("MeterNo", $meterNo)
-                  ->where("AccountType", $accountType);
-        })->orWhere(function ($query) use ($meterNo, $accountType) {
-            $query->where("AccountNo", $meterNo)
-                  ->where("AccountType", $accountType);
-        })->first();
+        // $customers = DimensionCustomer::where(function ($query) use ($meterNo, $accountType) {
+        //     $query->where("MeterNo", $meterNo)
+        //           ->where("AccountType", $accountType);
+        // })->orWhere(function ($query) use ($meterNo, $accountType) {
+        //     $query->where("AccountNo", $meterNo)
+        //           ->where("AccountType", $accountType);
+        // })->first();
     
-        return $customers;
+        // return $customers;
+
+        // $customers = DimensionCustomer::where('AccountType', $accountType)
+        // ->where(function ($query) use ($meterNo, $accountType) {
+        //     if ($accountType === 'Prepaid') {
+        //         $query->where('MeterNo', $meterNo);
+        //     } elseif ($accountType === 'Postpaid') {
+        //         $query->where('AccountNo', $meterNo);
+        //     }
+        // })
+        // ->first();
+
+        if($accountType == 'Prepaid'){
+         return  ZoneECMI::where("MeterNo", $meterNo)->orWhere("AccountNo", $meterNo)->first();
+        }else {
+         return ZoneCustomer::where("AccountNo", $meterNo)->whereIn("StatusCode", ['A', 'S'])->first();
+        }
+
+      
+
+        // $customers = DimensionCustomer::where('AccountType', $accountType)
+        // ->when($accountType === 'Prepaid', function ($query) use ($meterNo) {
+        //     return $query->where('MeterNo', $meterNo)->orWhere("AccountNo", $meterNo);
+        // })
+        // ->when($accountType === 'Postpaid', function ($query) use ($meterNo) {
+        //     return $query->where('AccountNo', $meterNo);
+        // })
+        // ->first();
+
+        // return $customers;
+
     }
     
 

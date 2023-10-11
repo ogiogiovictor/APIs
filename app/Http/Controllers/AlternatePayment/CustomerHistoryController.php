@@ -12,6 +12,7 @@ use App\Models\ZonePayments;
 use App\Models\ZonePaymentTransaction;
 use App\Helpers\StringHelper;
 use App\Models\ZoneBills;
+use App\Models\ECMITransactions;
 
 class CustomerHistoryController extends BaseApiController
 {
@@ -34,7 +35,7 @@ class CustomerHistoryController extends BaseApiController
 
     private function getPrepaidHistory($type, $meterno){
         
-        $getHistory = ECMIPayment::where('meterno', $meterno)->paginate(20);
+        $getHistory = ECMITransactions::where('MeterNo', $meterno)->orderby("TransactionDateTime", "desc")->paginate(20);
         if($getHistory){
             return $this->sendSuccess($getHistory, "Prepaid History Retrieved Successfully", Response::HTTP_OK); 
         }else{
@@ -46,7 +47,7 @@ class CustomerHistoryController extends BaseApiController
     private function getPostpaidHistory($type, $accountNo){
 
         $formatAccount = StringHelper::formatAccountNumber($accountNo);
-        $getHistory = ZonePayments::where('AccountNo', $formatAccount)->paginate(20);
+        $getHistory = ZonePayments::where('AccountNo', $formatAccount)->orderby("PayDate", "desc")->paginate(20);
         
         return $this->sendSuccess($getHistory, "Postpaid History Retrieved Successfully", Response::HTTP_OK);
     }
@@ -55,7 +56,7 @@ class CustomerHistoryController extends BaseApiController
     public function getCustomerBill($accountNo){
 
         $formatAccount = StringHelper::formatAccountNumber($accountNo);
-        $getBillHistory = ZoneBills::where("AccountNo", $formatAccount)->paginate(20);
+        $getBillHistory = ZoneBills::where("AccountNo", $formatAccount)->orderby("Billdate", "desc")->paginate(20);
         return $this->sendSuccess($getBillHistory, "Bill History Retrieved Successfully", Response::HTTP_OK);
     }
 

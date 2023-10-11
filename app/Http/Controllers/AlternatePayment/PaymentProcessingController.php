@@ -313,6 +313,27 @@ class PaymentProcessingController extends BaseApiController
 
                 try{
 
+
+                    //Redirecting postpaid to midlleware
+                    // $baseUrl = env('MIDDLEWARE_URL');
+                    //      $addCustomerUrl = $baseUrl . 'vendelect';
+         
+                    //      $data = [
+                    //              'meterno' => $checkRef->meter_no,
+                    //              'vendtype' => $checkRef->account_type,
+                    //              'amount' => $request->payment_status['apprAmt'], 
+                    //              "provider" => "IBEDC",
+                    //              "custname" => $checkRef->customer_name,
+                    //              "businesshub" => $custInfo->BUID,
+                    //              "custphoneno" => $checkRef->phone,
+                    //              "payreference" => $checkRef->transaction_id,
+                    //              "colagentid" => "IB001",
+                                         
+                    //          ];
+                     
+
+
+
                     $generateRefRand = strtoupper(Str::uuid()->toString());
 
                     $addPaymentStatus = ZonePaymentTransaction::create([  // ZonePaymentTransaction   //TestModelPayments

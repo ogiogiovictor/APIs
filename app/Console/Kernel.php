@@ -14,6 +14,11 @@ class Kernel extends ConsoleKernel
     {
         // $schedule->command('inspire')->hourly();
         $schedule->command('auth:clear-resets')->everyFifteenMinutes();
+        $schedule->command('app:token-lookup')->everyMinute();
+        $schedule->command('app:requery-token')->everyTwoMinutes();
+
+        // Enable task scheduler logging
+         $schedule->exec('echo "Task Scheduler Ran: $(date)" >> /var/www/html/IBEDCENGINE/storage/logs/scheduler.log')->everyMinute();
     }
 
     /**

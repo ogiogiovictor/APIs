@@ -21,7 +21,7 @@ class NewResource extends JsonResource
     public function toArray(Request $request): array
     {
         return [
-                'SetupDate' => $this->SetupDate,
+                'SetupDate' =>  $this->SetupDate,
                 'AccountNo' => $this->AccountNo,
                 'FAccountNo' => StringHelper::removeSpecialCharsAndSlashes($this->AccountNo),
                 'BookNo' => $this->BookNo,

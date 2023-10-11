@@ -9,6 +9,7 @@ use Symfony\Component\HttpFoundation\Response;
 use App\Mail\PrepaidPaymentMail;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\DB;
+use Mail;
 
 class TokenLookup extends Command
 {
@@ -31,7 +32,7 @@ class TokenLookup extends Command
      */
     public function handle()
     {
-        $this->info('***** Starting to push Pending Payments *************');
+        $this->info('***** TOKENLOOKUP API :: Starting to push Pending Payments *************');
         $paymentData = []; 
 
         DB::connection()->enableQueryLog();
@@ -72,11 +73,11 @@ class TokenLookup extends Command
                              $newResponse =  $response->json();
 
                                // Log API request and response for debugging
-                        \Log::info('API Request: ' . json_encode($data));
-                        \Log::info('API Response: ' . json_encode($newResponse));
+                        \Log::info('TOKENLOOKUP API Request: ' . json_encode($data));
+                        \Log::info('TOKENLOOKUP API Response: ' . json_encode($newResponse));
 
                         $totalRecords = count($paymentLogs);
-                        \Log::info("Total Records to Update: " . $totalRecords);
+                        \Log::info("TOKENLOOKUP API Total Records to Update: " . $totalRecords);
 
  
                      if($newResponse['status'] == "true"){      
@@ -99,7 +100,7 @@ class TokenLookup extends Command
                          //Send SMS to User
                          $token =  isset($newResponse['recieptNumber']) ? $newResponse['recieptNumber'] : $newResponse['data']['recieptNumber'];
 
-                         $this->info('***** Sending token to the customer *************');
+                         $this->info('***** TOKENLOOKUP API :: Sending token to the customer *************');
                          
                          $baseUrl = env('SMS_MESSAGE');
 
@@ -112,14 +113,14 @@ class TokenLookup extends Command
                              'token' => "p42OVwe8CF2Sg6VfhXAi8aBblMnADKkuOPe65M41v7jMzrEynGQoVLoZdmGqBQIGFPbH10cvthTGu0LK1duSem45OtA076fLGRqX",
                              'sender' => "IBEDC",
                              'to' => $paymentLog->phone,
-                             "message" => "IBEDC - Your Payment Token is $token for this ReferenceNo $paymentLog->transaction_id",
+                             "message" => "Meter Token: $token  Your IBEDC Prepaid payment of $paymentLog->amount was successful. REF: $paymentLog->transaction_id. For Support: 07001239999",
                              "type" => 0,
                              "routing" => 3,
                          ];
  
                          $iresponse = Http::asForm()->post($baseUrl, $idata);
 
-                         $this->info('***** SMS has been sent to the customer *************');
+                         $this->info('***** TOKENLOOKUP API :: SMS has been sent to the customer *************');
 
                          $emailData = [
                             'token' => $token,
@@ -130,25 +131,25 @@ class TokenLookup extends Command
                             "payreference" => $paymentLog->transaction_id,
                         ];
 
-                         Mail::to($paymentLog->email)->bcc(["fortune.odesanya@ibedc.com, somto.anowai@ibedc.com,victor.ogiogio@ibedc.com, frank.obasogie@ibedc.com"])->send(
-                            new PrepaidPaymentMail($emailData));
+                         Mail::to($paymentLog->email)->send(new PrepaidPaymentMail($emailData));
  
-                        //return $newResponse;
+                        return $newResponse;
                       }
                         
  
                      }
                  });
                  \Log::info(DB::getQueryLog());
-                 $this->info('***** All payments processed successfully *************');
+                 $this->info('***** TOKENLOOKUP API :: All payments processed successfully *************');
                  
                  return $paymentData; //Return the data collected from payments
          } catch (\Exception $e) {
+            
+
+             $this->info('***** TOKENLOOKUP API :: Error Processing Payment *************');
              \Log::error($e->getMessage());
-
-             $this->info('***** Error Processing Payment *************');
-
-             return $this->sendError('Error', "We are experiencing issues retrieving tokens from ibedc  " . $e->getMessage(), Response::HTTP_BAD_REQUEST);
+            // return response()->json('Error', Response::HTTP_INTERNAL_SERVER_ERROR);
+             //return $this->sendError('Error', "We are experiencing issues retrieving tokens from ibedc" . $e->getMessage(), Response::HTTP_BAD_REQUEST);
          }
 
       

@@ -36,7 +36,7 @@ use App\Http\Controllers\AlternatePayment\LogoutController;
 use App\Http\Controllers\AlternatePayment\CustomerHistoryController;
 use App\Http\Controllers\FileDownloadController;
 use App\Http\Models\CRMDCustomers;
-
+use App\Http\Controllers\AlternatePayment\UploadImagesController;
 ///////////////////////////////////////////////////////////////
 # END OF ALTERNATE PAYMENT <CONTROLLERS>
 //////////////////////////////////////////////////////////////
@@ -364,7 +364,6 @@ Route::group(['prefix' => 'v3ibedc_AUTH_token', 'namespace' => 'Api\v3', 'middle
     Route::prefix('authenticate')->group(function() {
         Route::post('auth_login', [AuthenticationController::class, 'login']); // normal login    
 
-
         Route::group(['middleware' => 'customer_dashboard'], function () {
            // Route::middleware(['auth:sanctum'])->group(function() {
           Route::get('get_customer_details', [GetCustomerController::class, 'getCustomerDetails']); // normal login   
@@ -385,6 +384,10 @@ Route::group(['prefix' => 'v3ibedc_AUTH_token', 'namespace' => 'Api\v3', 'middle
           Route::get('customerbills/{account_no?}', [CustomerHistoryController::class, 'getCustomerBill']); 
 
           Route::get('customernotification/{meter_no?}', [PaymentProcessingController::class, 'notificationService']);
+
+          Route::post('upload_images', [UploadImagesController::class, 'storeImages']);
+
+
            // });
         });
         

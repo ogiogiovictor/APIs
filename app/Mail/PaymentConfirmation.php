@@ -13,13 +13,20 @@ class PaymentConfirmation extends Mailable
 {
     use Queueable, SerializesModels;
 
-    protected $payment;
+    protected $customer_name;
+    protected $email;
+    protected $amount;
+    protected $providerRef;
+
     /**
      * Create a new message instance.
      */
-    public function __construct($payment)
+    public function __construct($customer_name, $email, $amount, $providerRef)
     {
-        $this->payment = $payment;
+        $this->customer_name = $customer_name;
+        $this->email = $email;
+        $this->amount = $amount;
+        $this->providerRef = $providerRef;
     }
 
     /**
@@ -28,7 +35,8 @@ class PaymentConfirmation extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'Payment Confirmation For '. $this->payment['customer_name'],
+           // subject: 'Payment Confirmation For '. $this->payment['customer_name'],
+            subject: 'Payment Confirmation For '. $this->customer_name,
         );
     }
 
@@ -37,12 +45,12 @@ class PaymentConfirmation extends Mailable
      */
     public function content(): Content
     {
-        $paymentData = $this->payment;
-
         return new Content(
             view: 'email.payment_confirmation',
-            with: ['name' => $paymentData['customer_name'], 'email' => $this->payment['email'], 'amount' => $this->payment['amount'] , 
-            'providerRef' => $this->payment['providerRef'], 'BUID' => $this->payment['BUID'], 'object' => $this->payment ],
+            with: ['name' => $this->customer_name, 'email' => $this->email, 'amount' => $this->amount, 
+            'providerRef' => $this->providerRef ],
+
+           // with: ['name' => $this->user['name'], 'email' => $this->user['email'], 'password' => $this->password ],
         );
     }
 

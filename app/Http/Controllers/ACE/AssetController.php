@@ -54,6 +54,8 @@ class AssetController extends BaseApiController
        
     }
 
+  
+
     public function stats() {
 
         $cacheKey = 'warehouse_dashboard_stats';

@@ -68,6 +68,8 @@ class CaadController extends BaseApiController
                   //  'status' => 0
                 ]);
 
+                
+
             }else {
 
                 $validator = Validator::make($request->file('file_upload'), [
@@ -114,6 +116,9 @@ class CaadController extends BaseApiController
                     'created_by' => Auth::user()->id,
     
                 ]);
+                
+                $userRole = Auth::user()->roles->pluck('name')->first();
+                $this->addComment($processCAAD, $userRole);
 
                 dispatch(new ProcessCAADJob($processCAAD));
 
@@ -521,7 +526,7 @@ class CaadController extends BaseApiController
             'cco' => CaadEnum::APPROVED_BY_CCO->label(),
             'md' => CaadEnum::APPROVED_BY_MD->label(),
             'admin' => CaadEnum::ADMIN->label(),
-            default => '',
+            default => 'Created By' . Auth::user()->name,
         };
 
       return  $caadComment = CAADCommentApproval::create([

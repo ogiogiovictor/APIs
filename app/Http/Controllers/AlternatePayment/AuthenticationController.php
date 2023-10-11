@@ -11,6 +11,7 @@ use App\Services\CustomerService;
 use App\Http\Resources\NewResource;
 use Illuminate\Support\Str;
 use App\Models\Customer\CustomerAuthModel;
+use App\Http\Resources\IBEDCPayResource;
 
 
 class AuthenticationController extends BaseApiController
@@ -31,10 +32,10 @@ class AuthenticationController extends BaseApiController
                 $customers = (new CustomerService)->authenticateCustomers($meterNo, $accountType);
 
                 if(!$customers){
-                    return $this->sendError("Error", "No Customer Result Found", Response::HTTP_BAD_REQUEST);
+                    return $this->sendError("Error", "No Customer Results Found", Response::HTTP_BAD_REQUEST);
                 }
                // $success['Authorizations'] = hash('sha256', $plainTextToken = Str::random(80));
-                $success['customer'] = new NewResource($customers);
+                $success['customer'] = new IBEDCPayResource($customers);
 
                 //Insert Authorization Headers
                $insertAuthorisation =  CustomerAuthModel::create([

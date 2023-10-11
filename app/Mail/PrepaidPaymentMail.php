@@ -38,9 +38,9 @@ class PrepaidPaymentMail extends Mailable
     public function content(): Content
     {
         return new Content(
-            view: 'view.email.prepaid_confirmation',
-            with: ['name' => $data['custname'], 'meterno' => $this->payment['meterno'], 'custphoneno' => $this->payment['custphoneno'] , 
-            'payreference' => $this->payment['payreference'], 'amount' => $this->payment['amount'], 'token' => $this->payment['token'], ],
+            view: 'email.prepaid_confirmation',
+            with: ['name' => $this->data['custname'], 'meterno' => $this->data['meterno'], 'custphoneno' => $this->data['custphoneno'] , 
+            'payreference' => $this->data['payreference'], 'amount' => $this->data['amount'], 'token' => $this->data['token'], ],
         );
     }
 

@@ -13,8 +13,10 @@ class FeederEleven extends Model
     use HasFactory;
 
 
+    protected $connection = 'ace_db';
     protected $primaryKey = 'msrepl_tran_version';
     protected $table = "Acedata.dbo.11KV Feeder";
+
 
     public $timestamps = false;
 

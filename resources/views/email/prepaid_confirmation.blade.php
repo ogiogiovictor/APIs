@@ -99,19 +99,20 @@
                                 <td style="padding: 0 30px 20px">
                                     <p style="margin-bottom: 10px;">Hi {{ $name }},</p>
                                     <p style="margin-bottom: 10px;">
-                                   Thank you for making payment to your bills. See details belows:<hr/>
-                                <php echo $object; ?>
+                                   Thank you for making payment to your payment details below:<hr/>
+
                                     <ul>
-                                    <li> Business Hub {{ $BUID }} </li>
-                                    <li> Email {{ $email }} </li>
-                                    <li> Amount {{ $amount }}</li>
-                                    <li> TransactionID {{ $providerRef }}</li>
+                                    <li> Meter No: {{ $meterno }} </li>
+                                    <li> Phone: {{ $custphoneno }} </li>
+                                    <li> Amount:  {{ $amount }}</li>
+                                    <li> TransactionID:  {{ $payreference }}</li>
+                                    <li> <b>Token:</b> <h2> {{ $token }} </h2></li>
 
                                     </ul>
                                  
                                     </td>
                             </tr>
-                            
+
                             <tr>
                                 <td style="padding: 0 30px">
                                     <h4 style="font-size: 15px; color: #000000; font-weight: 600; margin: 0; text-transform: uppercase; margin-bottom: 10px"></h4>

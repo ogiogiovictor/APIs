@@ -36,7 +36,7 @@ class ProcessCAADJob implements ShouldQueue
        // $email = $this->process->email;
        //Get email of the User
        //$email = $this->getUser($this->process->region, $this->process->business_hub);
-        $levelFormat = $this->process->region.",".$this->process->business_hub.",";
+        $levelFormat = $this->process->region." ".$this->process->business_hub;
         
         $email = isset($levelFormat) ?  User::where("level", $levelFormat)->value("email") : "victor.ogiogio@ibedc.com";
         $name = isset($levelFormat)  ? User::where("level", $levelFormat)->value("name") : "Victor Ogiogio";

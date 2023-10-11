@@ -97,16 +97,14 @@
                             </tr>
                             <tr>
                                 <td style="padding: 0 30px 20px">
-                                    <p style="margin-bottom: 10px;">Hi {{ $data['name'] }},</p>
+                                    <p style="margin-bottom: 10px;">Hi {{ $name }},</p>
                                     <p style="margin-bottom: 10px;">
-                                   Thank you for making payment to your payment details below:<hr/>
-                                
+                                   Thank you for making payment to your bills. See details belows:<hr/>
+                              
                                     <ul>
-                                    <li> Meter No {{ $data['meterno'] }} </li>
-                                    <li> Phone {{ $custphoneno }} </li>
+                                    <li> Email {{ $email }} </li>
                                     <li> Amount {{ $amount }}</li>
                                     <li> TransactionID {{ $providerRef }}</li>
-                                    <li> Token {{ $token }}</li>
 
                                     </ul>
                                  
