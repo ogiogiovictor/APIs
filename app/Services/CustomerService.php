@@ -473,7 +473,7 @@ class CustomerService
         // ->first();
 
         if($accountType == 'Prepaid'){
-         return  ZoneECMI::where("MeterNo", $meterNo)->orWhere("AccountNo", $meterNo)->first();
+         return  ZoneECMI::where("MeterNo", $meterNo)->where("activated", 1)->first();
         }else {
          return ZoneCustomer::where("AccountNo", $meterNo)->whereIn("StatusCode", ['A', 'S'])->first();
         }
@@ -492,20 +492,6 @@ class CustomerService
         // return $customers;
 
     }
-    
-
-
-    // public function authenticateCustomersOLD($meterNo, $accountType) {
-    //     $customers =  DimensionCustomer::select('*')->where(function ($query) use ($meterNo, $accountType) {
-    //         $query->whereNotIn("StatusCode", ["0, I, C, N"]);
-    //         $query->where('AccountNo', 'like', '%'. $meterNo .  '%');
-    //         $query->orWhere('MeterNo', $meterNo );
-    //         $query->Where('AccountType', $accountType);
-    //     })->first(); 
-
-    //     return $customers;
-
-    // }
 
 
 

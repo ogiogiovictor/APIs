@@ -68,10 +68,13 @@ class RequeryToken extends Command
                              'token' => "p42OVwe8CF2Sg6VfhXAi8aBblMnADKkuOPe65M41v7jMzrEynGQoVLoZdmGqBQIGFPbH10cvthTGu0LK1duSem45OtA076fLGRqX",
                              'sender' => "IBEDC",
                              'to' => $paymentLog->phone,
-                             "message" => "IBEDC - Your Payment Token is $transactionID->Token for this ReferenceNo $paymentLog->transaction_id",
+                            // "message" => "IBEDC - Your Payment Token is $transactionID->Token for this ReferenceNo $paymentLog->transaction_id",
+                             "message" => "Meter Token: $transactionID->Token  Your payment of $paymentLog->amount for MeterNo $paymentLog->meter_no was successful. REF: $paymentLog->transaction_id. For Support: 07001239999",
                              "type" => 0,
                              "routing" => 3,
                          ];
+
+                         //  "message" => "Meter Token: $token Your payment of $amount for Meter No $meterNo was successful. REF: $transactionID. For Support: 07001239999",
  
                          $iresponse = Http::asForm()->post($baseUrl, $idata);
 

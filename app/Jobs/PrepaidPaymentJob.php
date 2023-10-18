@@ -151,8 +151,6 @@ class PrepaidPaymentJob implements ShouldQueue
 
                     Mail::send('email.middleware_error', $data, function ($message) {
                         $message->to('victor.ogiogio@ibedc.com', 'Victor Ogiogio')
-                                //->cc('fortune.odesanya@ibedc.com', 'Fortune Odesanya')
-                            // ->bcc('somto.anowai@ibedc.com', 'Somto Anowai')
                                 ->subject('TOKEN ERROR - '. $this->payment['transaction_id']);
                     });
                 

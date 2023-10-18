@@ -13,6 +13,7 @@ return new class extends Migration
     {
         Schema::table('payment_logs', function (Blueprint $table) {
             $table->string('owner')->default("null");
+            $table->string('response_status')->default("0");
         });
     }
 
@@ -23,6 +24,7 @@ return new class extends Migration
     {
         Schema::table('payment_logs', function (Blueprint $table) {
             $table->dropColumn('owner');
+            $table->dropColumn('response_status');
         });
     }
 };

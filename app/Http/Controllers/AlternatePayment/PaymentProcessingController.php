@@ -28,106 +28,109 @@ use App\Models\ContactUs;
 use App\Models\ZonePayments;
 use App\Models\ZonePaymentTransaction;
 use App\Jobs\PrepaidPaymentJob;
+use App\Mail\ContactMail;
+use Illuminate\Support\Facades\Mail; 
+//use Mail;
 
 
 class PaymentProcessingController extends BaseApiController
 {
 
-    public function textpayment() {
-        $paymentData = []; // Initialize an array to store payment data
+    // public function textpayment() {
+    //     $paymentData = []; // Initialize an array to store payment data
 
-        DB::connection()->enableQueryLog();
+    //     DB::connection()->enableQueryLog();
 
-        \Log::info('***** Starting to push Pending Payments *************');
-        try {
-           PaymentModel::whereNull('receiptno')
-                ->where('account_type', 'prepaid')
-                ->where('status', 'pending')
-                ->whereNotNull('providerRef')
-                ->chunk(2, function ($paymentLogs) use (&$paymentData) {
-                    // Add the payment logs to the data array
-                    foreach ($paymentLogs as $paymentLog) {
+    //     \Log::info('***** Starting to push Pending Payments *************');
+    //     try {
+    //        PaymentModel::whereNull('receiptno')
+    //             ->where('account_type', 'prepaid')
+    //             ->where('status', 'pending')
+    //             ->whereNotNull('providerRef')
+    //             ->chunk(2, function ($paymentLogs) use (&$paymentData) {
+    //                 // Add the payment logs to the data array
+    //                 foreach ($paymentLogs as $paymentLog) {
                        
-                        $baseUrl = env('MIDDLEWARE_URL');
-                        $addCustomerUrl = $baseUrl . 'vendelect';
+    //                     $baseUrl = env('MIDDLEWARE_URL');
+    //                     $addCustomerUrl = $baseUrl . 'vendelect';
         
-                        $data = [
-                                'meterno' => $paymentLog->meter_no,
-                                'vendtype' => $paymentLog->account_type,
-                                'amount' => $paymentLog->amount, 
-                                "provider" => "IBEDC",
-                                "custname" => $paymentLog->customer_name,
-                                "businesshub" => $paymentLog->BUID,
-                                "custphoneno" => $paymentLog->phone,
-                                "payreference" => $paymentLog->transaction_id,
-                                "colagentid" => "IB001",
+    //                     $data = [
+    //                             'meterno' => $paymentLog->meter_no,
+    //                             'vendtype' => $paymentLog->account_type,
+    //                             'amount' => $paymentLog->amount, 
+    //                             "provider" => "IBEDC",
+    //                             "custname" => $paymentLog->customer_name,
+    //                             "businesshub" => $paymentLog->BUID,
+    //                             "custphoneno" => $paymentLog->phone,
+    //                             "payreference" => $paymentLog->transaction_id,
+    //                             "colagentid" => "IB001",
         
-                            ];
+    //                         ];
 
-                            $response = Http::withoutVerifying()->withHeaders([
-                                'Authorization' => 'Bearer LIVEKEY_711E5A0C138903BBCE202DF5671D3C18',
-                            ])->post($addCustomerUrl, $data);
+    //                         $response = Http::withoutVerifying()->withHeaders([
+    //                             'Authorization' => 'Bearer LIVEKEY_711E5A0C138903BBCE202DF5671D3C18',
+    //                         ])->post($addCustomerUrl, $data);
                     
-                            $newResponse =  $response->json();
+    //                         $newResponse =  $response->json();
 
-                    // Log API request and response for debugging
-                        \Log::info('API Request: ' . json_encode($data));
-                        \Log::info('API Response: ' . json_encode($newResponse));
+    //                 // Log API request and response for debugging
+    //                     \Log::info('API Request: ' . json_encode($data));
+    //                     \Log::info('API Response: ' . json_encode($newResponse));
 
-                        $totalRecords = count($paymentLogs);
-                        \Log::info("Total Records to Update: " . $totalRecords);
+    //                     $totalRecords = count($paymentLogs);
+    //                     \Log::info("Total Records to Update: " . $totalRecords);
 
 
-                    if($newResponse['status'] == "true"){   
+    //                 if($newResponse['status'] == "true"){   
                         
-                        $paymentData[] = $data;
-                         // Log added data for debugging
-                        \Log::info('Added Data: ' . json_encode($data));
+    //                     $paymentData[] = $data;
+    //                      // Log added data for debugging
+    //                     \Log::info('Added Data: ' . json_encode($data));
 
                         
 
-                        $update = PaymentModel::where("transaction_id", $paymentLog->transaction_id)->update([
-                            'status' => $newResponse['status'] == "true" ?  'success' : 'failed', //"resp": "00",
-                            'provider' => isset($newResponse['transactionReference'])  ? $newResponse['transactionReference'] : $newResponse['data']['transactionReference'],
-                        // 'providerRef' => $newResponse['transactionReference'],
-                            'receiptno' =>   isset($newResponse['recieptNumber']) ? $newResponse['recieptNumber'] : $newResponse['data']['recieptNumber'],  //Carbon::now()->format('YmdHis').time()
-                          //  'BUID' => $paymentLog->BUID,
-                            'Descript' =>  isset($newResponse['message']) ? $newResponse['message'] : $newResponse['transaction_status'],
-                        ]);
+    //                     $update = PaymentModel::where("transaction_id", $paymentLog->transaction_id)->update([
+    //                         'status' => $newResponse['status'] == "true" ?  'success' : 'failed', //"resp": "00",
+    //                         'provider' => isset($newResponse['transactionReference'])  ? $newResponse['transactionReference'] : $newResponse['data']['transactionReference'],
+    //                     // 'providerRef' => $newResponse['transactionReference'],
+    //                         'receiptno' =>   isset($newResponse['recieptNumber']) ? $newResponse['recieptNumber'] : $newResponse['data']['recieptNumber'],  //Carbon::now()->format('YmdHis').time()
+    //                       //  'BUID' => $paymentLog->BUID,
+    //                         'Descript' =>  isset($newResponse['message']) ? $newResponse['message'] : $newResponse['transaction_status'],
+    //                     ]);
 
-                        \Log::info("Updated Records: " . $updatedRecords);
+    //                     \Log::info("Updated Records: " . $updatedRecords);
 
-                        //Send SMS to User
-                        $token =  isset($newResponse['recieptNumber']) ? $newResponse['recieptNumber'] : $newResponse['data']['recieptNumber'];
+    //                     //Send SMS to User
+    //                     $token =  isset($newResponse['recieptNumber']) ? $newResponse['recieptNumber'] : $newResponse['data']['recieptNumber'];
 
-                        \Log::info('***** Sending token to the customer *************');
+    //                     \Log::info('***** Sending token to the customer *************');
 
-                        $baseUrl = env('SMS_MESSAGE');
-                        $data = [
-                            'token' => "p42OVwe8CF2Sg6VfhXAi8aBblMnADKkuOPe65M41v7jMzrEynGQoVLoZdmGqBQIGFPbH10cvthTGu0LK1duSem45OtA076fLGRqX",
-                            'sender' => "IBEDC",
-                            'to' => $paymentLog->phone,
-                            "message" => "IBEDC - Your Payment Token is $token for this ReferenceNo $paymentLog->transaction_id",
-                            "type" => 0,
-                            "routing" => 3,
-                        ];
+    //                     $baseUrl = env('SMS_MESSAGE');
+    //                     $data = [
+    //                         'token' => "p42OVwe8CF2Sg6VfhXAi8aBblMnADKkuOPe65M41v7jMzrEynGQoVLoZdmGqBQIGFPbH10cvthTGu0LK1duSem45OtA076fLGRqX",
+    //                         'sender' => "IBEDC",
+    //                         'to' => $paymentLog->phone,
+    //                         "message" => "IBEDC - Your Payment Token is $token for this ReferenceNo $paymentLog->transaction_id",
+    //                         "type" => 0,
+    //                         "routing" => 3,
+    //                     ];
 
-                        $iresponse = Http::asForm()->post($baseUrl, $data);
-                        \Log::info('***** SMS has been sent to the customer  *************');
+    //                     $iresponse = Http::asForm()->post($baseUrl, $data);
+    //                     \Log::info('***** SMS has been sent to the customer  *************');
 
-                     }
+    //                  }
                        
 
-                    }
-                });
-                \Log::info(DB::getQueryLog());
-            return $paymentData;
-        } catch (\Exception $e) {
-            \Log::error($e->getMessage());
-            return $this->sendError('Error', "We are experiencing issues retrieving tokens from ibedc  " . $e->getMessage(), Response::HTTP_BAD_REQUEST);
-        }
+    //                 }
+    //             });
+    //             \Log::info(DB::getQueryLog());
+    //         return $paymentData;
+    //     } catch (\Exception $e) {
+    //         \Log::error($e->getMessage());
+    //         return $this->sendError('Error', "We are experiencing issues retrieving tokens from ibedc  " . $e->getMessage(), Response::HTTP_BAD_REQUEST);
+    //     }
       
-    }
+    // }
 
     
    
@@ -185,18 +188,17 @@ class PaymentProcessingController extends BaseApiController
 
             // Create payment record using query builder
             $payment =  PaymentModel::create([
-                'email' => $request->email ?? '',
+               'email' => $request->email ?? '',
                'transaction_id' => strtoUpper($limitedUuid),   //strtoUpper(Str::uuid()->toString()) ?? $transactionID,
                'phone' => $request->phone ?? '',
                 'amount' => $request->amount,
                 'account_type' => $request->account_type,
                 'account_number' => trim($request->account_number),
                 'payment_source' => $request->payment_source,
-               // 'meter_no' => $request->meter_no,
                 'status' => "pending",
                 'customer_name' => $custInfo->Surname.' '. $custInfo->FirstName,
                 'date_entered' => Carbon::now(),
-                'BUID' => $buCode ?? $custInfo->BUID,
+                'BUID' => $buCode ?: $custInfo->BUID,
                 'owner' => $request->owner
             ]);
            
@@ -280,187 +282,6 @@ class PaymentProcessingController extends BaseApiController
         }
 
 
-    }
-
-
-
-
-    public function processPayment(Request $request){
-      
-        if(!$request->payment_status){
-            return $this->sendError('Error', "Error Initiating Payment", Response::HTTP_BAD_REQUEST);
-        }
-
-        $checkRef =  PaymentModel::where("transaction_id", $request->payment_status['txnref'])->first();
-
-    
-       //return $checkRef;
-       if($checkRef && $request->payment_status['payRef'] && $request->payment_status['resp']){
-
-            if($checkRef->account_type == 'Postpaid'){
-
-                $custInfo = ZoneCustomer::where("AccountNo", $checkRef->account_number)->first();
-                $mainBills = ZoneBills::where('AccountNo', $checkRef->account_number)->latest('BillDate')->first();
-
-                $receiptNo = Carbon::now()->format('YmdHis');  //YmdHisu
-
-                $checkExist = ZonePayments::where("receiptnumber", $checkRef->transaction_id)->exists();  // //ZonePayments   // TestModel
-
-                if($checkExist){
-                    return $this->sendError('Error', "Duplicate Reference Key". $checkRef->transaction_id, Response::HTTP_BAD_REQUEST);
-                }
-
-
-                try{
-
-
-                    //Redirecting postpaid to midlleware
-                    // $baseUrl = env('MIDDLEWARE_URL');
-                    //      $addCustomerUrl = $baseUrl . 'vendelect';
-         
-                    //      $data = [
-                    //              'meterno' => $checkRef->meter_no,
-                    //              'vendtype' => $checkRef->account_type,
-                    //              'amount' => $request->payment_status['apprAmt'], 
-                    //              "provider" => "IBEDC",
-                    //              "custname" => $checkRef->customer_name,
-                    //              "businesshub" => $custInfo->BUID,
-                    //              "custphoneno" => $checkRef->phone,
-                    //              "payreference" => $checkRef->transaction_id,
-                    //              "colagentid" => "IB001",
-                                         
-                    //          ];
-                     
-
-
-
-                    $generateRefRand = strtoupper(Str::uuid()->toString());
-
-                    $addPaymentStatus = ZonePaymentTransaction::create([  // ZonePaymentTransaction   //TestModelPayments
-                        'transid' =>  $generateRefRand, //strval($addPayment->PaymentTransactionId),
-                        'transref' =>  $checkRef->transaction_id,
-                        'enteredby' => 1926,//113, //$checkRef->payment_source,  //An account to be created by Joseph
-                        'transdate' => Carbon::now()->format('Y-m-d H:i:s'),
-                        'transamount' => $request->payment_status['apprAmt'],
-                        'transstatus' =>  $request->payment_status['resp'] == '00' ?  'success' : 'failed', 
-                        'accountno' => $checkRef->account_number,
-                        'transactionresponsemessage' => $request->payment_status['payRef'],
-                        'paymenttype' => 3, //We need to check this later,
-                        'TransactionBusinessUnit' => $custInfo->BUID,
-                    ]);
-
-                        //Update Billing Status  //ZonePayments   // TestModel
-                        $addPayment = ZonePayments::create([
-                            //"PaymentID" =>  $checkRef->transaction_id,
-                            "BillID" => strval($mainBills->BillID),
-                            "PaymentTransactionId" => $addPaymentStatus->transid,// strtoupper(Str::uuid()->toString()),   // strval($request->payment_status['payRef']),  //$checkRef->providerRef,
-                            "receiptnumber" => $checkRef->transaction_id,  //?? strval($receiptNo),
-                            "PaymentSource" => 101,
-                            "MeterNo" => strval($custInfo->MeterNo) ?? 'NULL',
-                            "AccountNo" => strval($custInfo->AccountNo) ?? 'NULL',
-                            "PayDate" =>  strval(Carbon::now()->format('Y-m-d H:i:s')),
-                            "PayMonth" => Carbon::now()->format('m'),
-                            "PayYear" => Carbon::now()->format('Y'),
-                            "OperatorID" => 1926,
-                            "TotalDue" => 0.00,
-                            "Payments" => $request->payment_status['apprAmt'],
-                            //"Balance" => 'NULL',
-                            "Processed" => 0,
-                            //"ProcessedDate" => 'NULL',
-                            "BusinessUnit" => BusinessUnit::where("BUID", $custInfo->BUID)->value("Name")  ?? strval($custInfo->BUID),
-                            "DateEngtered" => strval(Carbon::now()->format('Y-m-d H:i:s')),
-                            "CustomerID" => strval($custInfo->CustomerID),
-                        ]);
-
-                       
-
-
-                        $update = PaymentModel::where("transaction_id", $checkRef->transaction_id)->update([
-                            'status' => $request->payment_status['resp'] == '00' ?  'success' : 'failed', //"resp": "00",
-                            'provider' => $request->payment_status['provider'] ?? '',
-                            'providerRef' => $request->payment_status['payRef'],
-                            'receiptno' =>  $receiptNo,  //Carbon::now()->format('YmdHis').time()
-                            'BUID' => $custInfo->BUID,
-                            'Descript' => $request->payment_status['desc'],
-                        ]);
-                       
-                        //Dispatch the event
-                        dispatch(new PaymentLogJobs($checkRef));
-                        
-                        //I still have one table to add here
-                        return $this->sendSuccess($addPayment, "Payment Successfully Completed", Response::HTTP_OK);
-
-
-                }catch(\Exception $e){
-
-                    return $this->sendError('Error', $e, Response::HTTP_BAD_REQUEST);
-
-                }
-               
-                
-               
-            
-            } else if($checkRef->account_type == 'Prepaid'){ 
-
-               
-                $zoneECMI = ZoneECMI::where("MeterNo", $request->payment_status['MeterNo'])->first();
-
-                if(!$request->payment_status['MeterNo'] || !$request->payment_status['account_type'] || !$request->payment_status['phone'] || !$request->payment_status['amount']){
-
-                    return $this->sendError('Error', "Please send all required information", Response::HTTP_BAD_REQUEST);
-                }
-
-                if(!$zoneECMI){
-                    return $this->sendError('Error', "Meter Information Not Found", Response::HTTP_BAD_REQUEST);
-                }
-
-                $update = PaymentModel::where("transaction_id", $checkRef->transaction_id)->update([
-                    'providerRef' => $request->payment_status['payRef'],
-                ]);
-
-               $amount = $request->amount; // please remove this on live later and add the amount request to the generate token;
-               $customerName = $zoneECMI->Surname.' '. $zoneECMI->OtherNames;
-               $phone = $request->payment_status['phone']  ?? $zoneECMI->Mobile;
-
-               //Before you generate token check if txnref exist;
-               $checkExist = PaymentModel::where("transaction_id", $request->payment_status['txnref'])->value("receiptno");
-               if($checkExist){
-                return $this->sendSuccess($checkExist, "PaymentSource Successfully Loaded", Response::HTTP_OK);
-               }else{
-
-                $payment = [
-                    'meterNo' => $request->payment_status['MeterNo'],
-                    'account_type' => $request->payment_status['account_type'],
-                    'amount' => $request->payment_status['amount'],
-                    'disco_name' => "IBEDC",
-                    'customerName' => $customerName,
-                    'BUID' => $zoneECMI->BUID,
-                    'phone' => $phone,
-                    'transaction_id' => $checkRef->transaction_id,
-                    'email' => $checkRef->email,
-                    'id' => $checkRef->id,
-                ];
-
-                
-                //Dispatch a job and send token to customer
-                dispatch(new PrepaidPaymentJob($payment))->delay(3);
-
-                return $this->sendSuccess($payment, "Payment Successfully Token will be sent to your email", Response::HTTP_OK);
-
-                // return $this->generateToken($request->payment_status['MeterNo'], $request->payment_status['account_type'], 
-                // $request->payment_status['amount'], "IBEDC", $customerName, $zoneECMI->BUID, $phone, $checkRef->transaction_id);  
- 
-               }
-
-              
-            }
-        
-
-      } else {
-        return $this->sendError('Error', "Error Processing Payment", Response::HTTP_BAD_REQUEST);
-      }
-
-       
     }
 
 
@@ -606,6 +427,13 @@ class PaymentProcessingController extends BaseApiController
             'unique_code' => 'required',
         ]);
 
+        $name = $request->name;
+        $email = $request->email;
+        $subject = $request->subject;
+        $accountType = $request->accountType;
+        $uniqueCode = $request->unique_code;
+        $message = $request->message;
+
         $createResponse = ContactUs::create([
             'name' => $request->name,
             'message' => $request->message,
@@ -614,6 +442,27 @@ class PaymentProcessingController extends BaseApiController
             'accountType' => $request->accountType,
             'unique_code' => $request->unique_code
         ]);
+
+        $emails = [
+            'victor.ogiogio@ibedc.com',
+            'fortune.odesanya@ibedc.com',
+            'mubaraq.akanbi@ibedc.com',
+            'udeme.akpan@ibedc.com',
+            'frank.obasogie@ibedc.com',
+            'sinmisola.balogun@ibedc.com'
+        ];
+
+       
+       
+       
+        Mail::to($emails)->send(new ContactMail(
+            $name,
+            $email,
+            $subject,
+            $accountType,
+            $uniqueCode,
+            $message
+        ));
 
         return $this->sendSuccess($createResponse, "Successfully Sent", Response::HTTP_OK);
     
@@ -665,6 +514,234 @@ class PaymentProcessingController extends BaseApiController
 
         return $this->sendSuccess($checkTransaction, "Notification Successfully Loaded", Response::HTTP_OK);
     }
+
+
+
+
+    ############################################################### PROCESS PAYMENT CODE IMPROVEMENT ############################################################
+
+    // public function processPayment(Request $request){
+    //     //return $this->sendError('Error', "Error Initiating Payment", Response::HTTP_BAD_REQUEST);
+
+    //     $checkRef =  PaymentModel::where("transaction_id", $request->payment_status['txnref'])->first();
+
+    //     $flutterData = [
+    //         'SECKEY' => 'FLWSECK-d1c7523a58aad65d4585d47df227ee25-X',
+    //         "txref" => $checkRef->transaction_id
+    //     ];
+        
+    //     $flutterUrl = "https://api.ravepay.co/flwv3-pug/getpaidx/api/v2/verify";
+    //     $iresponse = Http::post($flutterUrl, $flutterData);
+    //     $flutterResponse = $iresponse->json(); // Change variable name to lowercase
+        
+    //     if ($flutterResponse['status'] != "success" && $flutterResponse['data']['status'] != 'successful') {
+    //         return $this->sendError('Error', "Error Completing Payment", Response::HTTP_BAD_REQUEST);
+    //     }
+        
+    //     if (!$request->payment_status) {
+    //         return $this->sendError('Error', "Error Initiating Payment", Response::HTTP_BAD_REQUEST);
+    //     }
+        
+
+
+    //     if ($flutterResponse['status'] == "success" && $flutterResponse['data']['status'] == 'successful') {
+    //         $update = PaymentModel::where("transaction_id", $checkRef->transaction_id)->update([
+    //             'providerRef' => $flutterResponse['data']['flwref'],
+    //         ]);
+    //     }
+       
+       
+    //     if($request->payment_status['payRef'] == 'undefined' || $request->payment_status['payRef'] == 'NULL' ){
+    //         return $this->sendError('Error', "Kindly Complete Your Payment", Response::HTTP_BAD_REQUEST);
+    //     }
+    
+    //    //return $checkRef;
+    //    if($checkRef && $request->payment_status['payRef'] && $request->payment_status['resp']){
+
+    //         if($checkRef->account_type == 'Postpaid'){
+
+    //             $custInfo = ZoneCustomer::where("AccountNo", $checkRef->account_number)->first();
+    //             $mainBills = ZoneBills::where('AccountNo', $checkRef->account_number)->latest('BillDate')->first();
+
+    //             $receiptNo = Carbon::now()->format('YmdHis');  //YmdHisu
+
+    //             $checkExist = ZonePayments::where("receiptnumber", $checkRef->transaction_id)->exists();  // //ZonePayments   // TestModel
+
+    //             if($checkExist){
+    //                 return $this->sendError('Error', "Duplicate Reference Key". $checkRef->transaction_id, Response::HTTP_BAD_REQUEST);
+    //             }
+
+
+    //             try{
+
+    //                 $update = PaymentModel::where("transaction_id", $checkRef->transaction_id)->update([
+    //                     'status' => $request->payment_status['resp'] == '00' ?  'success' : 'failed', //"resp": "00",
+    //                     'provider' => $request->payment_status['provider'] ?? '',
+    //                     //'providerRef' => $request->payment_status['payRef'],
+    //                     'receiptno' =>  $receiptNo,  //Carbon::now()->format('YmdHis').time()
+    //                     'BUID' => $custInfo->BUID,
+    //                     'Descript' => $request->payment_status['desc'],
+    //                 ]);
+
+
+    //               //  Redirecting postpaid to midlleware
+    //                 $baseUrl = env('MIDDLEWARE_URL');
+    //                 $addCustomerUrl = $baseUrl . 'vendelect';
+         
+    //                 $data = [
+    //                     'meterno' => $checkRef->account_number,
+    //                     'vendtype' => $checkRef->account_type,
+    //                     'amount' => $request->payment_status['apprAmt'], 
+    //                     "provider" => "IBEDC",
+    //                     "custname" => $checkRef->customer_name,
+    //                     "businesshub" => $custInfo->BUID,
+    //                     "custphoneno" => $checkRef->phone,
+    //                     "payreference" => $checkRef->transaction_id,
+    //                     "colagentid" => "IB001",
+                                         
+    //                 ];
+
+    //                 $response = Http::withoutVerifying()->withHeaders([
+    //                     'Authorization' => 'Bearer LIVEKEY_711E5A0C138903BBCE202DF5671D3C18',
+    //                 ])->post($addCustomerUrl, $data);
+            
+    //                 $newResponse =  $response->json();
+
+                   
+
+    //                 if($newResponse['status'] == "false"){  
+                        
+    //                     $update = PaymentModel::where("transaction_id", $checkRef->transaction_id)->update([
+    //                         'response_status' => 1,
+                        
+    //                     ]);
+
+    //                         // $generateRefRand = strtoupper(Str::uuid()->toString());
+
+    //                         // $addPaymentStatus = ZonePaymentTransaction::create([  // ZonePaymentTransaction   //TestModelPayments
+    //                         //     'transid' =>  $generateRefRand, //strval($addPayment->PaymentTransactionId),
+    //                         //     'transref' =>  $checkRef->transaction_id,
+    //                         //     'enteredby' => 1926,//113, //$checkRef->payment_source,  //An account to be created by Joseph
+    //                         //     'transdate' => Carbon::now()->format('Y-m-d H:i:s'),
+    //                         //     'transamount' => $request->payment_status['apprAmt'],
+    //                         //     'transstatus' =>  $request->payment_status['resp'] == '00' ?  'success' : 'failed', 
+    //                         //     'accountno' => $checkRef->account_number,
+    //                         //     'transactionresponsemessage' => $request->payment_status['payRef'],
+    //                         //     'paymenttype' => 3, //We need to check this later,
+    //                         //     'TransactionBusinessUnit' => $custInfo->BUID,
+    //                         // ]);
+
+    //                             //Update Billing Status  //ZonePayments   // TestModel
+    //                         // $addPayment = ZonePayments::create([
+    //                         //     //"PaymentID" =>  $checkRef->transaction_id,
+    //                         //     "BillID" => strval($mainBills->BillID),
+    //                         //     "PaymentTransactionId" => $addPaymentStatus->transid,// strtoupper(Str::uuid()->toString()),   // strval($request->payment_status['payRef']),  //$checkRef->providerRef,
+    //                         //     "receiptnumber" => $checkRef->transaction_id,  //?? strval($receiptNo),
+    //                         //     "PaymentSource" => 101,
+    //                         //     "MeterNo" => strval($custInfo->MeterNo) ?? 'NULL',
+    //                         //     "AccountNo" => strval($custInfo->AccountNo) ?? 'NULL',
+    //                         //     "PayDate" =>  strval(Carbon::now()->format('Y-m-d H:i:s')),
+    //                         //     "PayMonth" => Carbon::now()->format('m'),
+    //                         //     "PayYear" => Carbon::now()->format('Y'),
+    //                         //     "OperatorID" => 1926,
+    //                         //     "TotalDue" => 0.00,
+    //                         //     "Payments" => $request->payment_status['apprAmt'],
+    //                         //     //"Balance" => 'NULL',
+    //                         //     "Processed" => 0,
+    //                         //     //"ProcessedDate" => 'NULL',
+    //                         //     "BusinessUnit" => $custInfo->BUID,    // BusinessUnit::where("BUID", $custInfo->BUID)->value("Name")  ?? strval($custInfo->BUID),
+    //                         //     "DateEngtered" => strval(Carbon::now()->format('Y-m-d H:i:s')),
+    //                         //     "CustomerID" => strval($custInfo->CustomerID),
+    //                         // ]);
+
+                       
+    //                  }
+                        
+                       
+    //                     //Dispatch the event
+                   
+    //                     dispatch(new PaymentLogJobs($checkRef));
+                       
+                        
+    //                 //I still have one table to add here
+    //                 //return $this->sendSuccess($addPayment, "Payment Successfully Completed", Response::HTTP_OK);
+    //                 return $this->sendSuccess($checkRef, "Payment Successfully Completed", Response::HTTP_OK);
+
+
+    //             }catch(\Exception $e){
+
+    //                 return $this->sendError('Error', $e, Response::HTTP_BAD_REQUEST);
+
+    //             }
+               
+                
+               
+            
+    //         } else if($checkRef->account_type == 'Prepaid'){ 
+ 
+    //             if($request->payment_status['payRef'] == 'undefined' || $request->payment_status['payRef'] == 'NULL' ){
+    //                 return $this->sendError('Error', "Kindly Complete Your Payment", Response::HTTP_BAD_REQUEST);
+    //             }
+               
+    //             $zoneECMI = ZoneECMI::where("MeterNo", $request->payment_status['MeterNo'])->first();
+
+    //             if(!$request->payment_status['MeterNo'] || !$request->payment_status['account_type'] || !$request->payment_status['phone'] || !$request->payment_status['amount']){
+
+    //                 return $this->sendError('Error', "Please send all required information", Response::HTTP_BAD_REQUEST);
+    //             }
+
+    //             if(!$zoneECMI){
+    //                 return $this->sendError('Error', "Meter Information Not Found", Response::HTTP_BAD_REQUEST);
+    //             }
+
+    //             // $update = PaymentModel::where("transaction_id", $checkRef->transaction_id)->update([
+    //             //     'providerRef' => $request->payment_status['payRef'],
+    //             // ]);
+
+    //            $amount = $request->amount; // please remove this on live later and add the amount request to the generate token;
+    //            $customerName = $zoneECMI->Surname.' '. $zoneECMI->OtherNames;
+    //            $phone = $request->payment_status['phone']  ?? $zoneECMI->Mobile;
+
+    //            //Before you generate token check if txnref exist;
+    //            $checkExist = PaymentModel::where("transaction_id", $request->payment_status['txnref'])->value("receiptno");
+    //            if($checkExist){
+    //             return $this->sendSuccess($checkExist, "PaymentSource Successfully Loaded", Response::HTTP_OK);
+    //            }else{
+
+    //             $payment = [
+    //                 'meterNo' => $request->payment_status['MeterNo'],
+    //                 'account_type' => $request->payment_status['account_type'],
+    //                 'amount' => $request->payment_status['amount'],
+    //                 'disco_name' => "IBEDC",
+    //                 'customerName' => $customerName,
+    //                 'BUID' => $zoneECMI->BUID,
+    //                 'phone' => $phone,
+    //                 'transaction_id' => $checkRef->transaction_id,
+    //                 'email' => $checkRef->email,
+    //                 'id' => $checkRef->id,
+    //             ];
+
+                
+    //             //Dispatch a job and send token to customer
+    //             dispatch(new PrepaidPaymentJob($payment))->delay(3);
+
+    //             return $this->sendSuccess($payment, "Payment Successfully Token will be sent to your email", Response::HTTP_OK);
+
+    //             // return $this->generateToken($request->payment_status['MeterNo'], $request->payment_status['account_type'], 
+    //             // $request->payment_status['amount'], "IBEDC", $customerName, $zoneECMI->BUID, $phone, $checkRef->transaction_id);  
+ 
+    //            }
+
+              
+    //         }
+        
+
+    //   } else {
+    //     return $this->sendError('Error', "Error Processing Payment", Response::HTTP_BAD_REQUEST);
+    //   }
+
+       
+    // }
 
    
 

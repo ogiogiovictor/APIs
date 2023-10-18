@@ -32,7 +32,6 @@ class PaymentLogJobs implements ShouldQueue
     public function handle(): void
     {
        
-
         //Send SMS
         //Send SMS to the Customer Here
         $amount = $this->payment->amount;

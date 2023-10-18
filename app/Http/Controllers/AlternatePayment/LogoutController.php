@@ -12,18 +12,25 @@ class LogoutController extends Controller
 
         $userId = $request->Authorization;
 
-        $deleteForce = CustomerAuthModel::where('Authorization', $userId)->get();
+        $user = CustomerAuthModel::where('Authorization', $userId)->first();
 
-        foreach ($deleteForce as $user) {
+         // Check if the user exists
+        if ($user) {
+            // Delete all records with the same account number
+            CustomerAuthModel::where('accountno', $user->accountno)->forceDelete();
+
+            // Delete the user
             $user->forceDelete();
-        }
 
+            return response()->json(['message' => 'Logged out successfully', 'user' => $userId]);
+        } else {
+            return response()->json(['message' => 'User not found'], 404);
+        }
         
- 
-        //$user =  auth()->user()->tokens()->delete();
-     
-         
-         return response()->json(['message' => 'Logged out successfully', 'user' => $userId]);
+       //  return response()->json(['message' => 'Logged out successfully', 'user' => $userId]);
 
     }
 }
+
+
+

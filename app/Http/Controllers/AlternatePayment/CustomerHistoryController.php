@@ -18,6 +18,8 @@ class CustomerHistoryController extends BaseApiController
 {
     public function getCustomerHistory($type, $uniqueno){
 
+       // return $this->sendError('Error', "Error Initiating Payment", Response::HTTP_BAD_REQUEST);
+
         if(!$type || !$uniqueno){
             return $this->sendError("Parameters to process request missing", Response::HTTP_BAD_REQUEST);
         }

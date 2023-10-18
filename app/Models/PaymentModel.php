@@ -28,7 +28,8 @@ class PaymentModel extends Model
         'receiptno',
         'payment_source',
         'Descript',
-        'owner'
+        'owner',
+        'response_status'
     ];
 
 }

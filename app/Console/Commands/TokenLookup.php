@@ -113,7 +113,7 @@ class TokenLookup extends Command
                              'token' => "p42OVwe8CF2Sg6VfhXAi8aBblMnADKkuOPe65M41v7jMzrEynGQoVLoZdmGqBQIGFPbH10cvthTGu0LK1duSem45OtA076fLGRqX",
                              'sender' => "IBEDC",
                              'to' => $paymentLog->phone,
-                             "message" => "Meter Token: $token  Your IBEDC Prepaid payment of $paymentLog->amount was successful. REF: $paymentLog->transaction_id. For Support: 07001239999",
+                             "message" => "Meter Token: $token  Your IBEDC Prepaid payment of $paymentLog->amount for Meter No $paymentLog->meter_no  was successful. REF: $paymentLog->transaction_id. For Support: 07001239999",
                              "type" => 0,
                              "routing" => 3,
                          ];

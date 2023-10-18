@@ -37,6 +37,7 @@ use App\Http\Controllers\AlternatePayment\CustomerHistoryController;
 use App\Http\Controllers\FileDownloadController;
 use App\Http\Models\CRMDCustomers;
 use App\Http\Controllers\AlternatePayment\UploadImagesController;
+use App\Http\Controllers\AlternatePayment\PayLogController;
 ///////////////////////////////////////////////////////////////
 # END OF ALTERNATE PAYMENT <CONTROLLERS>
 //////////////////////////////////////////////////////////////
@@ -370,7 +371,7 @@ Route::group(['prefix' => 'v3ibedc_AUTH_token', 'namespace' => 'Api\v3', 'middle
           Route::get('customer360/{account?}/{dss?}/{AccountType?}/{MeterNo?}', [CustomerOveriewController::class, 'customer360']); 
 
           Route::post("process_payment", [PaymentProcessingController::class, 'makePayment']);
-          Route::post("complete_payment", [PaymentProcessingController::class, 'processPayment']);
+          
           Route::get("payment_source", [PaymentProcessingController::class, 'paymentSource']);
           Route::post("payment_retry", [PaymentProcessingController::class, 'retryPayment']);
           Route::post("help", [PaymentProcessingController::class, 'ContactUs']);
@@ -387,6 +388,8 @@ Route::group(['prefix' => 'v3ibedc_AUTH_token', 'namespace' => 'Api\v3', 'middle
 
           Route::post('upload_images', [UploadImagesController::class, 'storeImages']);
 
+          Route::post("complete_payment", [PayLogController::class, 'processPayment']);
+          //Route::post("complete_payment", [PaymentProcessingController::class, 'processPayment']);
 
            // });
         });
