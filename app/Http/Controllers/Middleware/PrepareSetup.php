@@ -243,12 +243,12 @@ class PrepareSetup extends BaseApiController
         if($tokeLogs){  $tokeLogs->delete(); }
         
 
-        //$trigD = Ecmsdb::where("Token_before",  $trimSpaces)->first();
-       // if($trigD){ $trigD->delete(); }
+        $trigD = Ecmsdb::where("Token_before",  $trimSpaces)->first();
+        if($trigD){ $trigD->delete(); }
         
         //Delete from whoisActive
-        //$whoisActive = Ewhois::where("Login_name", "distributor_piq")->first();
-        //if($whoisActive){  $whoisActive->delete(); }
+        // $whoisActive = Ewhois::where("Login_name", "distributor_piq")->first();
+        // if($whoisActive){  $whoisActive->delete(); }
 
            
         //[HoldModeTransactions] Delete Token if Exists  // check this

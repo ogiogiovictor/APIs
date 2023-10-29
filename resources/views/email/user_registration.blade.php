@@ -120,7 +120,7 @@
                                     Your Password  is {{ $password }}
                                     </p>
                                    
-                                    <a href="http://192.168.15.160" target="_blank" style="background-color:#6576ff;border-radius:4px;color:#ffffff;display:inline-block;font-size:13px;font-weight:600;line-height:44px;text-align:center;text-decoration:none;text-transform: uppercase; padding: 0 30px">CLICK HERE TO LOGIN</a>
+                                    <a href="https://cms.ibedc.com" target="_blank" style="background-color:#6576ff;border-radius:4px;color:#ffffff;display:inline-block;font-size:13px;font-weight:600;line-height:44px;text-align:center;text-decoration:none;text-transform: uppercase; padding: 0 30px">CLICK HERE TO LOGIN</a>
                                 </td>
                             </tr>
                             

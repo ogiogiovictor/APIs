@@ -42,7 +42,7 @@ class TokenLookup extends Command
                  ->where('account_type', 'Prepaid')
                  ->where('status', 'pending')
                  ->whereNotNull('providerRef')
-                 ->chunk(2, function ($paymentLogs) use (&$paymentData) {
+                 ->chunk(3, function ($paymentLogs) use (&$paymentData) {
                      // Add the payment logs to the data array
                      foreach ($paymentLogs as $paymentLog) {
                         

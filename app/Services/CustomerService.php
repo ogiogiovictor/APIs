@@ -204,7 +204,7 @@ class CustomerService
        'recent_customers' => $recentCustomers,
        "total_staff" => 0,
        "outsourced_staff" => 0,
-       "msms_meters" => number_format_short(MsmsMeters::count()),
+      "msms_meters" => number_format_short(MsmsMeters::count()),
        "service_centers" => number_format_short(ServiceUnit::count()),
     ];
 

@@ -29,7 +29,10 @@ class PaymentModel extends Model
         'payment_source',
         'Descript',
         'owner',
-        'response_status'
+        'response_status',
+        'latitude',
+        'longitude',
+        'source_type'
     ];
 
 }

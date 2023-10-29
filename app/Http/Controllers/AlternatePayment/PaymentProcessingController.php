@@ -30,7 +30,7 @@ use App\Models\ZonePaymentTransaction;
 use App\Jobs\PrepaidPaymentJob;
 use App\Mail\ContactMail;
 use Illuminate\Support\Facades\Mail; 
-//use Mail;
+use App\Models\SubAccount;
 
 
 class PaymentProcessingController extends BaseApiController
@@ -164,9 +164,12 @@ class PaymentProcessingController extends BaseApiController
     private function createPostPayment($request){
        $custInfo = ZoneCustomer::where("AccountNo", $request->account_number)->first();
 
+
         if(!$custInfo){
             return $this->sendError('Error', "No Record Found", Response::HTTP_BAD_REQUEST);
         }
+
+        
 
        $transactionID = StringHelper::generateTransactionReference();
 
@@ -191,7 +194,7 @@ class PaymentProcessingController extends BaseApiController
                'email' => $request->email ?? '',
                'transaction_id' => strtoUpper($limitedUuid),   //strtoUpper(Str::uuid()->toString()) ?? $transactionID,
                'phone' => $request->phone ?? '',
-                'amount' => $request->amount,
+                'amount' => (float)$request->amount,
                 'account_type' => $request->account_type,
                 'account_number' => trim($request->account_number),
                 'payment_source' => $request->payment_source,
@@ -199,7 +202,10 @@ class PaymentProcessingController extends BaseApiController
                 'customer_name' => $custInfo->Surname.' '. $custInfo->FirstName,
                 'date_entered' => Carbon::now(),
                 'BUID' => $buCode ?: $custInfo->BUID,
-                'owner' => $request->owner
+                'owner' => $request->owner,
+                'latitude' => isset($request->latitude) ? $request->latitude : 'null',
+                'longitude' => isset($request->longitude) ? $request->longitude : 'null',
+                'source_type' => isset($request->source_type) ? $request->source_type : 'null',
             ]);
            
          
@@ -233,6 +239,22 @@ class PaymentProcessingController extends BaseApiController
         }
 
         $zoneECMI = ZoneECMI::where("MeterNo", $request->MeterNo)->first();
+
+       
+
+        // Check Customer Eligibility for Payment
+         $eligibilityCheck = SubAccount::where('AccountNo', $zoneECMI->AccountNo)
+        ->whereIn('ModeOfPayment', ['MONTHLY PAYMENT', 'One-off'])
+        ->first();
+
+       // return $eligibilityCheck->PaymentAmount;
+
+       if($eligibilityCheck){
+            if($request->amount < $eligibilityCheck->PaymentAmount){
+                return $this->sendError('Error', "Transaction Amount cannot by less than $eligibilityCheck->PaymentAmount due to your pending outstanding", Response::HTTP_BAD_REQUEST);
+            }
+       }
+      
       
 
         if(!$zoneECMI){
@@ -261,8 +283,10 @@ class PaymentProcessingController extends BaseApiController
                 'customer_name' => $zoneECMI->Surname.' '. $zoneECMI->OtherNames,
                 'date_entered' => Carbon::now(),
                 'BUID' => $zoneECMI->BUID,
-                'owner' => $request->owner
-    
+                'owner' => $request->owner,
+                'latitude' => isset($request->latitude) ? $request->latitude : 'null',
+                'longitude' => isset($request->longitude) ? $request->longitude : 'null',
+                'source_type' => isset($request->source_type) ? $request->source_type : 'null',
             ]);
 
             $response = [
@@ -453,8 +477,6 @@ class PaymentProcessingController extends BaseApiController
         ];
 
        
-       
-       
         Mail::to($emails)->send(new ContactMail(
             $name,
             $email,
@@ -467,6 +489,14 @@ class PaymentProcessingController extends BaseApiController
         return $this->sendSuccess($createResponse, "Successfully Sent", Response::HTTP_OK);
     
         
+    }
+
+
+    public function GetHelp(){
+
+        $contact = ContactUs::orderby("id", "desc")->paginate(20);
+        return $this->sendSuccess($contact, "Loaded Successfully", Response::HTTP_OK);
+
     }
 
 

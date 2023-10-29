@@ -40,7 +40,7 @@ class PrepaidService extends BaseApiController
                 'phone' => $phone,
                 'transaction_id' => $checkRef->transaction_id,
                 'email' => $checkRef->email,
-                'id' => $checkRef->id,
+                'id' => $checkRef->id
             ];
 
             //Dispatch a job and send token to customer

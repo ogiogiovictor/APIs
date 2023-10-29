@@ -13,5 +13,8 @@ class LogInsertSubAccountDeductions extends Model
 
     protected $connection = 'ecmi_prod';
 
+    protected $primaryKey = 'transactionno';
+
+
     public $timestamps = false;
 }

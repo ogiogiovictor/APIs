@@ -375,11 +375,12 @@ Route::group(['prefix' => 'v3ibedc_AUTH_token', 'namespace' => 'Api\v3', 'middle
           Route::get("payment_source", [PaymentProcessingController::class, 'paymentSource']);
           Route::post("payment_retry", [PaymentProcessingController::class, 'retryPayment']);
           Route::post("help", [PaymentProcessingController::class, 'ContactUs']);
+          Route::get("help", [PaymentProcessingController::class, 'GetHelp']);
 
           Route::post('plogout', [LogoutController::class, 'userLogout']);
 
 
-          Route::get("testing", [PaymentProcessingController::class, 'textpayment']);
+          //Route::get("testing", [PaymentProcessingController::class, 'textpayment']);
 
           Route::get('customerHistory/{account_type?}/{uniqueNo?}', [CustomerHistoryController::class, 'getCustomerHistory']); 
           Route::get('customerbills/{account_no?}', [CustomerHistoryController::class, 'getCustomerBill']); 

@@ -37,7 +37,7 @@ class CustomerHistoryController extends BaseApiController
 
     private function getPrepaidHistory($type, $meterno){
         
-        $getHistory = ECMITransactions::where('MeterNo', $meterno)->orderby("TransactionDateTime", "desc")->paginate(20);
+        $getHistory = ECMITransactions::where('MeterNo', $meterno)->whereNotNull('transref')->orderby("TransactionDateTime", "desc")->paginate(20);
         if($getHistory){
             return $this->sendSuccess($getHistory, "Prepaid History Retrieved Successfully", Response::HTTP_OK); 
         }else{

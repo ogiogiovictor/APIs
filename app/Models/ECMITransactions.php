@@ -16,7 +16,7 @@ class ECMITransactions extends Model
     public $timestamps = false;
 
    // protected $primaryKey = 'Token';
-   // protected $primaryKey = 'transref';
+    //protected $primaryKey = 'transref';
    protected $primaryKey =  'TransactionNo';
     
 
