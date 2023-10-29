@@ -122,32 +122,32 @@ class PrepareSetup extends BaseApiController
 
 
 
-    private function runPreparationMigration($data){
+    // private function runPreparationMigration($data){
 
-       $baseUrl = env('MIDDLEWARE_URL');
-       $addCustomerUrl = $baseUrl . 'vendelect';
+    //    $baseUrl = env('MIDDLEWARE_URL');
+    //    $addCustomerUrl = $baseUrl . 'vendelect';
 
-        try {
+    //     try {
 
-            $response = Http::withHeaders([
-                'Authorization' => 'Bearer LIVEKEY_711E5A0C138903BBCE202DF5671D3C18',
-            ])->post($addCustomerUrl , $data);
+    //         $response = Http::withHeaders([
+    //             'Authorization' => 'Bearer LIVEKEY_711E5A0C138903BBCE202DF5671D3C18',
+    //         ])->post($addCustomerUrl , $data);
 
-            $newResponse =  $response->json();
+    //         $newResponse =  $response->json();
 
-            if($newResponse['status'] == "true"){
+    //         if($newResponse['status'] == "true"){
 
-                //Save Response to Warehouse. //Create a new database
-               return $this->privatdeactiveallProcesse($newResponse);
-            }else {
-                return $newResponse;
-            }
+    //             //Save Response to Warehouse. //Create a new database
+    //            return $this->privatdeactiveallProcesse($newResponse);
+    //         }else {
+    //             return $newResponse;
+    //         }
       
-        }catch(\Exception $e){
-            return $this->sendError('Error', "Error Initiating Payment: " . $e->getMessage(), Response::HTTP_BAD_REQUEST);
-        }
+    //     }catch(\Exception $e){
+    //         return $this->sendError('Error', "Error Initiating Payment: " . $e->getMessage(), Response::HTTP_BAD_REQUEST);
+    //     }
 
-    }
+    // }
 
 
 
