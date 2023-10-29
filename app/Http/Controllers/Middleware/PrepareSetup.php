@@ -152,6 +152,7 @@ class PrepareSetup extends BaseApiController
 
 
     public function prepareIntegration(Request $request) {
+       
         // Validate the incoming request data
         $validator = Validator::make($request->all(), [
             'meter_number' => 'required|string',

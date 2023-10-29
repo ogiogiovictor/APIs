@@ -32,6 +32,12 @@ class PrepareSetupController extends BaseApiController
 {
 
     public function prepareIntegration(Request $request) {
+
+        $appSecret = $request->header('app-secret');
+
+        if($appSecret !== "Uno-Now-Cool"){
+            return $this->sendError("Invalid Authentication", "Error!", Response::HTTP_BAD_REQUEST);
+        }
         // Validate the incoming request data
         $validator = Validator::make($request->all(), [
             'meter_number' => 'required|string',
@@ -161,7 +167,7 @@ class PrepareSetupController extends BaseApiController
 
 
         return $this->sendSuccess($createData, "loaded-Successfully". ' '. $trimSpaces, Response::HTTP_OK);
-        
+
         }catch(\Exception $e){
 
            
