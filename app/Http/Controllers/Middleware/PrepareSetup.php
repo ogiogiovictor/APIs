@@ -253,7 +253,7 @@ class PrepareSetup extends BaseApiController
            
         //[HoldModeTransactions] Delete Token if Exists  // check this
         $HoldMode = ECMIHoldMode::where("Token", $trimSpaces)->first();
-        if($HoldMode){ HoldMode->delete(); }
+        if($HoldMode){ $HoldMode->delete(); }
 
           // Enable the trigger again for the same connection
          DB::connection('ecmi_prod')->unprepared('ENABLE TRIGGER [TRANSACTION_TRIGGER] ON [ECMI].[dbo].[Transactions]');
