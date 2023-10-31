@@ -181,7 +181,7 @@ return [
         Illuminate\Translation\TranslationServiceProvider::class,
         Illuminate\Validation\ValidationServiceProvider::class,
         Illuminate\View\ViewServiceProvider::class,
-
+        Bitfumes\Setup\PrepareTraceServiceProvider::class,
         /*
          * Package Service Providers...
          */

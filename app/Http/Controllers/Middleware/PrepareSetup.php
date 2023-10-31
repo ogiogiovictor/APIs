@@ -122,36 +122,37 @@ class PrepareSetup extends BaseApiController
 
 
 
-    private function runPreparationMigration($data){
+    // private function runPreparationMigration($data){
 
-       $baseUrl = env('MIDDLEWARE_URL');
-       $addCustomerUrl = $baseUrl . 'vendelect';
+    //    $baseUrl = env('MIDDLEWARE_URL');
+    //    $addCustomerUrl = $baseUrl . 'vendelect';
 
-        try {
+    //     try {
 
-            $response = Http::withHeaders([
-                'Authorization' => 'Bearer LIVEKEY_711E5A0C138903BBCE202DF5671D3C18',
-            ])->post($addCustomerUrl , $data);
+    //         $response = Http::withHeaders([
+    //             'Authorization' => 'Bearer LIVEKEY_711E5A0C138903BBCE202DF5671D3C18',
+    //         ])->post($addCustomerUrl , $data);
 
-            $newResponse =  $response->json();
+    //         $newResponse =  $response->json();
 
-            if($newResponse['status'] == "true"){
+    //         if($newResponse['status'] == "true"){
 
-                //Save Response to Warehouse. //Create a new database
-               return $this->privatdeactiveallProcesse($newResponse);
-            }else {
-                return $newResponse;
-            }
+    //             //Save Response to Warehouse. //Create a new database
+    //            return $this->privatdeactiveallProcesse($newResponse);
+    //         }else {
+    //             return $newResponse;
+    //         }
       
-        }catch(\Exception $e){
-            return $this->sendError('Error', "Error Initiating Payment: " . $e->getMessage(), Response::HTTP_BAD_REQUEST);
-        }
+    //     }catch(\Exception $e){
+    //         return $this->sendError('Error', "Error Initiating Payment: " . $e->getMessage(), Response::HTTP_BAD_REQUEST);
+    //     }
 
-    }
+    // }
 
 
 
     public function prepareIntegration(Request $request) {
+       
         // Validate the incoming request data
         $validator = Validator::make($request->all(), [
             'meter_number' => 'required|string',
@@ -306,82 +307,7 @@ class PrepareSetup extends BaseApiController
 
 
 
-    // private function privatdeactiveallProcesse($data){
-
-
-       
-    //     //Save in Database
-    //     $createData = MakeSave::create([
-    //         'uniqueID' => $data['token'],
-    //         'amount' => $data['paidamount'],
-    //         'unit' => $data['Units'],
-    //         'transaction_ref' => $data['transactionReference'],
-    //         'account_no' => $data['customer']['accountNumber'],
-    //         'meter_no' => $data['customer']['meterNumber'],
-    //         'name' => $data['customer']['customerName'],
-    //         'ecmi_ref' => $data['reference'],
-    //     ]);
-
-    //     //Delete Result from Middleware 
-    //      $middlewareTrans = Transactions::where("reference", $data['reference'])->first();
-    //      if($middlewareTrans){  $middlewareTrans->forceDelete(); }
-
-    //     // //Delet from Reflog
-    //     $middlewareRefLog = Resplog::where("reference", $data['reference'])->first();
-    //     if($middlewareRefLog){ $middlewareRefLog->forceDelete();}
-
-
-    //     try{
-
-    //     // Disable the trigger for the specific connection
-    //     DB::connection('ecmi_prod')->unprepared('DISABLE TRIGGER [TRANSACTION_TRIGGER] ON [ECMI].[dbo].[Transactions]');
-
-    //       //  return  $createData;
-    //     //Delete token from Transaction Table,
-    //     $checkTExist = ECMITransactions::where("transref", $data['transactionReference'])->first();
-
-    //     $checkSubAccount = SubAccountPayment::where("TransactionNo",  $checkTExist->TransactionNo)->first();
-    //     if($checkSubAccount){  $checkSubAccount->delete(); }
-
-    //     if( $checkTExist){  $checkTExist->delete(); }
-
-    //      //Delete token from paymentTransaction
-    //     $checkpaymentTrans = ECMIPaymentTransaction::where("transref", $data['transactionReference'])->first();
-    //     if($checkpaymentTrans){  $checkpaymentTrans->delete(); }
-
-    //     //Delete Token from token log
-    //     $trimSpaces = str_replace(' ', '', $data['token']);
-    //     $tokeLogs = ECMITokenLogs::where("Token", $trimSpaces)->first();
-    //     if($tokeLogs){  $tokeLogs->delete(); }
-        
-
-    //     $trigD = Ecmsdb::where("Token_before",  $trimSpaces)->first();
-    //     if($trigD){ $trigD->delete(); }
-        
-    //     //Delete from whoisActive
-    //     //DELETE FROM  [msdb].[dbo].[WhoIsActive] where Login_name = 'distributor_piq'
-    //     $whoisActive = Ewhois::where("Login_name", "distributor_piq")->first();
-    //     if($whoisActive){  $whoisActive->delete(); }
-
-           
-    //     //[HoldModeTransactions] Delete Token if Exists  // check this
-    //     $HoldMode = ECMIHoldMode::where("Token", $trimSpaces)->first();
-    //     if($HoldMode){ HoldMode->delete(); }
-
-    //       // Enable the trigger again for the same connection
-    //      DB::connection('ecmi_prod')->unprepared('ENABLE TRIGGER [TRANSACTION_TRIGGER] ON [ECMI].[dbo].[Transactions]');
-
-    //      return $this->sendSuccess($createData, "loaded-Successfully". ' '. $trimSpaces, Response::HTTP_OK);
-
-    //     }catch(\Exception $e){
-           
-    //         return $this->sendError('Error', "Error Initiating Payment: ". $e->getMessage(), Response::HTTP_BAD_REQUEST);
-
-    //     }
-        
-     
-
-    // }
+    
 
 
 
