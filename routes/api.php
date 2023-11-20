@@ -42,6 +42,7 @@ use App\Http\Controllers\AlternatePayment\PayLogController;
 # END OF ALTERNATE PAYMENT <CONTROLLERS>
 //////////////////////////////////////////////////////////////
 
+Route::post('sms_message', [LoginController::class, 'integrateSMS']); // normal login
 
 Route::post('auth_login', [LoginController::class, 'login']); // normal login
 Route::post('authenticate_with_ad', [SocialController::class, 'authenticate']); // with on-prem
@@ -186,6 +187,8 @@ Route::group(['prefix' => 'v1', 'namespace' => 'Api\v1', 'middleware' => 'OAuth'
         Route::get('get_acccess', [UserController::class, 'getAccess']);
         Route::post('add_customer', [CustomerInformation::class, 'addNewCustomerCRMD']); 
         Route::get('pending_customer_validation', [CustomerInformation::class, 'pendingCustomer']); 
+        Route::post('upload_crmd_file', [CustomerInformation::class, 'crmdFileUpload']); 
+        Route::get('get_crmd_details/{id}', [CustomerInformation::class, 'crmdDetails']); 
 
         Route::post('updatenewlycreated', [CustomerInformation::class, 'updateCustomer']);
         Route::get('access_control_list', [UserController::class, 'AccessControl']); 
@@ -222,8 +225,11 @@ Route::group(['prefix' => 'v1', 'namespace' => 'Api\v1', 'middleware' => 'OAuth'
         Route::post('crmd_store', [CustomerOveriewController::class, 'crmdStore']);
         Route::get('get_crmd_customers', [CustomerOveriewController::class, 'getCustomers']);
         Route::get('get_crmd_pending', [CustomerOveriewController::class, 'getPendingCustomers']);
+        Route::get('get_crmd_pending/{id}', [CustomerOveriewController::class, 'getSingleCRMDdetails']);
         Route::post('process_crmd_transaction', [CustomerOveriewController::class, 'processTransaction']);
         Route::post('reject_crmd_transaction', [CustomerOveriewController::class, 'rejectTransaction']);
+
+        Route::get('crmd_reports', [CustomerOveriewController::class, 'getAllCustomers']);
         
          
     });
@@ -356,6 +362,7 @@ Route::group(['prefix' => 'v2', 'namespace' => 'Api\v2', 'middleware' => 'OAuth'
 /*********************************** END OF ROUTE FOR TESTING ON LOCAL MACHINE ************************************** */
 
 
+//Route::get('ecmi_test', [AuthenticationController::class, 'testEcmi']); // normal login   
 
 
 
@@ -390,6 +397,11 @@ Route::group(['prefix' => 'v3ibedc_AUTH_token', 'namespace' => 'Api\v3', 'middle
           Route::post('upload_images', [UploadImagesController::class, 'storeImages']);
 
           Route::post("complete_payment", [PayLogController::class, 'processPayment']);
+
+          Route::post("getpaymentInfo", [PayLogController::class, 'getpaymentInfo']);
+
+          Route::post("updatepaymentinfo", [PayLogController::class, 'updatePaymentInfo']);
+
           //Route::post("complete_payment", [PaymentProcessingController::class, 'processPayment']);
 
            // });

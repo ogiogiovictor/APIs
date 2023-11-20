@@ -39,6 +39,11 @@ class CustomerCRMDResource extends JsonResource
             'new_firstname' => $this->new_firstname,
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
+            'new_email' => $this->new_email,
+            'email' => $this->email,
+            'new_tarriff_code' => $this->new_tarriff_code,
+            'tarriffcode' => $this->tarriffcode,
+            'old_mobile' => $this->old_mobile,
 
         ];
         //return parent::toArray($request);

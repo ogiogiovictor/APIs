@@ -40,7 +40,7 @@ class PospaidLookup extends Command
             ->where('response_status', 0)
             ->where('status', 'pending')
             ->whereNotNull('providerRef')
-            ->chunk(2, function ($paymentLogs) use (&$paymentData) {
+            ->chunk(5, function ($paymentLogs) use (&$paymentData) {
 
                 foreach ($paymentLogs as $paymentLog) {
 

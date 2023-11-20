@@ -32,6 +32,9 @@ class User extends Authenticatable
         'login_type',
         'guid',
         'domain',
+        'region',
+        'bhub',
+        'service_center'
     ];
 
     /**

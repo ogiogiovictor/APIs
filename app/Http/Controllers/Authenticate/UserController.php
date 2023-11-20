@@ -75,17 +75,37 @@ class UserController extends BaseApiController
                 return $this->sendError("Validation Error", $validator->errors(), Response::HTTP_BAD_REQUEST);
             }
 
+            $checkUser = isset($request->level) ? explode(",", $request->level) : [];
+
             $user = User::create([
                 'name' => $request->name,
                 'email' => $request->email,
                 'status' => 1,
                 'authority' => $request->authority,
                 'password' => Hash::make($request->password),
-                'level' => $request->level ?? []
+                'level' => $request->level ?? "",
+                'region' => isset($checkUser[0]) ? strtoupper($checkUser[0]) : 'null',
+                'bhub' => isset($checkUser[1]) ? strtoupper($checkUser[1]) : 'null',
+                'service_center' => isset($checkUser[2]) ? strtoupper($checkUser[2]) : 'null',
             ]);
+
+            // $checkUser = isset($request->level) ? explode(",", $request->level) : [];
+
+            // $user = User::create([
+            //     'name' => $request->name,
+            //     'email' => $request->email,
+            //     'status' => 1,
+            //     'authority' => $request->authority,
+            //     'password' => Hash::make($request->password),
+            //     'level' => json_encode($checkUser),
+            //     'region' => isset($checkUser[0]) ? $checkUser[0] : 'null',
+            //     'bhub' => isset($checkUser[1]) ? $checkUser[1] : 'null',
+            //     'service_center' => isset($checkUser[2]) ? $checkUser[2] : 'null',
+            // ]);
     
               //Atach User to a Role
               $user->assignRole($request->role);
+
         }else {
 
             $validator = Validator::make($request->all(), [

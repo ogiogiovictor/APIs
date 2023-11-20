@@ -36,6 +36,9 @@ class UserResource extends JsonResource
             "time_ago" => Carbon::parse($this->created_at)->subMinutes(2)->diffForHumans(),
             "menus" => $this->menuAccess($this->roles->first()->id),
             "permission" =>  $this->permissions->pluck('name'),
+            "region" => $this->region,
+            "bhub" => $this->bhub,
+            "service_center" => $this->service_center,
 
         ];
         //return parent::toArray($request);

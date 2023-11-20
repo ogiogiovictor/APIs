@@ -10,6 +10,9 @@ use App\Models\EMSPayment;
 use App\Helpers\StringHelper;
 use App\Models\SubAccount;
 
+use App\Models\ZonePayment;
+use App\Models\ECMITransactions;
+
 class IBEDCPayResource extends JsonResource
 {
     /**
@@ -48,9 +51,9 @@ class IBEDCPayResource extends JsonResource
             "DistributionID" => $this->DistributionID,
             //"ADC"=> $this->ADC,
            // "ConnectionType" => $this->ConnectionType,
-            "lasttransactiondate" => isset($this->activated) ? 
-            ECMIPayment::select('TransactionDateTime')->latest('TransactionDateTime')->where("AccountNo", $this->AccountNo)->value('TransactionDateTime') :
-            EMSPayment::select('PayDate')->latest('PayDate')->where("AccountNo", $this->AccountNo)->value('PayDate'),
+           // "lasttransactiondate" => isset($this->activated) ? 
+           // ECMIPayment::select('TransactionDateTime')->latest('TransactionDateTime')->where("AccountNo", $this->AccountNo)->value('TransactionDateTime') :
+           // EMSPayment::select('PayDate')->latest('PayDate')->where("AccountNo", $this->AccountNo)->value('PayDate'),
            // "lasttoken" =>isset($this->activated) ?  ECMIPayment::select('Token')->latest('TransactionDateTime')->where("AccountNo", $this->AccountNo)->value('Token') : null,
            // "units" => isset($this->activated) ?  ECMIPayment::select('Units')->latest('TransactionDateTime')->where("AccountNo", $this->AccountNo)->value('Units') : null,
            // "amounts" => isset($this->activated) ?  ECMIPayment::select('Amount')->latest('TransactionDateTime')->where("AccountNo", $this->AccountNo)->value('Amount') : null,

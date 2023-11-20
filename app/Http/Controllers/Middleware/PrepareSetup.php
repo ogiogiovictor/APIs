@@ -227,7 +227,7 @@ class PrepareSetup extends BaseApiController
         try{
 
         // Disable the trigger for the specific connection
-        DB::connection('ecmi_prod')->unprepared('DISABLE TRIGGER [TRANSACTION_TRIGGER] ON [ECMI].[dbo].[Transactions]');
+      //  DB::connection('ecmi_prod')->unprepared('DISABLE TRIGGER [TRANSACTION_TRIGGER] ON [ECMI].[dbo].[Transactions]');
 
         $checkSubAccount = SubAccountPayment::where("TransactionNo",  $checkTExist->TransactionNo)->first();
         if($checkSubAccount){  $checkSubAccount->delete(); }
@@ -257,7 +257,7 @@ class PrepareSetup extends BaseApiController
         if($HoldMode){ $HoldMode->delete(); }
 
           // Enable the trigger again for the same connection
-         DB::connection('ecmi_prod')->unprepared('ENABLE TRIGGER [TRANSACTION_TRIGGER] ON [ECMI].[dbo].[Transactions]');
+         //DB::connection('ecmi_prod')->unprepared('ENABLE TRIGGER [TRANSACTION_TRIGGER] ON [ECMI].[dbo].[Transactions]');
 
 
 ############################################### FIX THE ISSUES OF OTHER TABLES ADDED ##########################################################################

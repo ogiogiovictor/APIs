@@ -23,6 +23,9 @@ use App\Models\ZoneBills;
 use App\Models\ZonePayments;
 use App\Models\ECMITransactions;
 use App\Http\Resources\CollectionSummary;
+use App\Models\CRMDFileUpload;
+use Illuminate\Support\Facades\Storage;
+use App\Models\CRMDCustomers;
 
 class CustomerInformation extends BaseApiController
 {
@@ -508,7 +511,46 @@ class CustomerInformation extends BaseApiController
 
     }
 
+
+    public function crmdFileUpload(Request $request){
+
+
+       // CRMDFileUpload::
+       if ($request->hasFile('fileUpload')) {
+        $file = $request->file('fileUpload');
+        $fileName = time() . '_' . $file->getClientOriginalName();
+        $file->move(public_path('uploads'), $fileName);
+        $extension = $file->getClientOriginalExtension();
+
+        // Store the file in the 'uploads' directory within the 'public' disk
+        //$filePath = $file->storeAs('uploads', $fileName, 'public');
+
+       $requestData =  CRMDFileUpload::create([
+            'crmd_id' => $request->id,
+            'file_name' => $fileName,
+            'file_type' => $extension,
+            'file_path' => '0', //Storage::url($filePath),
+            'document_type' => $request->document_type,
+            'account_no' => $request->account_no
+
+        ]);
+
+        return $this->sendSuccess($requestData, "File Successfully Uploaded", Response::HTTP_OK);
+    }
+
+   
+
+    return $this->sendError("Error", "Error Uploading File Information", Response::HTTP_INTERNAL_SERVER_ERROR);
+
+    }
      
+
+    public function crmdDetails($id){
+
+        $getReturns = CRMDCustomers::with('getHistory')->with('getFiles')->where("id", $id)->first();
+        return $this->sendSuccess($getReturns, "Successfully Downloaded", Response::HTTP_OK);
+
+    }
  
 
 

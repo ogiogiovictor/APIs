@@ -12,7 +12,10 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('crmdcustomers_files', function (Blueprint $table) {
-            $table->timestamps();
+          
+            $table->string('document_type')->default("null");
+            $table->string('account_no')->default("null");
+
         });
     }
 
@@ -21,6 +24,9 @@ return new class extends Migration
      */
     public function down(): void
     {
-        //Schema::dropIfExists('crmdcustomers_files');
+        Schema::table('crmdcustomers_files', function (Blueprint $table) {
+            $table->dropColumn('document_type');
+            $table->dropColumn('account_no');
+        });
     }
 };

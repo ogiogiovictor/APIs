@@ -11,8 +11,14 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('crmdcustomers_files', function (Blueprint $table) {
+        Schema::create('crmdcustomers_files', function (Blueprint $table) {
+            $table->id();
+            $table->string('crmd_id');
+            $table->string('file_name')->default("null");
+            $table->string('file_type')->default("null");
+            $table->string('file_path')->default("null");
             $table->timestamps();
+
         });
     }
 
@@ -21,6 +27,7 @@ return new class extends Migration
      */
     public function down(): void
     {
-        //Schema::dropIfExists('crmdcustomers_files');
+        Schema::dropIfExists('crmdcustomers_files');
+      
     }
 };

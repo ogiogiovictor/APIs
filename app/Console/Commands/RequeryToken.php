@@ -39,7 +39,7 @@ class RequeryToken extends Command
                  ->where('account_type', 'Prepaid')
                  ->where('status', 'pending')
                  ->whereNotNull('providerRef')
-                 ->chunk(2, function ($paymentLogs) use (&$data) {
+                 ->chunk(5, function ($paymentLogs) use (&$data) {
                      // Add the payment logs to the data array
                      foreach ($paymentLogs as $paymentLog) {
 

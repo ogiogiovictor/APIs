@@ -42,30 +42,30 @@ class CheckPaymentStatus extends Command
 
             foreach ($paymentLogs as $paymentLog) {
 
-                \Log::info("Log Single Data: ".  $paymentLog);
+                
         
                 $flutterData = [
                     'SECKEY' => 'FLWSECK-d1c7523a58aad65d4585d47df227ee25-X',
                     "txref" => $paymentLog->transaction_id
                 ];
 
-                \Log::info("Log Flutter Data with TransRef: ". $flutterData);
-        
         
                 $flutterUrl = env('FLUTTER_WAVE_URL');
         
                 $iresponse = Http::post($flutterUrl, $flutterData);
                 $flutterResponse = $iresponse->json(); 
 
-                \Log::info("Log Flutter Response: ".  $flutterResponse );
+               // \Log::info("Log Flutter Response: ".  json_encode($flutterResponse) );
 
                 if ($flutterResponse['status'] == "success" && $flutterResponse['data']['status'] == 'successful') {
                     $update = PaymentModel::where("transaction_id", $paymentLog->transaction_id)->update([
                         'providerRef' => $flutterResponse['data']['flwref'],
                     ]);
+
+                    \Log::info("Success: ". json_encode($flutterResponse));
                 }
 
-                \Log::info("Success: ". $flutterResponse);
+              
         
 
             }

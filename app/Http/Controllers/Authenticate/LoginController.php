@@ -180,4 +180,8 @@ class LoginController extends BaseApiController
 
 
 
+        public function integrateSMS(Request $request){
+            
+        }
+
 }

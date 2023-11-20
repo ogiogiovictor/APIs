@@ -14,7 +14,7 @@ enum AuthorityEnum: string
         return match($this) {
             self::HEADQUATERS => 'hq',
             self::REGION => 'region',
-            self::BUSINESSHUB => 'business_hub',
+            self::BUSINESSHUB => 'business_hub',  //business_hub
             self::SERVICECENTER => 'service_center',
         };
     }

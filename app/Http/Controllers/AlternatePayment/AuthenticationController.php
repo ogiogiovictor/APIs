@@ -13,9 +13,30 @@ use Illuminate\Support\Str;
 use App\Models\Customer\CustomerAuthModel;
 use App\Http\Resources\IBEDCPayResource;
 
+use App\Models\ECMIPayment;
+
+
 
 class AuthenticationController extends BaseApiController
 {
+
+
+    public function testEcmi() {
+
+        // try{
+
+        //     $customers = ECMIPayment::paginate(10);
+        //     return $this->sendSuccess($customers, "Customer Successfully Loaded", Response::HTTP_OK);
+
+        // }catch(\Exception $e){
+
+        //     return $this->sendError($e->getmessage(), "No Result Found", Response::HTTP_BAD_REQUEST);
+
+        // }
+        
+       
+    }
+
     public function login(Request $request){
 
         $meterNo = $request->meter_no;
@@ -29,7 +50,7 @@ class AuthenticationController extends BaseApiController
 
             try{
                 
-                $customers = (new CustomerService)->authenticateCustomers($meterNo, $accountType);
+               $customers = (new CustomerService)->authenticateCustomers($meterNo, $accountType);
 
                 if(!$customers){
                     return $this->sendError("Error", "No Customer Results Found", Response::HTTP_BAD_REQUEST);

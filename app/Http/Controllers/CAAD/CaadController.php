@@ -425,7 +425,6 @@ class CaadController extends BaseApiController
 
 
     public function CaadApprovalRequest(Request $request){
-
           try{
 
            
@@ -485,6 +484,7 @@ class CaadController extends BaseApiController
             'hcs' => 'hcs',
             'cco' => 'cco',
             'md' => 'md',
+            'billing' => 'billing'
         ];
     
        // $table = $batchType === 'single' ? 'ProcessCAAD' : 'BulkCAAD';
@@ -513,7 +513,7 @@ class CaadController extends BaseApiController
 
 
    
-    private function addComment(Request $request, string $userRole)
+    private function addComment($request, string $userRole)
     {
 
         // Get the label for the given userRole from the CaadEnum
@@ -526,15 +526,16 @@ class CaadController extends BaseApiController
             'cco' => CaadEnum::APPROVED_BY_CCO->label(),
             'md' => CaadEnum::APPROVED_BY_MD->label(),
             'admin' => CaadEnum::ADMIN->label(),
-            default => 'Created By' . Auth::user()->name,
+            'billing' => CaadEnum::BILLING->label(),
+            default => 'Created By ' . Auth::user()->name,
         };
 
       return  $caadComment = CAADCommentApproval::create([
             'process_caad_id' => $request->id,
-            'approval_type' => $request->batch_type,
+            'approval_type' => isset($request->batch_type) ? $request->batch_type : 0,
             'batch_id' => isset($request->batch_id) ? $request->batch_id : 0,
             'approval_by' => Auth::user()->name,
-            'comments' =>  $userRoleLabel . ' @ ' . ' ' . Date('Y-m-d H:i:s'),
+            'comments' =>  $userRoleLabel . ' - ' . ' ' . Auth::user()->name, //Date('Y-m-d H:i:s'),
         ]);
     }
 
@@ -547,7 +548,7 @@ class CaadController extends BaseApiController
             'approval_type' => $request->batch_type,
             'batch_id' => isset($request->batch_id) ? $request->batch_id : 0,
             'approval_by' => Auth::user()->name,
-            'comments' =>  'Rejected By ' . $userRole. ' @ ' . ' ' . Date('Y-m-d H:i:s'),
+            'comments' =>  'Rejected By ' . $userRole. ' @ ' . ' ' . Date('Y-m-d H:i:s') . ' || Comment - '. $request->add_comment,
         ]);
     }
 
@@ -556,7 +557,7 @@ class CaadController extends BaseApiController
 
 
       public function CaadRejectRequest(Request $request){
-  
+   
         try{
             // Get the user role
             $userRole = Auth::user()->roles->pluck('name')->first();

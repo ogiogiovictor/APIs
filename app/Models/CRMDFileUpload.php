@@ -5,21 +5,18 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class CRMDHistory extends Model
+class CRMDFileUpload extends Model
 {
     use HasFactory;
 
-    protected $table = "crmd_history";
+    protected $table = "crmdcustomers_files";
 
     protected $fillable = [
-        'user_id', 'crmd_id', 'status', 'approval', 'comment'
+        'crmd_id', 'file_name', 'file_type', 'file_path', 'document_type', 'account_no'
     ];
 
-
-    public function getCRMD()
+    public function getFileCRMD()
     {
         return $this->belongsTo(CRMDCustomers::class, 'crmd_id', 'id');
     }
-
-
 }

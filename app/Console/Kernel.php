@@ -17,6 +17,7 @@ class Kernel extends ConsoleKernel
         $schedule->command('app:token-lookup')->everyMinute();
         $schedule->command('app:requery-token')->everyTwoMinutes();
         $schedule->command('app:pospaid-lookup')->everyMinute();
+        $schedule->command('app:check-payment-status')->everyFifteenMinutes();
 
         // Enable task scheduler logging
          $schedule->exec('echo "Task Scheduler Ran: $(date)" >> /var/www/html/IBEDCENGINE/storage/logs/scheduler.log')->everyMinute();
