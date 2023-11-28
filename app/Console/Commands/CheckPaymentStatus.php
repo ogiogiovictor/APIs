@@ -35,6 +35,9 @@ class CheckPaymentStatus extends Command
         $this->info('***** POSTPAID API :: Lookup Started *************');
 
         $today = now()->toDateString();
+
+
+        //$checkTransaction = PaymentModel::where('status', 'pending') 2022-11-24
       
         $checkTransaction = PaymentModel::whereDate('created_at', $today)
         ->where('status', 'pending')

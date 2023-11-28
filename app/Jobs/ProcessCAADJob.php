@@ -36,10 +36,53 @@ class ProcessCAADJob implements ShouldQueue
        // $email = $this->process->email;
        //Get email of the User
        //$email = $this->getUser($this->process->region, $this->process->business_hub);
-        $levelFormat = $this->process->region." ".$this->process->business_hub;
+       if($this->process->id == 1){
+        $email = User::where("region", $this->process->region)->where("business_hub", $this->process->business_hub)
+        ->where("user_role", "district_accountant")->value("email");
+        $name = User::where("region", $this->process->region)->where("business_hub", $this->process->business_hub)
+        ->where("user_role", "district_accountant")->value("name");
+       }else if($this->process->id == 2){
+        $email = User::where("region", $this->process->region)->where("business_hub", $this->process->business_hub)
+        ->where("user_role", "businesshub_manager")->value("email");
+        $name = User::where("region", $this->process->region)->where("business_hub", $this->process->business_hub)
+        ->where("user_role", "district_accountant")->value("name");
+       }else if($this->process->id == 3){
+        $email = User::where("region", $this->process->region)->where("business_hub", $this->process->business_hub)
+        ->where("user_role", "audit")->value("email");
+        $name = User::where("region", $this->process->region)->where("business_hub", $this->process->business_hub)
+        ->where("user_role", "district_accountant")->value("name");
+       }else if($this->process->id == 4){
+        $email = User::where("region", $this->process->region)->where("business_hub", $this->process->business_hub)
+        ->where("user_role", "regional_manager")->value("email");
+        $name = User::where("region", $this->process->region)->where("business_hub", $this->process->business_hub)
+        ->where("user_role", "district_accountant")->value("name");
+       }else if($this->process->id == 5){
+        $email = User::where("region", $this->process->region)->where("business_hub", $this->process->business_hub)
+        ->where("user_role", "hcs")->value("email");
+        $name = User::where("region", $this->process->region)->where("business_hub", $this->process->business_hub)
+        ->where("user_role", "district_accountant")->value("name");
+       }else if($this->process->id == 6){
+        $email = User::where("region", $this->process->region)->where("business_hub", $this->process->business_hub)
+        ->where("user_role", "ccu")->value("email");
+        $name = User::where("region", $this->process->region)->where("business_hub", $this->process->business_hub)
+        ->where("user_role", "district_accountant")->value("name");
+       }else if($this->process->id == 7){
+        $email = User::where("region", $this->process->region)->where("business_hub", $this->process->business_hub)
+        ->where("user_role", "md")->value("email");
+        $name = User::where("region", $this->process->region)->where("business_hub", $this->process->business_hub)
+        ->where("user_role", "district_accountant")->value("name");
+       }else if($this->process->id == 9){
+        $email = User::where("region", $this->process->region)->where("business_hub", $this->process->business_hub)
+        ->where("user_role", "billing")->value("email");
+        $name = User::where("region", $this->process->region)->where("business_hub", $this->process->business_hub)
+        ->where("user_role", "district_accountant")->value("name");
+       }
+      
+
+        // $levelFormat = $this->process->region." ".$this->process->business_hub;
         
-        $email = isset($levelFormat) ?  User::where("level", $levelFormat)->value("email") : "victor.ogiogio@ibedc.com";
-        $name = isset($levelFormat)  ? User::where("level", $levelFormat)->value("name") : "Victor Ogiogio";
+        // $email = isset($levelFormat) ?  User::where("level", $levelFormat)->value("email") : "victor.ogiogio@ibedc.com";
+        // $name = isset($levelFormat)  ? User::where("level", $levelFormat)->value("name") : "Victor Ogiogio";
 
         Mail::to($email)->send(new ProcessCAADMail($this->process, $name));
     }

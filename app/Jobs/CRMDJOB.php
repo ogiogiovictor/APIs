@@ -27,7 +27,7 @@ class CRMDJOB implements ShouldQueue
      */
     public function handle(): void
     {
-        $email = $this->crmd->email;
+        $email = $this->crmd['email'];
         
         Mail::to($email)->send(new ProcessCAADMail($this->crmd));
     }

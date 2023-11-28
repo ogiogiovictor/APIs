@@ -37,34 +37,36 @@ class PrepaidPaymentJob implements ShouldQueue
     public function handle(): void
     {
 
+        $baseUrl = env('MIDDLEWARE_URL');
+        $addCustomerUrl = $baseUrl . 'vendelect';
+
+        $data = [
+            'meterno' => $this->payment['meterNo'],
+            'vendtype' => $this->payment['account_type'],
+            'amount' => $this->payment['amount'], 
+            "provider" => $this->payment['disco_name'],
+            "custname" => $this->payment['customerName'],
+            "businesshub" => $this->payment['BUID'],
+            "custphoneno" => $this->payment['phone'],
+            "payreference" => $this->payment['transaction_id'],     // StringHelper::generateTransactionReference(),
+            "colagentid" => "IB001",
+            "email" => $this->payment['email'],
+
+        ];
+
 
         $checkifTokenExist = PaymentModel::where("transaction_id", $this->payment['transaction_id'])->first();
 
 
 
-            $baseUrl = env('MIDDLEWARE_URL');
-            $addCustomerUrl = $baseUrl . 'vendelect';
+        if($checkifTokenExist->status == 'pending' && $checkifTokenExist->providerRef != "" && $checkifTokenExist->receiptno == 'NULL' ){
 
-            $data = [
-                'meterno' => $this->payment['meterNo'],
-                'vendtype' => $this->payment['account_type'],
-                'amount' => $this->payment['amount'], 
-                "provider" => $this->payment['disco_name'],
-                "custname" => $this->payment['customerName'],
-                "businesshub" => $this->payment['BUID'],
-                "custphoneno" => $this->payment['phone'],
-                "payreference" => $this->payment['transaction_id'],     // StringHelper::generateTransactionReference(),
-                "colagentid" => "IB001",
-                "email" => $this->payment['email'],
-
-            ];
 
             $response = Http::withoutVerifying()->withHeaders([
                 'Authorization' => 'Bearer LIVEKEY_711E5A0C138903BBCE202DF5671D3C18',
             ])->post($addCustomerUrl, $data);
 
             $newResponse =  $response->json();
-
 
             if ($newResponse === null) {
                 //log the error
@@ -157,6 +159,49 @@ class PrepaidPaymentJob implements ShouldQueue
                     //Send a mail of the logged response as token was not recieved and response from the middleware with the error message
                 }
             }
+
+
+        } else {
+
+
+            $baseUrl = env('SMS_MESSAGE');
+            $amount = $this->payment['amount'];
+            $transactionID = $this->payment['transaction_id'];
+            $meterNo = $this->payment['meterNo'];
+
+            $smsdata = [
+                'token' => "p42OVwe8CF2Sg6VfhXAi8aBblMnADKkuOPe65M41v7jMzrEynGQoVLoZdmGqBQIGFPbH10cvthTGu0LK1duSem45OtA076fLGRqX",
+                'sender' => "IBEDC",
+                'to' => $this->payment['phone'],
+                "message" => "Meter Token: $checkifTokenExist->receiptno Your payment of $amount for Meter No $meterNo was successful. REF: $transactionID. For Support: 07001239999",
+                "type" => 0,
+                "routing" => 3,
+            ];
+
+            Log::info('NULL RESPONSE: - ', ['SMS Response' =>    $smsdata ]);
+
+
+            $emailData = [
+                'token' => $checkifTokenExist->receiptno,
+                'meterno' => $this->payment['meterNo'],
+                'amount' => $this->payment['amount'], 
+                "custname" => $this->payment['customerName'],
+                "custphoneno" => $this->payment['phone'],
+                "payreference" => $this->payment['transaction_id'],    
+            ];
+
+            Mail::to($this->payment['email'])->send(new PrepaidPaymentMail($emailData));
+
+
+        }
+
+
+
+           
+
+           
+
+          
 
         
        

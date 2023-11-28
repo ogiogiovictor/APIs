@@ -32,7 +32,7 @@ class TokenLookup extends Command
      */
     public function handle()
     {
-        $this->info('***** TOKENLOOKUP API :: Starting to push Pending Payments *************');
+        $this->info('***** TOKENLOOKUP API STARTED:: Starting to push Pending Payments *************');
         $paymentData = []; 
 
         DB::connection()->enableQueryLog();
@@ -42,7 +42,7 @@ class TokenLookup extends Command
                  ->where('account_type', 'Prepaid')
                  ->where('status', 'pending')
                  ->whereNotNull('providerRef')
-                 ->chunk(7, function ($paymentLogs) use (&$paymentData) {
+                 ->chunk(10, function ($paymentLogs) use (&$paymentData) {
                      // Add the payment logs to the data array
                      foreach ($paymentLogs as $paymentLog) {
                         
@@ -73,18 +73,18 @@ class TokenLookup extends Command
                              $newResponse =  $response->json();
 
                                // Log API request and response for debugging
-                        \Log::info('TOKENLOOKUP API Request: ' . json_encode($data));
-                        \Log::info('TOKENLOOKUP API Response: ' . json_encode($newResponse));
+                        \Log::info('TOKENLOOKUP API Lookup Data: ' . json_encode($data));
+                        //\Log::info('TOKENLOOKUP API Response: ' . json_encode($newResponse));
 
                         $totalRecords = count($paymentLogs);
-                        \Log::info("TOKENLOOKUP API Total Records to Update: " . $totalRecords);
+                      //  \Log::info("TOKENLOOKUP API Total Records to Update: " . $totalRecords);
 
  
                      if($newResponse['status'] == "true"){      
                         
                         $paymentData[] = $data;
                          // Log added data for debugging
-                        \Log::info('Added Data: ' . json_encode($data));
+                       // \Log::info('Added Data: ' . json_encode($data));
  
                          $update = PaymentModel::where("transaction_id", $paymentLog->transaction_id)->update([
                              'status' => $newResponse['status'] == "true" ?  'success' : 'failed', //"resp": "00",
@@ -120,7 +120,8 @@ class TokenLookup extends Command
  
                          $iresponse = Http::asForm()->post($baseUrl, $idata);
 
-                         $this->info('***** TOKENLOOKUP API :: SMS has been sent to the customer *************');
+                         $this->info('***** TOKENLOOKUP API SUCCESSFUL :: SMS has been sent to the customer *************');
+                         \Log::info("SMS SENT SUCCESSFULLY: ".   json_encode($idata));
 
                          $emailData = [
                             'token' => $token,
@@ -140,13 +141,13 @@ class TokenLookup extends Command
                      }
                  });
                  \Log::info(DB::getQueryLog());
-                 $this->info('***** TOKENLOOKUP API :: All payments processed successfully *************');
+                 $this->info('***** TOKENLOOKUP API PAYMENT COMPLETED:: All payments processed successfully *************');
                  
                  return $paymentData; //Return the data collected from payments
          } catch (\Exception $e) {
             
 
-             $this->info('***** TOKENLOOKUP API :: Error Processing Payment *************');
+             $this->info('***** TOKENLOOKUP API ERROR :: Error Processing Payment *************');
              \Log::error($e->getMessage());
             // return response()->json('Error', Response::HTTP_INTERNAL_SERVER_ERROR);
              //return $this->sendError('Error', "We are experiencing issues retrieving tokens from ibedc" . $e->getMessage(), Response::HTTP_BAD_REQUEST);

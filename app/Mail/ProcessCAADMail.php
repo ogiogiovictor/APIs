@@ -51,7 +51,8 @@ class ProcessCAADMail extends Mailable
                 'amount' => $this->caad->amount, 
                 'region' => $this->caad->region,
                 'effective_date' => $this->caad->effective_date, 
-                'name' => $this->name 
+                'name' => $this->name,
+                'id' => $this->id,
             ],
         );
 

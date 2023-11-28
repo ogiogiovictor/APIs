@@ -20,6 +20,7 @@ return new class extends Migration
             $table->string('unique_code')->default(0);
             $table->string('subject')->default(0);
             $table->string('status')->default(0);
+            $table->string('phone')->default(0);
             $table->timestamps();
         });
     }

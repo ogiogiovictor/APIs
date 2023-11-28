@@ -10,6 +10,6 @@ class ContactUs extends Model
     use HasFactory;
 
     protected $fillable = [
-        'name', 'message', 'email', 'subject', 'accountType', 'unique_code', 'status'
+        'name', 'message', 'email', 'subject', 'accountType', 'unique_code', 'status', 'phone'
     ];
 }

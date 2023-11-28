@@ -39,7 +39,7 @@ class IBEDCPayResource extends JsonResource
             'State' => $this->State,
             'Mobile' => $this->Mobile,
             'Email' => $this->EMail ?? $this->email,
-            'ArrearsBalance' => $this->ArrearsBalance,
+            'ArrearsBalance' => "", //$this->ArrearsBalance,
             'BUID' => $this->BUID,
             //'BusinessHub' =>  $this->BusinessHub,
            // 'Region' => $this->Region,

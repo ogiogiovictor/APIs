@@ -37,7 +37,7 @@ class PospaidLookup extends Command
             $this->info('***** POSTPAID API :: Lookup Started *************');
             $checkTransaction = PaymentModel::whereNull('receiptno')
             ->where('account_type', 'Postpaid')
-            ->where('response_status', 0)
+            //->where('response_status', 0)
             ->where('status', 'pending')
             ->whereNotNull('providerRef')
             ->chunk(5, function ($paymentLogs) use (&$paymentData) {
@@ -79,7 +79,7 @@ class PospaidLookup extends Command
                             'receiptno' =>  Carbon::now()->format('YmdHis'),
                         ]);
                         dispatch(new PaymentLogJobs($paymentLog));
-                        \Log::info('Postpaid Payment Successfuly: ' . $newResponse);
+                        \Log::info('Postpaid Payment Successfuly: ' . json_encode($newResponse));
                     }
 
                 }

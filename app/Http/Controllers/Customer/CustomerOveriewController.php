@@ -142,8 +142,32 @@ class CustomerOveriewController extends BaseApiController
                     'new_email' => $request->new_email,
                 ]);
 
+
+                $roles = [
+                    1 => 'teamlead',
+                    2 => 'businesshub_manager',
+                    3 => 'audit',
+                    4 => 'billing',
+                ];
+                
+                $targetRole = $roles[$addData->id] ?? null;
+                
+                if ($targetRole) {
+                    $user = User::where("region", $this->process->region)
+                        ->where("business_hub", $this->process->business_hub)
+                        ->where("user_role", $targetRole)
+                        ->first();
+                
+                    if ($user) {
+                        $email = $user->email;
+                        $name = $user->name;
+                    }
+                }
+
+                
+
                 $generateData = [
-                    'email' => User::where("bhub", $accountHub)->value("email"),
+                    'email' =>  $email, //User::where("bhub", $accountHub)->value("email"),
                     'id' =>  $addData->id,
                     'accountNo' => $request->AccountNo,
                     'meterNo' => $request->MeterNo,
@@ -165,6 +189,8 @@ class CustomerOveriewController extends BaseApiController
         //     return $this->sendError("Error Loading Data, Something went wrong",  $request->all(),  Response::HTTP_INTERNAL_SERVER_ERROR);
         // }
     }
+
+
 
 
     public function getCustomers(){

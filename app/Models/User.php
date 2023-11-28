@@ -34,7 +34,8 @@ class User extends Authenticatable
         'domain',
         'region',
         'bhub',
-        'service_center'
+        'service_center',
+        'user_role',
     ];
 
     /**

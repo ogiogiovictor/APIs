@@ -210,7 +210,7 @@ class CaadController extends BaseApiController
             ->when($userRole === 'admin', function ($query) {
                 return $query->whereIn('status', [0, 1, 2, 3, 4, 5, 6, 7, 10]);
             })->when($userRole === 'billing', function ($query) {
-                return $query->where('status', [CaadEnum::APPROVED_BY_MD->value, CaadEnum::BILLING->value]); 
+                return $query->whereIn('status', [CaadEnum::APPROVED_BY_MD->value, CaadEnum::BILLING->value]); 
             })
             ->orderBy('id', 'desc')
         ->paginate(20);
@@ -315,7 +315,7 @@ class CaadController extends BaseApiController
             'hcs' => ($amount <= (int)$getLimit) ? CaadEnum::BILLING->value  : CaadEnum::APPROVED_BY_HCS->value,
             'cco' => ($amount <= (int)$getLimit) ? CaadEnum::BILLING->value : CaadEnum::APPROVED_BY_CCO->value,
             'md' => ($amount <= (int)$getLimit) ? CaadEnum::BILLING->value : CaadEnum::APPROVED_BY_MD->value,
-            'billing' => CaadEnum::BILLING->value,
+            'billing' => CaadEnum::COMPLETED->value,  //CaadEnum::BILLING->value,
             'admin' => CaadEnum::ADMIN->value,
         ];
 
@@ -526,7 +526,7 @@ class CaadController extends BaseApiController
             'cco' => CaadEnum::APPROVED_BY_CCO->label(),
             'md' => CaadEnum::APPROVED_BY_MD->label(),
             'admin' => CaadEnum::ADMIN->label(),
-            'billing' => CaadEnum::BILLING->label(),
+            'billing' => CaadEnum::COMPLETED->label(),  //CaadEnum::BILLING->label(),
             default => 'Created By ' . Auth::user()->name,
         };
 

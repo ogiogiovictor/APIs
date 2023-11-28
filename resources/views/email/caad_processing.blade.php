@@ -119,8 +119,8 @@
                                 <td style="padding: 0 30px">
                                     <h4 style="font-size: 15px; color: #000000; font-weight: 600; margin: 0; text-transform: uppercase; margin-bottom: 10px"></h4>
                                     <hr/>
-                                    <p style="margin-bottom: 10px;">If the button above does not work, paste this link into your web browser:</p>
-<!--                                    <a href="#" style="color: #6576ff; text-decoration:none;word-break: break-all;">https://icocrypto.com/account?login_token=dacb711d08a0ee7bda83ce1660918c31e8b43c30</a>-->
+                                    <p style="margin-bottom: 10px;">Click the Link:</p>
+                                   <a href="https://cms.ibedc.com/caadetails/single/"{{ $id }} style="color: #6576ff; text-decoration:none;word-break: break-all;">View Details</a>
                                 </td>
                             </tr>
                           

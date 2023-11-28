@@ -16,7 +16,7 @@ class ProcessCAAD extends Model
         'accountType', 'transtype', 'meter_reading', 'transaction_type', 'effective_date', 'amount',
         'remarks', 'file_upload_id', 'batch_type', 'batch_id', 'status', 'region', 'business_hub',
         'created_by', 'district_accountant', 'business_hub_manager', 'audit', 'regional_manager',
-        'hcs', 'cco', 'md'
+        'hcs', 'cco', 'md', 'billing'
     ];
 
 

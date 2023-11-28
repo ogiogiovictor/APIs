@@ -39,7 +39,7 @@ class UserController extends BaseApiController
 
     public function getAllUsers() {
 
-        $users = User::orderby("id", "desc")->paginate(20);
+        $users = User::orderby("id", "desc")->paginate(500);
         // Modify the date format and status values
         $users->getCollection()->transform(function ($user) {
             // Convert created_at to human-readable date format
@@ -87,6 +87,7 @@ class UserController extends BaseApiController
                 'region' => isset($checkUser[0]) ? strtoupper($checkUser[0]) : 'null',
                 'bhub' => isset($checkUser[1]) ? strtoupper($checkUser[1]) : 'null',
                 'service_center' => isset($checkUser[2]) ? strtoupper($checkUser[2]) : 'null',
+                'user_role' => $request->role,
             ]);
 
             // $checkUser = isset($request->level) ? explode(",", $request->level) : [];

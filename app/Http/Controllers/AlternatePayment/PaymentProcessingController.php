@@ -456,6 +456,7 @@ class PaymentProcessingController extends BaseApiController
         $accountType = $request->accountType;
         $uniqueCode = $request->unique_code;
         $message = $request->message;
+        $mobile = $request->phone;
 
         $createResponse = ContactUs::create([
             'name' => $request->name,
@@ -463,7 +464,8 @@ class PaymentProcessingController extends BaseApiController
             'email' => $request->email,
             'subject' => $request->subject,
             'accountType' => $request->accountType,
-            'unique_code' => $request->unique_code
+            'unique_code' => $request->unique_code,
+            'phone' => $request->phone,
         ]);
 
         $emails = [

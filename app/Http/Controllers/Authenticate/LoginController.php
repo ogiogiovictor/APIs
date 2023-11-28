@@ -13,6 +13,7 @@ use Illuminate\Support\Facades\Password;
 use Illuminate\Auth\Events\PasswordReset;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Http;
 
 
 class LoginController extends BaseApiController
@@ -23,9 +24,8 @@ class LoginController extends BaseApiController
         if($request->expectsJson()) {
 
              $validatedData = $request->validated();
-
-
-            $userStatus = User::where('email', $validatedData['email'])->value('status');
+            
+           $userStatus = User::where('email', $validatedData['email'])->value("status");
 
             if($userStatus == 0 || $userStatus == '0'){
                 return $this->sendError('Invalid Status', "No Activation Included in the account", Response::HTTP_UNAUTHORIZED);
@@ -181,6 +181,34 @@ class LoginController extends BaseApiController
 
 
         public function integrateSMS(Request $request){
+
+            $validatedData = $request->validate([
+                'phone' => 'required',
+                'message' => 'required',
+                'token' => 'required',
+            ]);
+
+          
+
+            if($request['token'] != "UM#skUD12Md123pMskuw891849189399Mjshd#MsCD"){
+                return $this->sendError("Error", "Invalid Token Information", Response::HTTP_BAD_REQUEST);
+            }
+
+            $baseUrl = env('SMS_MESSAGE');
+
+            $smsdata = [
+                'token' => "p42OVwe8CF2Sg6VfhXAi8aBblMnADKkuOPe65M41v7jMzrEynGQoVLoZdmGqBQIGFPbH10cvthTGu0LK1duSem45OtA076fLGRqX",
+                'sender' => "IBEDC",
+                'to' => $validatedData['phone'],
+                "message" => $validatedData['message'],
+                "type" => 0,
+                "routing" => 3,
+            ];
+
+            $iresponse = Http::asForm()->post($baseUrl, $smsdata);
+
+            return $this->sendSuccess($iresponse, "SMS Successfully Sent", Response::HTTP_OK);
+           //return $this->sendSuccess(json_encode($iresponse), "SMS Successfully Sent", Response::HTTP_OK);
             
         }
 
