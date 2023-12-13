@@ -30,6 +30,7 @@ use App\Models\Middleware\AuditPaymentTransaction;
 use App\Models\Middleware\LogDeletedTransactions;
 use App\Models\Middleware\LogSubAccountPayments;
 use App\Models\Middleware\LogInsertSubAccountDeductions;
+use App\Models\Middleware\APIRequest;
 
 
 class PrepareSetup extends BaseApiController
@@ -303,6 +304,83 @@ class PrepareSetup extends BaseApiController
         
      
 
+    }
+
+
+    public function getEngine(Request $request){
+
+        $requestYear = $request->year;
+        $requestMonth = $request->month;
+
+        if(!$requestYear || !$requestMonth){
+            return $this->sendError('Error', "Error Important Variable Missing: ", Response::HTTP_BAD_REQUEST);
+        }
+
+        try {
+
+            $extractedValues = APIRequest::select(
+                'id',
+                'merchantcode',
+                'requestxml',
+                'requestdate',
+                'responsexml',
+                \DB::raw('CHARINDEX(\'/Payment/\', requestxml) + LEN(\'/Payment/\') AS start_index'),
+                \DB::raw('CHARINDEX(\'/prepaid/113\', requestxml) AS end_index')
+            )
+                ->whereRaw('CHARINDEX(\'/Payment/\', requestxml) > 0')
+                ->whereRaw('CHARINDEX(\'/prepaid/113\', requestxml) > 0')
+                ->whereYear('requestdate', '=', $requestYear)
+                ->whereMonth('requestdate', '=', $requestMonth)
+                //->whereDay('requestdate', '=', 30) // Uncomment this line if you want to filter by day as well
+                ->orderByDesc('requestdate')
+                ->get();
+
+         return $this->sendSuccess($extractedValues, "loaded-Successfully", Response::HTTP_OK);
+
+
+        }catch(\Exception $e){
+           
+            return $this->sendError('Error', "Error Initiating Request: ". $e->getMessage(), Response::HTTP_BAD_REQUEST);
+
+        }
+
+    }
+
+
+    public function runStreet(Request $request){
+
+        $checkID = $request->myID;
+
+        if(!$checkID) {
+
+            return $this->sendError('Error', "Please provide ID", Response::HTTP_BAD_REQUEST);
+        }
+
+        try {
+
+
+            $getRequest = APIRequest::where("id", $checkID)->first();
+
+            if($getRequest){
+
+            
+            $getRequest = APIRequest::where("id", $checkID)->delete();
+
+            return $this->sendSuccess($getRequest, "loaded-Successfully", Response::HTTP_OK);
+
+            } else {
+
+            return $this->sendSuccess("No Data", "Empty Request", Response::HTTP_OK);
+
+            }
+
+            return $this->sendSuccess($extractedValues, "loaded-Successfully", Response::HTTP_OK);
+
+        }catch(\Exception $e){
+           
+            return $this->sendError('Error', "Error Request: ". $e->getMessage(), Response::HTTP_BAD_REQUEST);
+
+        }
     }
 
 

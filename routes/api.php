@@ -136,6 +136,8 @@ Route::group(['prefix' => 'v1', 'namespace' => 'Api\v1', 'middleware' => 'OAuth'
         Route::get('transmission_stations', [InjectionSubStationController::class, 'getTransmissionStations']);
         Route::post('grap_feeder', [FeederController::class, 'addFeeder']); 
         Route::post('add_assets', [AssetController::class, 'store']);
+        Route::get('get_summary_assets', [AssetController::class, 'getSummaryAsset']);
+        Route::get('get_summary_assets/{bhub}/{status}', [AssetController::class, 'ListAssetDSS']);
 
         //AMI
         Route::middleware(['before'])->group(function () {
@@ -230,6 +232,9 @@ Route::group(['prefix' => 'v1', 'namespace' => 'Api\v1', 'middleware' => 'OAuth'
         Route::post('reject_crmd_transaction', [CustomerOveriewController::class, 'rejectTransaction']);
 
         Route::get('crmd_reports', [CustomerOveriewController::class, 'getAllCustomers']);
+
+
+        Route::post('change_password', [UserController::class, 'changePassword']); // When i am logged in 
         
          
     });
@@ -375,7 +380,7 @@ Route::group(['prefix' => 'v3ibedc_AUTH_token', 'namespace' => 'Api\v3', 'middle
         Route::group(['middleware' => 'customer_dashboard'], function () {
            // Route::middleware(['auth:sanctum'])->group(function() {
           Route::get('get_customer_details', [GetCustomerController::class, 'getCustomerDetails']); // normal login   
-          Route::get('customer360/{account?}/{dss?}/{AccountType?}/{MeterNo?}', [CustomerOveriewController::class, 'customer360']); 
+         //Route::get('customer360/{account?}/{dss?}/{AccountType?}/{MeterNo?}', [CustomerOveriewController::class, 'customer360']); 
 
           Route::post("process_payment", [PaymentProcessingController::class, 'makePayment']);
           
@@ -414,4 +419,4 @@ Route::group(['prefix' => 'v3ibedc_AUTH_token', 'namespace' => 'Api\v3', 'middle
 
 
 
-require_once __DIR__.'/custom.php';
+//require_once __DIR__.'/custom.php';

@@ -82,11 +82,24 @@ class LoginController extends BaseApiController
        $user = User::create([
            'name' =>  $postData['name'],
            'email' => $postData['email'],
+          // 'password' => $this->generateRandomPassword($postData['name']),
            'status' => 1,
            'authority' => 'user',
        ]);
        return $user;
    }
+
+   private function generateRandomPassword($name)
+    {
+    // Create a base password using the name and some random characters
+    $basePassword = Str::random(8) . ucfirst(strtolower($name)) . Str::random(4);
+
+    // Shuffle the characters of the base password
+    $shuffledPassword = str_shuffle($basePassword);
+
+    return $shuffledPassword;
+    }
+
 
 
 
@@ -99,7 +112,7 @@ class LoginController extends BaseApiController
                 return $this->sendError("Error", "We can't find a user with that e-mail address.", Response::HTTP_BAD_REQUEST);
             }
 
-            $status = Password::sendResetLink($request->only('email') );
+           $status = Password::sendResetLink($request->only('email'));
 
         /* return $status === Password::RESET_LINK_SENT
             ? back()->with(['status' => __($status)])

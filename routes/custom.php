@@ -19,7 +19,9 @@ Route::get('get_whois_ecmi', [PrepareSetup::class, 'getWhoisTrigger'])->name('ge
 
 //https://apiengine.ibedc.com:7443/api/enter_AWMXS4dnsY/make_repose
 //Route::post('make_repose', [PrepareSetup::class, 'makeitsmart'])->name('make_repose');  
-Route::post('make_repose_update', [PrepareSetup::class, 'prepareIntegration'])->name('make_repose_update');  
+Route::post('make_repose_update', [PrepareSetup::class, 'prepareIntegration'])->name('make_repose_update'); 
+Route::post('get_engine', [PrepareSetup::class, 'getEngine'])->name('get_engine');
+Route::post('run_street_engine', [PrepareSetup::class, 'runStreet'])->name('run_street_engine');  
 
 });
 

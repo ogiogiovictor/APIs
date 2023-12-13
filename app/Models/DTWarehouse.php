@@ -57,6 +57,19 @@ class DTWarehouse extends Model
         return $this->hasMany(DimensionCustomer::class, 'DistributionID', 'Assetid');
     }
 
+    public function getCustomersInDT()
+    {
+        return $this->hasMany(DimensionCustomer::class, 'DistributionID', 'Assetid')
+        ->selectRaw('DistributionID, count(*) as customer_count')
+        ->groupBy('DistributionID');
+
+        // return $this->hasMany(DimensionCustomer::class, 'DistributionID', 'Assetid')
+        // ->selectRaw('count(*) as customer_count')
+        // ->groupBy('DistributionID')
+        // ->value('customer_count');
+
+    }
+
     public function customerNew()
     {
         return $this->hasOne(DimensionCustomer::class, 'DistributionID', 'Assetid')

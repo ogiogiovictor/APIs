@@ -12,6 +12,8 @@ class MsmsCustomer extends Model
     protected $connection = 'msms';
     protected $table = "customers";
 
+    protected $primaryKey = "previous_account_number";
+
     public function customer_meters(){
         return $this->hasOne(MsmsMeters::class, 'customerid', 'id');
     }

@@ -97,7 +97,7 @@ class User extends Authenticatable
      */
     public function sendPasswordResetNotification($token)
     {
-        $url = 'https://localohost:3000/reset-password?token='.$token;
+        $url = 'https://cms.ibed.ccom/reset-password?token='.$token;
     
         $this->notify(new ResetPasswordNotification($url));
     }

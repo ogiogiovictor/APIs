@@ -18,6 +18,7 @@ use Illuminate\Support\Facades\Hash;
 use Spatie\Permission\Models\Role;
 use App\Models\AssignSubMenu;
 use App\Jobs\RegistrationJob;
+use Illuminate\Support\Str;
 
 
 class UserController extends BaseApiController
@@ -77,12 +78,14 @@ class UserController extends BaseApiController
 
             $checkUser = isset($request->level) ? explode(",", $request->level) : [];
 
+            $generatePass = $this->generateRandomPassword(Str::replace(' ', '', $request->name));
+
             $user = User::create([
                 'name' => $request->name,
                 'email' => $request->email,
                 'status' => 1,
                 'authority' => $request->authority,
-                'password' => Hash::make($request->password),
+                'password' => Hash::make($generatePass), //Hash::make($request->password),
                 'level' => $request->level ?? "",
                 'region' => isset($checkUser[0]) ? strtoupper($checkUser[0]) : 'null',
                 'bhub' => isset($checkUser[1]) ? strtoupper($checkUser[1]) : 'null',
@@ -124,7 +127,7 @@ class UserController extends BaseApiController
             //$user->email = $request->email;
             $user->status = isset($request->status) ? $request->status :  0;
             $user->authority = isset($request->authority) ? $request->authority : null;
-            $user->password = Hash::make($request->password);
+            $user->password = Hash::make($generatePass); //Hash::make($request->password);
             $user->level = isset($request->level) ? $request->level : '';
             $user->save();
 
@@ -132,12 +135,23 @@ class UserController extends BaseApiController
             $user->assignRole($request->role);
         }
 
-          dispatch(new RegistrationJob($user, $request->password));
+          //dispatch(new RegistrationJob($user, $request->password));  //generatePass
+          dispatch(new RegistrationJob($user, $generatePass));
 
         return $this->sendSuccess($user, "User Created Successfully", Response::HTTP_OK);
     }
 
 
+    private function generateRandomPassword($name)
+    {
+    // Create a base password using the name and some random characters
+    $basePassword = Str::random(2).ucfirst(strtolower($name)).Str::random(1);
+
+    // Shuffle the characters of the base password
+    $shuffledPassword = str_shuffle($basePassword);
+
+    return $shuffledPassword;
+    }
 
 
     public function getAccess() {
@@ -265,6 +279,32 @@ class UserController extends BaseApiController
         
         return response()->json(['message' => 'Logged out successfully', 'user' => $user]);
     }
+
+    
+    public function changePassword(Request $request){
+
+        $request->validate([
+            'old_password' => 'required',
+            'new_password' => 'required|string|min:6',
+        ]);
+
+        $user = Auth::user();
+
+        if (!Hash::check($request->old_password, $user->password)) {
+            return $this->sendError("Error", "Your current password does not matches with the password you provided. Please try again.", Response::HTTP_BAD_REQUEST);
+        }
+
+        if (strcmp($request->old_password, $request->new_password) == 0) {
+            return $this->sendError("Error", "New Password cannot be same as your current password. Please choose a different password.", Response::HTTP_BAD_REQUEST);
+        }
+
+        //Hash::make($request->new_password)
+        $user->password = bcrypt($request->new_password);
+        $user->save();
+
+        return $this->sendSuccess($user, "Password changed successfully !", Response::HTTP_OK);
+    }
+
 
     
 

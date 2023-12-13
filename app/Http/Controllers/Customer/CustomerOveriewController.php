@@ -144,6 +144,7 @@ class CustomerOveriewController extends BaseApiController
 
 
                 $roles = [
+                    0 => 'cro',
                     1 => 'teamlead',
                     2 => 'businesshub_manager',
                     3 => 'audit',
@@ -161,21 +162,20 @@ class CustomerOveriewController extends BaseApiController
                     if ($user) {
                         $email = $user->email;
                         $name = $user->name;
+
+                        $generateData = [
+                            'email' =>  $email, //User::where("bhub", $accountHub)->value("email"),
+                            'id' =>  $addData->id,
+                            'accountNo' => $request->AccountNo,
+                            'meterNo' => $request->MeterNo,
+                            'name' => $request->New_FullName,
+                        ];
+        
+                        dispatch(new CRMDJOB($generateData))->delay(5);
                     }
-                }
 
-                
-
-                $generateData = [
-                    'email' =>  $email, //User::where("bhub", $accountHub)->value("email"),
-                    'id' =>  $addData->id,
-                    'accountNo' => $request->AccountNo,
-                    'meterNo' => $request->MeterNo,
-                    'name' => $request->New_FullName,
-                ];
-
-                dispatch(new CRMDJOB($generateData))->delay(5);
-                
+               
+               }
     
                 return $this->sendSuccess($addData, "Customer 360 Loaded", Response::HTTP_OK);
 

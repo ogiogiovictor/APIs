@@ -285,6 +285,7 @@ class CustomerService
         //$customer = DimensionCustomer::with('bills')->where('AccountNo', $changeAccountNumber)->first();
         
         $newFormatedNumber = StringHelper::formatAccountNumber($changeAccountNumber);
+
        
         if($accountType == 'Postpaid'){
             $customer = DimensionCustomer::with(['bills' => function ($query) {
@@ -337,7 +338,12 @@ class CustomerService
        ->select("id", "title", "surname", "firstname", "other_names", "supply_address",
        "lga", "contact_no", "email", "means_of_id", "o_account_no", "service_center", "unique_code",
        "debt", "debt_date", "debt_type")
-       ->where('o_account_no', $newFormatedNumber)->first();
+       ->where('previous_account_number', $newFormatedNumber)->first();
+
+    //    $msmsMeters = MsmsCustomer::select("id", "title", "surname", "firstname", "other_names", "supply_address",
+    //    "lga", "contact_no", "email", "means_of_id", "o_account_no", "service_center", "unique_code",
+    //    "debt", "debt_date", "debt_type")
+    //    ->where('previous_account_number', $newFormatedNumber)->first();
        
        if($msmsMeters){
         $customer->msmsCustomerInfo = $msmsMeters;
@@ -382,14 +388,15 @@ class CustomerService
 
        if($accountType == 'Prepaid'){
         $subAccountBal = SubAccount::select("SubAccountNo", "AccountNo", "AmountAttached", "Balance", "SubAccountAbbre", "ModeOfPayment", "PaymentAmount", "lastmodified")
-        ->where(["AccountNo" => $newFormatedNumber, "SubAccountAbbre" => 'OUTBAL'])->first();
+        ->where(["AccountNo" => $newFormatedNumber])->get();
 
-            $addBalance = 0;
-            if($subAccountBal){
-                $subAccountBalFpUnit = SubAccount::where(["AccountNo" => $newFormatedNumber, "SubAccountAbbre" => 'FPUNIT'])->first()->Balance;
-                $addBalance = $subAccountBal->Balance + $subAccountBalFpUnit;
-                $subAccountBal->Balance = number_format($addBalance, 2, ".", "");
-            }
+        //->where(["AccountNo" => $newFormatedNumber, "SubAccountAbbre" => 'OUTBAL'])->first();
+            // $addBalance = 0;
+            // if($subAccountBal){
+            //     $subAccountBalFpUnit = SubAccount::where(["AccountNo" => $newFormatedNumber, "SubAccountAbbre" => 'FPUNIT'])->first()->Balance;
+            //     $addBalance = $subAccountBal->Balance + $subAccountBalFpUnit;
+            //     $subAccountBal->Balance = number_format($addBalance, 2, ".", "");
+            // }
         $customer->outbalance = $subAccountBal;
        }
 

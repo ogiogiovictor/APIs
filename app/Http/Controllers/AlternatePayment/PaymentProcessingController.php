@@ -35,104 +35,8 @@ use App\Models\SubAccount;
 
 class PaymentProcessingController extends BaseApiController
 {
-
-    // public function textpayment() {
-    //     $paymentData = []; // Initialize an array to store payment data
-
-    //     DB::connection()->enableQueryLog();
-
-    //     \Log::info('***** Starting to push Pending Payments *************');
-    //     try {
-    //        PaymentModel::whereNull('receiptno')
-    //             ->where('account_type', 'prepaid')
-    //             ->where('status', 'pending')
-    //             ->whereNotNull('providerRef')
-    //             ->chunk(2, function ($paymentLogs) use (&$paymentData) {
-    //                 // Add the payment logs to the data array
-    //                 foreach ($paymentLogs as $paymentLog) {
-                       
-    //                     $baseUrl = env('MIDDLEWARE_URL');
-    //                     $addCustomerUrl = $baseUrl . 'vendelect';
-        
-    //                     $data = [
-    //                             'meterno' => $paymentLog->meter_no,
-    //                             'vendtype' => $paymentLog->account_type,
-    //                             'amount' => $paymentLog->amount, 
-    //                             "provider" => "IBEDC",
-    //                             "custname" => $paymentLog->customer_name,
-    //                             "businesshub" => $paymentLog->BUID,
-    //                             "custphoneno" => $paymentLog->phone,
-    //                             "payreference" => $paymentLog->transaction_id,
-    //                             "colagentid" => "IB001",
-        
-    //                         ];
-
-    //                         $response = Http::withoutVerifying()->withHeaders([
-    //                             'Authorization' => 'Bearer LIVEKEY_711E5A0C138903BBCE202DF5671D3C18',
-    //                         ])->post($addCustomerUrl, $data);
-                    
-    //                         $newResponse =  $response->json();
-
-    //                 // Log API request and response for debugging
-    //                     \Log::info('API Request: ' . json_encode($data));
-    //                     \Log::info('API Response: ' . json_encode($newResponse));
-
-    //                     $totalRecords = count($paymentLogs);
-    //                     \Log::info("Total Records to Update: " . $totalRecords);
-
-
-    //                 if($newResponse['status'] == "true"){   
-                        
-    //                     $paymentData[] = $data;
-    //                      // Log added data for debugging
-    //                     \Log::info('Added Data: ' . json_encode($data));
-
-                        
-
-    //                     $update = PaymentModel::where("transaction_id", $paymentLog->transaction_id)->update([
-    //                         'status' => $newResponse['status'] == "true" ?  'success' : 'failed', //"resp": "00",
-    //                         'provider' => isset($newResponse['transactionReference'])  ? $newResponse['transactionReference'] : $newResponse['data']['transactionReference'],
-    //                     // 'providerRef' => $newResponse['transactionReference'],
-    //                         'receiptno' =>   isset($newResponse['recieptNumber']) ? $newResponse['recieptNumber'] : $newResponse['data']['recieptNumber'],  //Carbon::now()->format('YmdHis').time()
-    //                       //  'BUID' => $paymentLog->BUID,
-    //                         'Descript' =>  isset($newResponse['message']) ? $newResponse['message'] : $newResponse['transaction_status'],
-    //                     ]);
-
-    //                     \Log::info("Updated Records: " . $updatedRecords);
-
-    //                     //Send SMS to User
-    //                     $token =  isset($newResponse['recieptNumber']) ? $newResponse['recieptNumber'] : $newResponse['data']['recieptNumber'];
-
-    //                     \Log::info('***** Sending token to the customer *************');
-
-    //                     $baseUrl = env('SMS_MESSAGE');
-    //                     $data = [
-    //                         'token' => "p42OVwe8CF2Sg6VfhXAi8aBblMnADKkuOPe65M41v7jMzrEynGQoVLoZdmGqBQIGFPbH10cvthTGu0LK1duSem45OtA076fLGRqX",
-    //                         'sender' => "IBEDC",
-    //                         'to' => $paymentLog->phone,
-    //                         "message" => "IBEDC - Your Payment Token is $token for this ReferenceNo $paymentLog->transaction_id",
-    //                         "type" => 0,
-    //                         "routing" => 3,
-    //                     ];
-
-    //                     $iresponse = Http::asForm()->post($baseUrl, $data);
-    //                     \Log::info('***** SMS has been sent to the customer  *************');
-
-    //                  }
-                       
-
-    //                 }
-    //             });
-    //             \Log::info(DB::getQueryLog());
-    //         return $paymentData;
-    //     } catch (\Exception $e) {
-    //         \Log::error($e->getMessage());
-    //         return $this->sendError('Error', "We are experiencing issues retrieving tokens from ibedc  " . $e->getMessage(), Response::HTTP_BAD_REQUEST);
-    //     }
-      
-    // }
-
     
+    //............. FIRST STAGE (STAGE ONE FOR PAYMENT PROCESSING) ........................//
    
     public function makePayment(PaymentRequest $request){
        
@@ -161,6 +65,7 @@ class PaymentProcessingController extends BaseApiController
     }
 
 
+    ///////////// CREATE POSTPAID PRIVATE FUNCTION ///////////////////
     private function createPostPayment($request){
        $custInfo = ZoneCustomer::where("AccountNo", $request->account_number)->first();
 
@@ -183,7 +88,7 @@ class PaymentProcessingController extends BaseApiController
 
         try {
 
-           //return $request->all();  //$uuid = str_replace(['_', '-'], '', Str::uuid()->toString());
+           // Generate UUID Transaction Reference for Each Transaction
             $uuid = str_replace("-", "", Str::uuid()->toString());
             $limitedUuid = "113-".substr($uuid, 0, 7).Carbon::now()->format('His');
 
@@ -209,6 +114,7 @@ class PaymentProcessingController extends BaseApiController
             ]);
            
          
+            //Flutter Wave Integration Key. Please move key to ENV 
             $response = [
                 'payment' => $payment,
                 'mpk' => "FLWPUBK_TEST-579a209dc157adc5b4156e03df9ddd25-X",
@@ -216,10 +122,12 @@ class PaymentProcessingController extends BaseApiController
     
             ];
 
+            //If the Transaction is successful commit to the database
             DB::commit();
             return $this->sendSuccess($response, "Payment Process Initiated", Response::HTTP_OK);
 
         }catch(\Exception $e){
+            //If the Transaction fails Rollback and show the error message to the User
             DB::rollBack();
             Log::error("Error Initiating Payment: " . $e->getMessage());
             return $this->sendError('Error', "Error Initiating Payment: " . $e->getMessage(), Response::HTTP_BAD_REQUEST);
@@ -231,6 +139,7 @@ class PaymentProcessingController extends BaseApiController
 
       
 
+    ///////////// CREATE PREPAID PRIVATE FUNCTION ///////////////////////
       private function createPrePayment($request) {
 
         $checkRequest = $request->MeterNo;
@@ -246,8 +155,8 @@ class PaymentProcessingController extends BaseApiController
         ->whereIn('ModeOfPayment', ['MONTHLY PAYMENT', 'One-off'])
         ->first();
 
-       // return $eligibilityCheck->PaymentAmount;
-
+    
+        // If Customer have outstanding return the error message
        if($eligibilityCheck){
             if($request->amount < $eligibilityCheck->PaymentAmount){
                 return $this->sendError('Error', "Transaction Amount cannot by less than $eligibilityCheck->PaymentAmount due to your pending outstanding", Response::HTTP_BAD_REQUEST);
@@ -255,7 +164,7 @@ class PaymentProcessingController extends BaseApiController
        }
       
       
-
+       // If Customer record is not found in the database return error message
         if(!$zoneECMI){
             return $this->sendError('Error', "No Record Found", Response::HTTP_BAD_REQUEST);
         }
@@ -271,9 +180,9 @@ class PaymentProcessingController extends BaseApiController
 
             $payment =  PaymentModel::create([
                 'email' => $request->EMail ?: $request->email,
-                'transaction_id' => $transactionID ?? strtoUpper($limitedUuid),   //strtoUpper(Str::uuid()->toString()) ?? $transactionID,
+                'transaction_id' => $transactionID ?? strtoUpper($limitedUuid), 
                 'phone' => $request->Mobile ?? $request->phone,
-                'amount' =>  $request->amount, //1
+                'amount' =>  $request->amount, 
                 'account_type' => $request->account_type,
                 'account_number' => trim($zoneECMI->AccountNo),
                 'payment_source' => $request->payment_source,
@@ -288,6 +197,7 @@ class PaymentProcessingController extends BaseApiController
                 'source_type' => isset($request->source_type) ? $request->source_type : 'null',
             ]);
 
+            // -- Comment: Move the flutter key to env file
             $response = [
                 'payment' => $payment,
                  'mpk' => "FLWPUBK_TEST-579a209dc157adc5b4156e03df9ddd25-X",
@@ -308,6 +218,8 @@ class PaymentProcessingController extends BaseApiController
     }
 
 
+
+    // RETRY PAYMENT IF NO TOKEN OR RECEIPT NO IS NULL
 
     public function retryPayment(Request $request){
 
@@ -349,6 +261,10 @@ class PaymentProcessingController extends BaseApiController
 
 
 
+
+
+
+    /////////////////// PRIVATE FUNCTION TO QUERY TOKEN FROM IBEDC VENDING SYSTEM //////////////////////////////////
     private function generateToken($meterNo, $accountType, $amount, $provider, $customerName, $buid, $phone, $transactionID){
 
        try {
@@ -439,6 +355,8 @@ class PaymentProcessingController extends BaseApiController
 
 
 
+
+    /////////////////// CUSTOMER HELP FUNCTION //////////////////////
     public function ContactUs(Request $request) {
 
         $validatedData = $request->validate([
@@ -501,6 +419,8 @@ class PaymentProcessingController extends BaseApiController
     }
 
 
+
+    ////////////////// CUSTOMER SUB ACCOUNT INFORMATION //////////////////////////////////
     private function subaccountmatch($bhub){
 
         $result = match($bhub) {

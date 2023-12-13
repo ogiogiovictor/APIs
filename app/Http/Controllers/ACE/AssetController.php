@@ -164,6 +164,23 @@ class AssetController extends BaseApiController
 
         return $this->sendSuccess($data, "loaded Successfully", Response::HTTP_OK);
     }
+
+
+    public function getSummaryAsset(){
+
+        $getbyBhubStatus = DTWarehouse::select('hub_name', 'Status', DB::raw('COUNT(Assetid) as AssetCount'))->groupBy('hub_name', 'Status')->orderby("hub_name", "desc")->get();
+
+        return $this->sendSuccess($getbyBhubStatus, "loaded Successfully", Response::HTTP_OK);
+    }
+
+
+    public function ListAssetDSS(Request $request){
+
+        $getbyBhubStatus = DTWarehouse::with("getCustomersInDT")->select('*')->where("hub_name", $request->bhub)->where("Status", $request->status)->paginate(40);
+
+        return $this->sendSuccess($getbyBhubStatus, "loaded Successfully", Response::HTTP_OK);
+
+    }
    
 
 
